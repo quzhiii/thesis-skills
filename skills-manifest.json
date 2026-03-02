@@ -1,0 +1,53 @@
+{
+  "name": "thesis-6-skills",
+  "version": "0.1.0-staging",
+  "default_ruleset": "tsinghua",
+  "supported_rulesets": [
+    "tsinghua",
+    "my-university"
+  ],
+  "modules": [
+    {
+      "id": "01-migrate",
+      "type": "workflow",
+      "entry": "01-migrate/THESIS_MIGRATE.md"
+    },
+    {
+      "id": "02-content",
+      "type": "checker",
+      "entry": "02-content/scan_symbols.py",
+      "report": "02-content/symbols-report.json"
+    },
+    {
+      "id": "03-references",
+      "type": "checker",
+      "entry": "03-references/check_references.py",
+      "report": "03-references/check_references-report.json"
+    },
+    {
+      "id": "04-language",
+      "type": "checker",
+      "entry": "04-language/check_language.py",
+      "report": "04-language/check_language-report.json"
+    },
+    {
+      "id": "05-format",
+      "type": "checker",
+      "entry": "05-format/check_structure.py",
+      "report": "05-format/check_structure-report.json"
+    },
+    {
+      "id": "06-rules",
+      "type": "ruleset",
+      "entry": "06-rules/THESIS_RULES.md"
+    }
+  ],
+  "runner": {
+    "entry": "run_check_once.py",
+    "compile_script": "scripts/thesis_quality_loop.ps1"
+  },
+  "notes": [
+    "non-tsinghua rules require manual template completion",
+    "intended as staging copy for release optimization"
+  ]
+}
