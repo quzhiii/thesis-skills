@@ -1,0 +1,23 @@
+name: checker-smoke
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run tsinghua rules smoke check
+        run: python run_check_once.py --project-root "examples/minimal-project" --rules tsinghua --skip-compile
+
+      - name: Run my-university rules smoke check
+        run: python run_check_once.py --project-root "examples/minimal-project" --rules my-university --skip-compile
