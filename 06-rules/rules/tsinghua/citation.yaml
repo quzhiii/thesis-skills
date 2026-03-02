@@ -1,0 +1,7 @@
+sources:
+  - ref/refs.bib
+  - ref/refs-import.bib
+missing_key_policy: error
+orphan_entry_policy: warning
+duplicate_policy: warning
+numeric_order_policy: info

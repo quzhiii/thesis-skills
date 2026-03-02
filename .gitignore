@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+
+# Generated reports
+*-report.json
+*-edge.json
+
+# Local runtime artifacts
+*.log
+*.tmp
