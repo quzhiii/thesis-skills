@@ -8,3 +8,4 @@ __pycache__/
 # Local runtime artifacts
 *.log
 *.tmp
+*.bak0
