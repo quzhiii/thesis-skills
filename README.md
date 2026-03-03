@@ -1,18 +1,24 @@
 # Thesis LaTeX Skills
 
-> **AI-powered quality assurance for LaTeX graduate theses** — A modular skill pipeline that checks, validates, and polishes your thesis without touching your research content.
+![Python](https://img.shields.io/badge/python-3.x-blue?logo=python&logoColor=white)
+![License](https://img.shields.io/github/license/quzhiii/thesis-skills)
+![Platform](https://img.shields.io/badge/platform-windows%20%7C%20linux%20%7C%20macos-lightgrey)
+![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
+
+> **Word → LaTeX migration, done right.**
+> A deterministic AI skill pipeline for LaTeX thesis QA — citation integrity, CJK style, format validation, and Zotero bib hygiene. No hallucinations. No rewrites. Precise error reports only.
 
 [中文版说明](README.zh-CN.md)
 
 ---
 
-## Why This Exists
+## The Problem
 
-Writing a graduate thesis in LaTeX is hard enough. The last thing you want is to submit with orphaned citations, broken cross-references, inconsistent punctuation, or a missing figure label — issues that a careful human editor would catch but that are easy to miss when you're deep in the writing.
+Most graduate students write in Word first, then switch to a LaTeX template — and with it come broken citation keys, missing cross-references, mixed punctuation, lost figure labels, and bib entries that fail GB7714-2015 validation. These issues don't throw errors. They pile up silently until submission day.
 
-**Thesis LaTeX Skills** is a modular AI skill pipeline designed to run inside your AI coding assistant (e.g., Claude with OpenCode / Cursor). Each skill knows exactly what to check, how to report it, and what to leave alone. They do not rewrite your arguments. They do not touch your conclusions. They catch the mechanical errors that reviewers notice.
+**Thesis LaTeX Skills** catches them before your advisor does.
 
-Built first for **Tsinghua University** thesis workflows using the [`thuthesis`](https://github.com/tuna/thuthesis) template. Extensible to any university with a LaTeX template.
+Built first for **Tsinghua University** (`thuthesis`). Extensible to any university with a LaTeX template.
 
 ---
 
@@ -33,8 +39,8 @@ Built first for **Tsinghua University** thesis workflows using the [`thuthesis`]
 ## Skill Modules
 
 ```
-thesis-6-skills/
-├── 00-zotero/   # Zotero/EndNote → .bib export & quality check (run before 01-migrate)
+thesis-latex-skills/
+├── 00-zotero/      # Zotero/EndNote → .bib export & quality check (run before 01-migrate)
 ├── 01-migrate/     # Word → LaTeX migration workflow
 ├── 02-content/     # Structure, abstract, and symbol/acronym checks
 ├── 03-references/  # Citation integrity and bibliography hygiene

@@ -1,6 +1,12 @@
 # Thesis LaTeX Skills
 
-> **AI 驱动的 LaTeX 学位论文质量保障工具** — 模块化 Skill 流水线，检查、验证并打磨你的论文格式，不触碰你的研究内容。
+![Python](https://img.shields.io/badge/python-3.x-blue?logo=python&logoColor=white)
+![License](https://img.shields.io/github/license/quzhiii/thesis-skills)
+![Platform](https://img.shields.io/badge/platform-windows%20%7C%20linux%20%7C%20macos-lightgrey)
+![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
+
+> **Word → LaTeX 迁移，不再掉坑。**
+> 确定性 AI Skill 流水线，专为 LaTeX 学位论文质检设计——引用完整性、中文语言规范、格式验证、Zotero 文献清洗。无幻觉，不改内容，只输出精确的问题报告。
 
 [English README](README.md)
 
@@ -8,11 +14,13 @@
 
 ## 为什么做这个
 
-用 LaTeX 写学位论文已经够难了。最不想看到的，就是提交时出现孤立引用、交叉引用断链、标点不一致，或图表缺少标签——这些问题细心的编辑能发现，但深陷写作时极容易遗漏。
+大多数研究生一开始并不会用 LaTeX 写论文。Word 更熟悉，上手快，改起来方便——直到某天发现学校要求提交符合 [`thuthesis`](https://github.com/tuna/thuthesis) 模板的 LaTeX 版本，或者 Word 排版根本达不到提交标准。
 
-**Thesis LaTeX Skills** 是一套模块化 AI Skill 流水线，设计用于在 AI 编程助手（如 Claude + OpenCode / Cursor）内运行。每个 Skill 清楚地知道要检查什么、如何报告、什么不该动。它们不会改写你的论点，不会触碰你的结论，只捕捉审稿人会注意到的机械性错误。
+从 Word 切换到 LaTeX 是一场迁移战：参考文献引用键断掉、交叉引用找不到、中英文标点混用、图表标签丢失、bib 文件缺少 GB7714-2015 要求的 `langid` 和必填字段……这些问题不会主动报错，只会在最后关头集中爆发。
 
-首先为使用 [`thuthesis`](https://github.com/tuna/thuthesis) 模板的**清华大学**论文流程构建，可扩展到任何拥有 LaTeX 模板的学校。
+**Thesis LaTeX Skills** 是一套为 Word→LaTeX 迁移场景专门设计的 AI Skill 流水线。无论你正处于迁移中，还是已经在用 LaTeX，每个 Skill 模块都对迁移过程中容易积累的机械性问题做确定性检查——引用完整性、Zotero 文献质量、中文语言规范、格式结构完整性——精确报告需要修复的位置，不改动你的研究内容。
+
+首先为**清华大学** `thuthesis` 模板流程构建，可扩展到任何拥有 LaTeX 模板的学校。
 
 ---
 
@@ -33,8 +41,8 @@
 ## Skill 模块
 
 ```
-thesis-6-skills/
-├── 00-zotero/   # Zotero/EndNote → .bib 导出与质量检查（在 01-migrate 之前运行）
+thesis-latex-skills/
+├── 00-zotero/      # Zotero/EndNote → .bib 导出与质量检查（在 01-migrate 之前运行）
 ├── 01-migrate/     # Word → LaTeX 迁移工作流
 ├── 02-content/     # 结构、摘要、符号/缩略词检查
 ├── 03-references/  # 引用完整性与文献库规范
