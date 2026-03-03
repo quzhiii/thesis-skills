@@ -6,7 +6,7 @@
 ![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
 
 > **Word → LaTeX migration, done right.**
-> A deterministic AI skill pipeline for LaTeX thesis QA — citation integrity, CJK style, format validation, and Zotero bib hygiene. No hallucinations. No rewrites. Precise error reports only.
+> A deterministic AI skill pipeline for LaTeX academic writing QA — citation integrity, CJK style, format validation, and Zotero bib hygiene. Works for theses and journal submissions alike. No hallucinations. No rewrites. Precise error reports only.
 
 [中文版说明](README.zh-CN.md)
 
@@ -14,11 +14,13 @@
 
 ## The Problem
 
-Most graduate students write in Word first, then switch to a LaTeX template — and with it come broken citation keys, missing cross-references, mixed punctuation, lost figure labels, and bib entries that fail GB7714-2015 validation. These issues don't throw errors. They pile up silently until submission day.
+Getting thesis formatting right is a real prerequisite for graduation. Word is approachable, but keeping formatting consistent across a full thesis — citation styles, cross-references, punctuation rules, figure numbering — is tedious and error-prone. LaTeX handles academic typesetting more robustly and produces cleaner, publication-quality output, but the learning curve is steep, especially when migrating an existing draft from Word.
 
-**Thesis LaTeX Skills** catches them before your advisor does.
+When you make that switch, problems pile up silently: broken citation keys, orphaned cross-references, mixed CJK/Latin punctuation, missing figure labels, bib entries that fail GB7714-2015 validation. They don't throw errors. They surface all at once on submission day.
 
-Built first for **Tsinghua University** (`thuthesis`). Extensible to any university with a LaTeX template.
+**Thesis LaTeX Skills** catches them before your advisor does — whether you're mid-migration from Word or already writing natively in LaTeX.
+
+Built first for **Tsinghua University** (`thuthesis`). Extensible to any university thesis template or journal LaTeX submission template.
 
 ---
 
