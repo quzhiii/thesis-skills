@@ -42,7 +42,8 @@ Built first for **Tsinghua University** (`thuthesis`). Extensible to any univers
 
 ```
 thesis-latex-skills/
-├── 00-zotero/      # Zotero/EndNote → .bib export & quality check (run before 01-migrate)
+├── 00-zotero/      # Zotero → .bib export & quality check (run before 01-migrate)
+├── 00-endnote/     # EndNote → BibTeX export, entry-type normalisation, field clean-up
 ├── 01-migrate/     # Word → LaTeX migration workflow
 ├── 02-content/     # Structure, abstract, and symbol/acronym checks
 ├── 03-references/  # Citation integrity and bibliography hygiene
@@ -51,12 +52,18 @@ thesis-latex-skills/
 └── 06-rules/       # Pluggable YAML rulesets (Tsinghua built-in, custom extensible)
 ```
 
-### `00-zotero` — Zotero/EndNote `.bib` Export & Quality Check
+### `00-zotero` — Zotero `.bib` Export & Quality Check
 
-If you inserted references in Word using **Zotero** (or EndNote), run this skill **before** `01-migrate`. It validates the `.bib` file exported from your reference manager before it enters the rest of the pipeline. Catches missing `langid` fields (required by GB7714-2015 / ThuThesis), incomplete required fields, malformed DOIs, and cite-key mismatches between the `.bib` and your `.tex` files.
+If you inserted references in Word using **Zotero**, run this skill **before** `01-migrate`. It validates the `.bib` file exported from Zotero Better BibLaTeX before it enters the pipeline. Catches missing `langid` fields (required by GB7714-2015 / ThuThesis), incomplete required fields, malformed DOIs, and cite-key mismatches between the `.bib` and your `.tex` files. Also detects non-standard entry types that indicate an EndNote export was placed here by mistake.
 
 **Inputs:** `ref/refs-import.bib` (exported from Zotero Better BibLaTeX)
 **Report:** `00-zotero/check_bib_quality-report.json`
+
+### `00-endnote` — EndNote `.bib` Export & Normalisation
+
+For **EndNote** users: a dedicated workflow skill that guides you through exporting BibTeX from EndNote, normalising non-standard entry types (`@Electronic` → `@online`, `@Conference` → `@inproceedings`, etc.) using **JabRef**, fixing field name differences, and adding `langid`. Hands off to `00-zotero/check_bib_quality.py` for final validation.
+
+**When to use:** Choose `00-endnote` if your Word document uses the EndNote plugin. Choose `00-zotero` if you use Zotero.
 
 ### `01-migrate` — Word → LaTeX Migration
 
@@ -113,6 +120,7 @@ All checkers read their rules from YAML files under `06-rules/rules/<ruleset>/`.
 │              run_check_once.py  (orchestrator)      │
 │    ┌──────────────────────────────────────────┐     │
 │    │  00-zotero (bib pre-check)               │     │
+│    │  00-endnote (via JabRef, if EndNOte)     │     │
 │    ├──────────────────────────────────────────┤     │
 │    │  03-references  │  04-language  │  05-format │  │
 │    │  02-content     │  (optional compile loop)  │  │

@@ -12,7 +12,13 @@
       "type": "checker",
       "entry": "00-zotero/check_bib_quality.py",
       "report": "00-zotero/check_bib_quality-report.json",
-      "description": "Zotero/EndNote .bib export quality check — run before 01-migrate when Zotero fields are active in Word"
+      "description": "Zotero .bib export quality check — run before 01-migrate when Zotero fields are active in Word"
+    },
+    {
+      "id": "00-endnote",
+      "type": "workflow",
+      "entry": "00-endnote/THESIS_ENDNOTE.md",
+      "description": "EndNote BibTeX export, entry-type normalisation (via JabRef), and field clean-up — alternative to 00-zotero for EndNote users"
     },
     {
       "id": "01-migrate",

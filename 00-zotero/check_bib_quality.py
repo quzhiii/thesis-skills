@@ -42,6 +42,21 @@ REQUIRED_FIELDS: dict[str, list[str]] = {
     "misc":          ["author", "title", "year"],
 }
 
+# ---------------------------------------------------------------------------
+# Non-standard entry types commonly produced by EndNote BibTeX exports.
+# Maps lower-cased type name -> (suggested replacement, human note)
+# ---------------------------------------------------------------------------
+NON_STANDARD_TYPES: dict[str, tuple[str, str]] = {
+    "electronic": ("online",         "Web pages / online resources"),
+    "webpage":    ("online",         "Alias for @Electronic in some EndNote styles"),
+    "conference": ("inproceedings", "Conference papers"),
+    "newspaper":  ("article",       "Add journaltitle = newspaper name"),
+    "patent":     ("misc",          "Add type = {Patent}"),
+    "report":     ("techreport",    "Government / industry reports"),
+    "thesis":     ("phdthesis",     "Disambiguate: @phdthesis or @mastersthesis"),
+    "generic":    ("misc",          "Catch-all, use a more specific type if possible"),
+}
+
 
 # ---------------------------------------------------------------------------
 # Data model
@@ -246,6 +261,24 @@ def check_entries(
                     file=bib_rel,
                     line=0,
                     suggestion="Verify and correct the DOI value in Zotero, then re-export",
+                )
+            )
+
+        # 4. Non-standard entry type (common in EndNote BibTeX exports)
+        if etype in NON_STANDARD_TYPES:
+            suggested, note = NON_STANDARD_TYPES[etype]
+            findings.append(
+                Finding(
+                    severity="error",
+                    code="BIB_NONSTANDARD_TYPE",
+                    message=f"{key}: non-standard entry type '@{etype}' (likely an EndNote export artefact)",
+                    file=bib_rel,
+                    line=0,
+                    suggestion=(
+                        f"Replace '@{etype}' with '@{suggested}'. "
+                        f"({note}). "
+                        "Use JabRef or find-and-replace — see 00-endnote/THESIS_ENDNOTE.md."
+                    ),
                 )
             )
 

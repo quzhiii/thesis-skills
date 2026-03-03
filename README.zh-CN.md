@@ -42,7 +42,8 @@
 
 ```
 thesis-latex-skills/
-├── 00-zotero/      # Zotero/EndNote → .bib 导出与质量检查（在 01-migrate 之前运行）
+├── 00-zotero/      # Zotero → .bib 导出与质量检查（在 01-migrate 之前运行）
+├── 00-endnote/     # EndNote → BibTeX 导出、条目类型规范化、字段清理
 ├── 01-migrate/     # Word → LaTeX 迁移工作流
 ├── 02-content/     # 结构、摘要、符号/缩略词检查
 ├── 03-references/  # 引用完整性与文献库规范
@@ -51,12 +52,18 @@ thesis-latex-skills/
 └── 06-rules/       # 可插拔 YAML 规则集（内置清华规则，支持自定义扩展）
 ```
 
-### `00-zotero` — Zotero/EndNote `.bib` 导出与质量检查
+### `00-zotero` — Zotero `.bib` 导出与质量检查
 
-如果你在 Word 中使用 **Zotero**（或 EndNote）插入参考文献，在运行 `01-migrate` **之前**先运行此 Skill。它验证从文献管理工具导出的 `.bib` 文件，在进入后续流程前捕捉错误。检查项目包括：缺失 `langid` 字段（GB7714-2015 / ThuThesis 强要求）、必填字段不完整、DOI 格式异常、`.bib` 与 `.tex` 引用键不匹配。
+如果你在 Word 中使用 **Zotero** 插入参考文献，在运行 `01-migrate` **之前**先运行此 Skill。它验证从 Zotero Better BibLaTeX 导出的 `.bib` 文件进入流水线前的质量。检查项目包括：缺少 `langid` 字段（GB7714-2015 / ThuThesis 强制要求）、必填字段不完整、DOI 格式异常、`.bib` 与 `.tex` 引用键不匹配；同时检测非标准条目类型（属于 EndNote 导出产物的误放情况）。
 
 **输入：** `ref/refs-import.bib`（从 Zotero Better BibLaTeX 导出）
 **报告：** `00-zotero/check_bib_quality-report.json`
+
+### `00-endnote` — EndNote `.bib` 导出与规范化
+
+针对 **EndNote** 用户的专属工作流 Skill：引导从 EndNote 导出 BibTeX、利用 **JabRef** 规范非标准条目类型（`@Electronic` → `@online`、`@Conference` → `@inproceedings` 等）、修復字段名差异并补充 `langid`，最后交由 `00-zotero/check_bib_quality.py` 做最终验证。
+
+**何时用：** Word 文档使用 EndNote 插件 → 选 `00-endnote`；使用 Zotero → 选 `00-zotero`。
 
 ### `01-migrate` — Word → LaTeX 迁移
 
@@ -112,7 +119,8 @@ thesis-latex-skills/
 ┌────────────────────▼────────────────────────────────┐
 │              run_check_once.py（编排器）             │
 │    ┌──────────────────────────────────────────┐     │
-│    │  00-zotero（文献预检查）                  │     │
+│    │  00-zotero（bib 预检查）                   │     │
+│    │  00-endnote（EndNOte 用户，经 JabRef 转换） │     │
 │    ├──────────────────────────────────────────┤     │
 │    │  03-references  │  04-language  │  05-format │  │
 │    │  02-content     │  （可选编译闭环）        │  │

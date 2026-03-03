@@ -16,6 +16,7 @@ and DOI format issues before the rest of the pipeline sees the bibliography.
 |---|---|
 | Zotero field codes still active in Word | ✅ Use this skill first |
 | Original Zotero library available | ✅ Use this skill first |
+| **Word uses the EndNote plugin** | ➡️ Use `00-endnote/THESIS_ENDNOTE.md` instead |
 | Only plain-text bibliography remains | ⚠️ Skip to `01-migrate` fallback path |
 | Word document fields already stripped | ⚠️ Try online extractor (see below) |
 
@@ -46,13 +47,17 @@ and DOI format issues before the rest of the pipeline sees the bibliography.
 
 ## Path B: EndNote Export
 
-1. In Word (with EndNote plugin), use EndNote **Traveling Library** to export cited items back to
-   an EndNote desktop library.
-2. In EndNote, export to BibTeX (or RIS, then convert with JabRef or Zotero).
-3. Save as `ref/refs-import.bib`.
+> **Use the dedicated `00-endnote/THESIS_ENDNOTE.md` skill instead.**
+> EndNote BibTeX exports have known structural issues (non-standard entry types, field name
+> differences) that require specific handling before the `.bib` enters the rest of the pipeline.
+> The `00-endnote` skill covers the full conversion and clean-up workflow, then hands off to
+> `check_bib_quality.py` for final validation.
 
-*Note: EndNote metadata quality depends on original library fields. Chinese entries must still
-have `langid = {chinese}` added manually if missing.*
+**Quick summary of the `00-endnote` path:**
+1. Export BibTeX from EndNote desktop.
+2. Open in **JabRef** → normalize non-standard entry types (e.g. `@Electronic` → `@online`).
+3. Save as `ref/refs-import.bib`.
+4. Run `check_bib_quality.py` to catch remaining issues before `01-migrate`.
 
 ---
 
