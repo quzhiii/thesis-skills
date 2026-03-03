@@ -33,7 +33,7 @@ Built first for **Tsinghua University** thesis workflows using the [`thuthesis`]
 ## Skill Modules
 
 ```
-thesis-6-skills/
+thesis-latex-skills/
 ├── 00-zotero/   # Zotero/EndNote → .bib export & quality check (run before 01-migrate)
 ├── 01-migrate/     # Word → LaTeX migration workflow
 ├── 02-content/     # Structure, abstract, and symbol/acronym checks
