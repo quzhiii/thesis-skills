@@ -6,7 +6,7 @@
 ![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
 
 > **Word → LaTeX migration, done right.**
-> A deterministic AI skill pipeline for LaTeX academic writing QA — citation integrity, CJK style, format validation, and Zotero bib hygiene. Works for theses and journal submissions alike. No hallucinations. No rewrites. Precise error reports only.
+> A deterministic AI skill pipeline for LaTeX academic writing QA — citation integrity, CJK style, format validation, and Zotero/EndNote bib hygiene. Works for theses and journal submissions alike. No hallucinations. No rewrites. Precise error reports only.
 
 [中文版说明](README.zh-CN.md)
 

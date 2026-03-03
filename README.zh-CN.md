@@ -6,7 +6,7 @@
 ![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
 
 > **Word → LaTeX 迁移，不再掉坑。**
-> 确定性 AI Skill 流水线，适用于学位论文与期刊投稿的 LaTeX 质检——引用完整性、中文语言规范、格式验证、Zotero 文献清洗。无幻觉，不改内容，只输出精确的问题报告。
+> 确定性 AI Skill 流水线，适用于学位论文与期刊投稿的 LaTeX 质检——引用完整性、中文语言规范、格式验证、Zotero/EndNote 文献质检。无幻觉，不改内容，只输出精确的问题报告。
 
 [English README](README.md)
 
