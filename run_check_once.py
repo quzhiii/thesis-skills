@@ -27,7 +27,7 @@ def powershell_command() -> str | None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Run six-skills one-pass thesis checks from staging copy"
+        description="Run thesis-latex-skills one-pass thesis checks from staging copy"
     )
     parser.add_argument(
         "--project-root",
@@ -62,6 +62,18 @@ def main() -> int:
     step_env["THESIS_RULES_ROOT"] = str(rules_root)
 
     steps: list[tuple[str, list[str], Path]] = [
+        (
+            "bib-quality",
+            [
+                sys.executable,
+                str(ROOT / "00-zotero" / "check_bib_quality.py"),
+                "--bib",
+                "ref/refs-import.bib",
+                "--main",
+                "thuthesis-example.tex",
+            ],
+            project_root,
+        ),
         (
             "references",
             [

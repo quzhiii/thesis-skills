@@ -3,6 +3,30 @@
 ## Purpose
 Convert Word-derived LaTeX content into this ThuThesis project safely, while preserving existing legacy scripts.
 
+---
+
+## Phase 0 (Pre-migrate): Zotero / EndNote `.bib` Export
+
+If your Word document still has **Zotero field codes active**, run the `00-zotero` skill first:
+
+```
+python 00-zotero/check_bib_quality.py
+```
+
+This exports a clean `ref/refs-import.bib` directly from your Zotero library with proper cite
+keys and `langid` fields — far more reliable than the plain-text reconstruction path.
+
+| Situation | Action |
+|---|---|
+| Zotero fields still active in Word | Run `00-zotero` skill first, then come back here |
+| Only plain-text references remain | Skip Phase 0, continue with steps below |
+
+If you ran Phase 0 and `ref/refs-import.bib` is already populated:
+- Run steps 1–2 below normally
+- **Skip step 3** (`generate_sanitized_refs_import.py`) to avoid overwriting the clean export
+
+---
+
 ## Scope
 - Use existing scripts only:
   - `scripts/migrate_from_word_tex.py`

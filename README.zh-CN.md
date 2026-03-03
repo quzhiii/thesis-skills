@@ -1,6 +1,6 @@
-# Thesis 6 Skills
+# Thesis LaTeX Skills
 
-> **AI 驱动的 LaTeX 学位论文质量保障工具** — 六个确定性 Skill 模块，检查、验证并打磨你的论文格式，不触碰你的研究内容。
+> **AI 驱动的 LaTeX 学位论文质量保障工具** — 模块化 Skill 流水线，检查、验证并打磨你的论文格式，不触碰你的研究内容。
 
 [English README](README.md)
 
@@ -10,7 +10,7 @@
 
 用 LaTeX 写学位论文已经够难了。最不想看到的，就是提交时出现孤立引用、交叉引用断链、标点不一致，或图表缺少标签——这些问题细心的编辑能发现，但深陷写作时极容易遗漏。
 
-**Thesis 6 Skills** 是六个模块化 AI Skill 的集合，设计用于在 AI 编程助手（如 Claude + OpenCode / Cursor）内运行。每个 Skill 清楚地知道要检查什么、如何报告、什么不该动。它们不会改写你的论点，不会触碰你的结论，只捕捉审稿人会注意到的机械性错误。
+**Thesis LaTeX Skills** 是一套模块化 AI Skill 流水线，设计用于在 AI 编程助手（如 Claude + OpenCode / Cursor）内运行。每个 Skill 清楚地知道要检查什么、如何报告、什么不该动。它们不会改写你的论点，不会触碰你的结论，只捕捉审稿人会注意到的机械性错误。
 
 首先为使用 [`thuthesis`](https://github.com/tuna/thuthesis) 模板的**清华大学**论文流程构建，可扩展到任何拥有 LaTeX 模板的学校。
 
@@ -30,10 +30,11 @@
 
 ---
 
-## 六个 Skill 模块
+## Skill 模块
 
 ```
 thesis-6-skills/
+├── 00-zotero/   # Zotero/EndNote → .bib 导出与质量检查（在 01-migrate 之前运行）
 ├── 01-migrate/     # Word → LaTeX 迁移工作流
 ├── 02-content/     # 结构、摘要、符号/缩略词检查
 ├── 03-references/  # 引用完整性与文献库规范
@@ -41,6 +42,13 @@ thesis-6-skills/
 ├── 05-format/      # 图、表、公式、交叉引用验证
 └── 06-rules/       # 可插拔 YAML 规则集（内置清华规则，支持自定义扩展）
 ```
+
+### `00-zotero` — Zotero/EndNote `.bib` 导出与质量检查
+
+如果你在 Word 中使用 **Zotero**（或 EndNote）插入参考文献，在运行 `01-migrate` **之前**先运行此 Skill。它验证从文献管理工具导出的 `.bib` 文件，在进入后续流程前捕捉错误。检查项目包括：缺失 `langid` 字段（GB7714-2015 / ThuThesis 强要求）、必填字段不完整、DOI 格式异常、`.bib` 与 `.tex` 引用键不匹配。
+
+**输入：** `ref/refs-import.bib`（从 Zotero Better BibLaTeX 导出）
+**报告：** `00-zotero/check_bib_quality-report.json`
 
 ### `01-migrate` — Word → LaTeX 迁移
 
@@ -131,11 +139,12 @@ python run_check_once.py --project-root "../thuthesis-v7.6.0" --rules tsinghua
 ```
 
 按顺序执行：
-1. `03-references/check_references.py` — 引用审计
-2. `04-language/check_language.py` — 语言风格
-3. `05-format/check_structure.py` — 结构完整性
-4. `02-content/scan_symbols.py --mode report` — 符号扫描
-5. 编译闭环（`thesis_quality_loop.ps1`）— 使用 `--skip-compile` 可跳过
+1. `00-zotero/check_bib_quality.py` — 文献导出质量（Zotero/langid/DOI）
+2. `03-references/check_references.py` — 引用审计
+3. `04-language/check_language.py` — 语言风格
+4. `05-format/check_structure.py` — 结构完整性
+5. `02-content/scan_symbols.py --mode report` — 符号扫描
+6. 编译闭环（`thesis_quality_loop.ps1`）— 使用 `--skip-compile` 可跳过
 
 跳过编译（更快，适合迭代检查）：
 ```bash
@@ -162,7 +171,7 @@ python run_check_once.py --project-root "../thuthesis-v7.6.0" --rules tsinghua -
 
 | 版本 | 状态 | 内容 |
 |---|---|---|
-| **v0.1** | ✅ 已发布 | 6 个核心 Skill 模块、清华规则集、一键运行器 |
+| **v0.1** | ✅ 已发布 | 7 个 Skill 模块（含 Zotero 文献检查器）、清华规则集、一键运行器 |
 | **v0.2** | 🔜 计划中 | `07-literature-review` Skill、`08-reviewer-audit` Skill、整合 `run-summary.json` |
 | **未来** | 💡 待办 | 供导师审阅的 LaTeX diff 助手、编译日志解析器、答辩幻灯片导出指引 |
 

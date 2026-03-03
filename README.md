@@ -1,6 +1,6 @@
-# Thesis 6 Skills
+# Thesis LaTeX Skills
 
-> **AI-powered quality assurance for LaTeX graduate theses** — Six deterministic skill modules that check, validate, and polish your thesis without touching your research content.
+> **AI-powered quality assurance for LaTeX graduate theses** — A modular skill pipeline that checks, validates, and polishes your thesis without touching your research content.
 
 [中文版说明](README.zh-CN.md)
 
@@ -10,7 +10,7 @@
 
 Writing a graduate thesis in LaTeX is hard enough. The last thing you want is to submit with orphaned citations, broken cross-references, inconsistent punctuation, or a missing figure label — issues that a careful human editor would catch but that are easy to miss when you're deep in the writing.
 
-**Thesis 6 Skills** is a collection of six modular AI skills designed to run inside your AI coding assistant (e.g., Claude with OpenCode / Cursor). Each skill knows exactly what to check, how to report it, and what to leave alone. They do not rewrite your arguments. They do not touch your conclusions. They catch the mechanical errors that reviewers notice.
+**Thesis LaTeX Skills** is a modular AI skill pipeline designed to run inside your AI coding assistant (e.g., Claude with OpenCode / Cursor). Each skill knows exactly what to check, how to report it, and what to leave alone. They do not rewrite your arguments. They do not touch your conclusions. They catch the mechanical errors that reviewers notice.
 
 Built first for **Tsinghua University** thesis workflows using the [`thuthesis`](https://github.com/tuna/thuthesis) template. Extensible to any university with a LaTeX template.
 
@@ -30,10 +30,11 @@ Built first for **Tsinghua University** thesis workflows using the [`thuthesis`]
 
 ---
 
-## The Six Skill Modules
+## Skill Modules
 
 ```
 thesis-6-skills/
+├── 00-zotero/   # Zotero/EndNote → .bib export & quality check (run before 01-migrate)
 ├── 01-migrate/     # Word → LaTeX migration workflow
 ├── 02-content/     # Structure, abstract, and symbol/acronym checks
 ├── 03-references/  # Citation integrity and bibliography hygiene
@@ -41,6 +42,13 @@ thesis-6-skills/
 ├── 05-format/      # Figure, table, equation, cross-reference validation
 └── 06-rules/       # Pluggable YAML rulesets (Tsinghua built-in, custom extensible)
 ```
+
+### `00-zotero` — Zotero/EndNote `.bib` Export & Quality Check
+
+If you inserted references in Word using **Zotero** (or EndNote), run this skill **before** `01-migrate`. It validates the `.bib` file exported from your reference manager before it enters the rest of the pipeline. Catches missing `langid` fields (required by GB7714-2015 / ThuThesis), incomplete required fields, malformed DOIs, and cite-key mismatches between the `.bib` and your `.tex` files.
+
+**Inputs:** `ref/refs-import.bib` (exported from Zotero Better BibLaTeX)
+**Report:** `00-zotero/check_bib_quality-report.json`
 
 ### `01-migrate` — Word → LaTeX Migration
 
@@ -131,11 +139,12 @@ python run_check_once.py --project-root "../thuthesis-v7.6.0" --rules tsinghua
 ```
 
 This runs, in order:
-1. `03-references/check_references.py` — citation audit
-2. `04-language/check_language.py` — language style
-3. `05-format/check_structure.py` — structural integrity
-4. `02-content/scan_symbols.py --mode report` — symbol scan
-5. Compile loop (`thesis_quality_loop.ps1`) — unless `--skip-compile`
+1. `00-zotero/check_bib_quality.py` — bibliography export quality (Zotero/langid/DOI)
+2. `03-references/check_references.py` — citation audit
+3. `04-language/check_language.py` — language style
+4. `05-format/check_structure.py` — structural integrity
+5. `02-content/scan_symbols.py --mode report` — symbol scan
+6. Compile loop (`thesis_quality_loop.ps1`) — unless `--skip-compile`
 
 Skip compile (faster, for iterative checks):
 ```bash
@@ -162,7 +171,7 @@ A working starter example is included at `06-rules/rules/my-university/`.
 
 | Version | Status | What's included |
 |---|---|---|
-| **v0.1** | ✅ Released | 6 core skill modules, Tsinghua ruleset, one-command runner |
+| **v0.1** | ✅ Released | 7 skill modules (incl. Zotero bib checker), Tsinghua ruleset, one-command runner |
 | **v0.2** | 🔜 Planned | `07-literature-review` skill, `08-reviewer-audit` skill, consolidated `run-summary.json` |
 | **Future** | 💡 Backlog | LaTeX diff helper for advisor review, compile log parser, defense slide export guidance |
 
