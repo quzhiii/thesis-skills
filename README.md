@@ -104,6 +104,8 @@ All checkers read their rules from YAML files under `06-rules/rules/<ruleset>/`.
 ┌────────────────────▼────────────────────────────────┐
 │              run_check_once.py  (orchestrator)      │
 │    ┌──────────────────────────────────────────┐     │
+│    │  00-zotero (bib pre-check)               │     │
+│    ├──────────────────────────────────────────┤     │
 │    │  03-references  │  04-language  │  05-format │  │
 │    │  02-content     │  (optional compile loop)  │  │
 │    └──────────────────────────────────────────┘     │
