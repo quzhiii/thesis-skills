@@ -18,6 +18,10 @@ def run_step(cmd: list[str], workdir: Path, env: dict[str, str] | None = None) -
     return proc.returncode
 
 
+FATAL_EXIT_CODES = {2, 3}  # config error or runtime failure — stop pipeline
+# exit code 1 means "quality findings present" — log but continue
+
+
 def powershell_command() -> str | None:
     for candidate in ("pwsh", "powershell", "powershell.exe"):
         if shutil.which(candidate):
@@ -121,9 +125,11 @@ def main() -> int:
     for name, cmd, workdir in steps:
         print(f"\n=== {name} ===")
         code = run_step(cmd, workdir, env=step_env)
-        if code != 0:
-            print(f"stopped at step: {name}", file=sys.stderr)
+        if code in FATAL_EXIT_CODES:
+            print(f"fatal error in step '{name}' (exit {code}) — stopping pipeline", file=sys.stderr)
             return code
+        if code != 0:
+            print(f"[warn] step '{name}' reported findings (exit {code}) — continuing")
 
     if args.skip_compile:
         print("\n[done] checkers completed (compile skipped)")

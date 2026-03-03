@@ -86,16 +86,43 @@ class Finding:
 # .bib parsing (stdlib regex, no bibtexparser)
 # ---------------------------------------------------------------------------
 def _field_value(body: str, field: str) -> str:
-    """Extract the value of a single field from a bib entry body."""
-    # Handles: field = {value}, field = "value", field = number
-    pattern = re.compile(
-        rf'\b{re.escape(field)}\s*=\s*(?:\{{([^{{}}]*(?:\{{[^{{}}]*\}}[^{{}}]*)*)\}}|"([^"]*)"|(\d+))',
-        re.IGNORECASE | re.DOTALL,
-    )
+    """Extract the value of a single field from a bib entry body.
+
+    Uses a brace-walker for ``{...}`` values so arbitrarily nested braces
+    (e.g. titles with ``\\text{...}`` or author names with ``{von}`` parts)
+    are handled correctly.
+    """
+    pattern = re.compile(rf"\b{re.escape(field)}\s*=\s*", re.IGNORECASE)
     m = pattern.search(body)
     if not m:
         return ""
-    return (m.group(1) or m.group(2) or m.group(3) or "").strip()
+    pos = m.end()
+    # skip whitespace
+    while pos < len(body) and body[pos] in " \t\n\r":
+        pos += 1
+    if pos >= len(body):
+        return ""
+
+    ch = body[pos]
+    if ch == '"':
+        end = body.find('"', pos + 1)
+        return body[pos + 1 : end].strip() if end != -1 else ""
+    elif ch == "{":
+        depth = 0
+        start = pos + 1
+        j = pos
+        while j < len(body):
+            if body[j] == "{":
+                depth += 1
+            elif body[j] == "}":
+                depth -= 1
+                if depth == 0:
+                    return body[start:j].strip()
+            j += 1
+        return ""
+    else:
+        num_m = re.match(r"[0-9a-zA-Z_\-]+", body[pos:])
+        return num_m.group(0) if num_m else ""
 
 
 def _read_bib_text(path: Path) -> str:
@@ -151,23 +178,68 @@ def parse_bib_file(path: Path) -> list[dict[str, str]]:
 
 
 def get_entry_fields(entry: dict[str, str]) -> dict[str, str]:
-    """Extract all field=value pairs from the entry body."""
+    """Extract all field=value pairs from the entry body using a brace-walker.
+
+    The regex-only approach only handles 2-level nesting; titles with LaTeX
+    macros (``{\\textbf{...}}``) or author names with ``{{von}}`` particles
+    can nest deeper and would be missed.  We scan for ``word =`` tokens, then
+    walk braces character-by-character to capture arbitrarily nested values.
+    """
     body = entry.get("_body", "")
-    # Skip the cite key (first token)
+    # Skip the cite key (first token before first comma)
     comma_pos = body.find(",")
     if comma_pos == -1:
         return {}
     body_after_key = body[comma_pos + 1 :]
-    # Find all field names
-    field_pattern = re.compile(
-        r"(\w+)\s*=\s*(?:\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}|\"([^\"]*)\"|(\d+))",
-        re.IGNORECASE | re.DOTALL,
-    )
+
     fields: dict[str, str] = {}
-    for fm in field_pattern.finditer(body_after_key):
-        fname = fm.group(1).lower()
-        fval = (fm.group(2) or fm.group(3) or fm.group(4) or "").strip()
+    field_name_re = re.compile(r"\b(\w+)\s*=\s*", re.IGNORECASE)
+    pos = 0
+    while pos < len(body_after_key):
+        nm = field_name_re.search(body_after_key, pos)
+        if not nm:
+            break
+        fname = nm.group(1).lower()
+        pos = nm.end()
+        # skip whitespace
+        while pos < len(body_after_key) and body_after_key[pos] in " \t\n\r":
+            pos += 1
+        if pos >= len(body_after_key):
+            break
+
+        ch = body_after_key[pos]
+        if ch == "{":
+            # Walk to matching close brace
+            depth = 0
+            start = pos + 1
+            j = pos
+            while j < len(body_after_key):
+                if body_after_key[j] == "{":
+                    depth += 1
+                elif body_after_key[j] == "}":
+                    depth -= 1
+                    if depth == 0:
+                        break
+                j += 1
+            fval = body_after_key[start:j].strip()
+            pos = j + 1
+        elif ch == '"':
+            end = body_after_key.find('"', pos + 1)
+            if end == -1:
+                break
+            fval = body_after_key[pos + 1 : end].strip()
+            pos = end + 1
+        else:
+            # Numeric / bare word
+            num_m = re.match(r"[0-9a-zA-Z_\-]+", body_after_key[pos:])
+            if not num_m:
+                pos += 1
+                continue
+            fval = num_m.group(0)
+            pos += len(fval)
+
         fields[fname] = fval
+
     return fields
 
 
