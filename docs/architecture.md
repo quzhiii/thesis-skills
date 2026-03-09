@@ -2,7 +2,7 @@
 
 ## Overview
 
-`thesis-skills` is organized around one core idea: academic writing workflows become much more reliable when migration, policy, checking, and fixing are separated into distinct layers.
+`thesis-skills` is organized around one guiding idea: academic writing workflows become more reliable when migration, policy, checking, and fixing are separated into distinct layers.
 
 The repository therefore uses four major layers:
 
@@ -26,9 +26,7 @@ Important contracts:
 - `example-intake.json` - uploaded-material metadata for draft-pack generation
 - `migration.json` - explicit asset mapping for Word-to-LaTeX migration
 
-Key design choice:
-
-Migration is explicit. The repository does not guess file intent solely from filenames. Instead, it uses:
+Migration is explicit. The repository does not guess file intent solely from filenames. It uses:
 
 - `document_metadata`
 - `word_style_mappings`
@@ -90,12 +88,47 @@ Relevant paths:
 
 Fixers consume reports rather than re-reading the entire project with unconstrained reasoning.
 
-That choice keeps them:
+That keeps them:
 
 - safer
-- more explainable
+- easier to explain
 - easier to test
-- easier to bound to minimal edits
+- easier to limit to minimal edits
+
+## Pack Lifecycle
+
+```mermaid
+flowchart LR
+    A[Collect guide, template, samples] --> B[Prepare intake metadata]
+    B --> C[Run create_draft_pack.py]
+    C --> D[Generate starter pack files]
+    D --> E[Review draft-notes.md]
+    E --> F[Refine pack.yaml, rules.yaml, mappings.yaml]
+    F --> G[Run sample project through run_check_once.py]
+    G --> H[Adjust rules and mappings]
+    H --> I[Reusable ruleset ready]
+```
+
+## Check/Fix Sequence
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant P as Project
+    participant R as Rule Pack
+    participant C as run_check_once.py
+    participant J as JSON Reports
+    participant F as run_fix_cycle.py
+
+    U->>C: run checks with project + ruleset
+    C->>P: discover files and content
+    C->>R: load selected pack
+    C->>J: write checker reports
+    U->>F: run fix cycle
+    F->>J: read existing reports
+    F->>P: apply minimal fixes or preview them
+    F-->>U: return fix summary
+```
 
 ## Runners
 
@@ -140,14 +173,14 @@ The intended extension model is:
 - new mechanical check -> new deterministic checker
 - new safe remediation -> new fixer driven by report codes
 
-The main runners should stay small and orchestration-focused.
+The main runners should stay orchestration-focused.
 
 ## Verification Model
 
 The repository is validated by:
 
-- unit-style regression tests in `tests/`
+- regression tests in `tests/`
 - runnable examples in `examples/`
 - one-click runner verification
 
-The design goal is not only to provide outputs, but to make those outputs easy to verify and reason about.
+The design goal is not only to produce outputs, but to make those outputs easy to verify and reason about.
