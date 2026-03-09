@@ -1,184 +1,184 @@
 # Thesis Skills
 
-面向论文与期刊投稿场景的 `Python + Skills` 工作流仓库。
+`Thesis Skills` 是一个面向论文写作、期刊投稿、模板接入与 `Word -> LaTeX` 迁移的 `Python + Skills` 工作流仓库。
 
-它不是一个“只会给建议的提示词集合”，而是一套可执行、可验证、可复用的学术写作基础设施：
+它不是一个“提示词集合”，而是一套可执行、可验证、可复用的学术写作基础设施：把学术规范转化为确定性检查、报告驱动修复，以及可复用的规则包。
 
-- 输入侧支持 `Word -> LaTeX` 迁移
-- 检查侧支持引用、语言、格式、结构的确定性校验
-- 修复侧支持基于报告的最小修复
-- 规则侧支持学校/期刊规则包复用
-- 接入侧支持从上传材料生成 draft pack
+## 目录
 
-如果你正在处理以下问题，这个项目就是为你准备的：
+- [项目概览](#项目概览)
+- [为什么要做这个项目](#为什么要做这个项目)
+- [项目优势](#项目优势)
+- [技术路线图](#技术路线图)
+- [仓库结构](#仓库结构)
+- [快速开始](#快速开始)
+- [增强版 Intake 规范](#增强版-intake-规范)
+- [适配其他学校与期刊](#适配其他学校与期刊)
+- [主流模板链接](#主流模板链接)
+- [详细架构文档](#详细架构文档)
+- [当前状态](#当前状态)
 
-- 已经在 Word 里写了很多内容，想迁到 LaTeX
-- 学校或期刊有模板，但没有一套稳定的检查闭环
-- 想把“格式规范”从人工记忆变成可运行规则
-- 想让 AI 辅助论文工作，但不希望它随意改写正文内容
+## 项目概览
 
-对应英文版见 `README.md`。
+`thesis-skills` 聚焦于学术写作中最容易反复出错、但又最适合程序化处理的部分。
 
-## 项目介绍
+它提供：
 
-`thesis-skills` 的核心目标，是把学术写作里最容易反复出错、但又最适合程序化处理的部分沉淀成可执行流程。
+- `Word -> LaTeX` 迁移助手
+- 面向引用、语言、格式、内容结构的确定性 checker
+- 基于 JSON report 的安全 fixer，而不是自由发挥式全文改写
+- 面向学校与期刊的 YAML 规则包
+- 基于上传材料元数据生成 draft pack 的脚手架
 
-这套项目把整个流程拆成四层：
-
-1. `输入/迁移层`：接收 Word 导出内容、参考文献导出文件、模板材料
-2. `规则层`：把学校/期刊规范编码成 YAML rule packs
-3. `检查层`：用确定性 checker 输出 JSON 报告
-4. `修复层`：根据报告做最小修复，而不是“全文重写”
-
-所以它的定位不是“论文生成器”，而是：
+因此，这个仓库更适合被理解为：
 
 - 论文迁移助手
-- 模板接入助手
-- 学位论文/期刊投稿质量门控工具
-- AI 协作时代的学术写作基础设施
+- 模板接入工具包
+- 学位论文 / 期刊投稿质量门控工具
+- AI + Python 协作的学术写作基础设施层
+
+## 为什么要做这个项目
+
+很多 AI 写作辅助方案停留在“提示词”层面。它们适合 brainstorming，但一旦进入学校模板、期刊规范、长周期论文维护，就很容易因为上下文漂移而失去稳定性。
+
+这个项目的目标，就是把能编码的部分编码，把不该全交给模型的部分从模型手里拿出来：
+
+1. Python 负责确定性扫描、文件发现、规则判断和报告输出。
+2. Skills 负责流程编排、解释、辅助决策和最小修改协作。
+3. Rule packs 负责承载学校 / 期刊的具体要求。
+
+这样就不需要让模型“记住整本写作指南”，而是把规范沉淀成可重复执行的流程。
 
 ## 项目优势
 
 ### 1. 不是只靠提示词，而是可执行闭环
 
-很多“AI 论文辅助”方案停留在提示词层，换一个模型、换一次上下文，结果就会漂。`thesis-skills` 的优势是把关键流程落成了 runner、checker、fixer 和规则包，因此行为更稳定、结果更可复现。
+核心流程是代码，不是想象：`run_check_once.py`、`run_fix_cycle.py`、deterministic checkers 和 rule packs 组成了真正可执行的主链路，因此结果更稳定，也更容易验证。
 
 ### 2. 把 AI 擅长和程序擅长的部分分开
 
-- 规则判断、文件发现、报告输出由 Python 负责
-- 解释、决策辅助、最小修改建议由 Skills/AI 协作负责
+- Python 负责扫描、匹配、规则判断、报告输出
+- Skills / AI 负责解释、迁移辅助、最小修改建议
 
 这样既减少幻觉，也减少机械劳动。
 
-### 3. 支持学校/期刊复用，而不是只服务单一模板
+### 3. 不只服务一个学校模板
 
-当前仓库以清华 `thuthesis` 思路为起点，但结构已经升级为通用规则包架构：
+当前 starter packs 已经包含：
 
 - `tsinghua-thesis`
 - `university-generic`
 - `journal-generic`
 
-后续接入别的学校或期刊，不需要重写整套程序，只需要新增或修订 pack。
+所以它已经不是“清华专用工具”，而是一个可扩展到其他高校、院系和期刊的规则包架构。
 
-### 4. 迁移和规范接入边界清晰
+### 4. 迁移与规范边界清晰
 
-`01-word-to-latex` 只负责把资产送入 LaTeX 项目；`90-rules` 只负责定义规范；`run_check_once.py` 和 `run_fix_cycle.py` 只负责消费项目与规则。这种分层可以显著降低项目复杂度。
+`01-word-to-latex` 只负责迁移资产；`90-rules` 只负责定义规范；`run_check_once.py` 与 `run_fix_cycle.py` 只负责消费项目状态与规则。这种边界能显著降低复杂度。
 
-### 5. 对新手友好，但不牺牲工程化
+### 5. 对新手友好，但仍保留工程质量
 
-用户可以先用一键命令跑起来，不需要先理解内部 Python 结构；但对高级用户来说，仓库内部又保留了足够清晰的模块边界，便于扩展、测试和维护。
+新用户可以直接跑一键命令；高级用户和贡献者则能看到清晰的模块、测试、starter packs 和 intake contracts，便于维护和扩展。
 
 ## 技术路线图
 
-下面是当前这版项目的技术路线：
-
-```text
-上传材料 / 现有项目
-    |
-    |-- Word 导出 TeX / 章节文本 / .bib
-    |-- 官方指南 PDF/HTML
-    |-- 官方模板 DOCX / DOTX / CLS / STY / TEX
-    |-- 合规样例 PDF 或源码
-    v
-adapters/intake/
-    |
-    |-- example-intake.json
-    |-- migration.json
-    v
-01-word-to-latex/migrate_project.py
-    |
-    |-- document_metadata
-    |-- word_style_mappings
-    |-- chapter_role_mappings
-    |-- chapter_mappings / bibliography_mappings
-    v
-目标 LaTeX 项目
-    |
-    +--> run_check_once.py
-           |
-           |-- 00-bib-zotero/check_bib_quality.py
-           |-- 10-check-references/check_references.py
-           |-- 11-check-language/check_language.py
-           |-- 12-check-format/check_format.py
-           |-- 13-check-content/check_content.py
-           v
-         JSON reports
-           |
-           +--> run_fix_cycle.py
-                  |
-                  |-- 20-fix-references/fix_references.py
-                  |-- 21-fix-language-style/fix_language_style.py
-                  |-- 22-fix-format-structure/fix_format_structure.py
-                  v
-                最小修复结果
-
-同时：
-
-上传材料元数据
-    v
-90-rules/create_draft_pack.py
-    v
-90-rules/packs/<ruleset>/
-    |
-    |-- pack.yaml
-    |-- rules.yaml
-    |-- mappings.yaml
-    |-- draft-notes.md
+```mermaid
+flowchart TD
+    A[上传材料或现有项目] --> B[adapters/intake]
+    B --> B1[example-intake.json]
+    B --> B2[migration.json]
+    B --> C[01-word-to-latex/migrate_project.py]
+    A --> D[90-rules/create_draft_pack.py]
+    D --> E[90-rules/packs/<ruleset>]
+    E --> E1[pack.yaml]
+    E --> E2[rules.yaml]
+    E --> E3[mappings.yaml]
+    E --> E4[draft-notes.md]
+    C --> F[目标 LaTeX 项目]
+    E --> G[run_check_once.py]
+    F --> G
+    G --> H1[00-bib-zotero/check_bib_quality.py]
+    G --> H2[10-check-references/check_references.py]
+    G --> H3[11-check-language/check_language.py]
+    G --> H4[12-check-format/check_format.py]
+    G --> H5[13-check-content/check_content.py]
+    H1 --> I[JSON reports]
+    H2 --> I
+    H3 --> I
+    H4 --> I
+    H5 --> I
+    I --> J[run_fix_cycle.py]
+    J --> K1[20-fix-references]
+    J --> K2[21-fix-language-style]
+    J --> K3[22-fix-format-structure]
+    K1 --> L[最小修复结果]
+    K2 --> L
+    K3 --> L
 ```
+
+用文字概括就是：
+
+1. 收集材料，或者直接指向一个现有 LaTeX 项目。
+2. 用 intake 元数据驱动迁移与 draft pack 生成。
+3. 跑确定性检查，生成机器可读报告。
+4. 基于报告运行安全 fixer。
+5. 反复迭代，直到项目满足目标 ruleset。
 
 ## 仓库结构
 
 ```text
 thesis-skills/
-├── 00-bib-zotero/              # Zotero 导出文献预检查
-├── 00-bib-endnote/             # EndNote 文献导出流程说明
+├── 00-bib-zotero/              # Zotero 文献预检查
+├── 00-bib-endnote/             # EndNote 文献流程说明
 ├── 01-word-to-latex/           # Word -> LaTeX 迁移入口
 ├── 10-check-references/        # 引用完整性检查
-├── 11-check-language/          # 中英混排、标点、弱表达检查
-├── 12-check-format/            # 图表、交叉引用、结构检查
-├── 13-check-content/           # 内容结构与摘要元数据检查
+├── 11-check-language/          # 语言与中英混排检查
+├── 12-check-format/            # 图表、格式、交叉引用检查
+├── 13-check-content/           # 内容结构检查
 ├── 20-fix-references/          # 基于 report 的引用修复
 ├── 21-fix-language-style/      # 基于 report 的语言修复
 ├── 22-fix-format-structure/    # 基于 report 的格式修复
-├── 90-rules/                   # 学校/期刊规则包与生成器
-├── 99-runner/                  # runner 说明
-├── adapters/intake/            # 用户上传材料和 intake 规范
-├── core/                       # 核心执行逻辑
-├── examples/                   # 最小样例与迁移示例
+├── 90-rules/                   # 规则包与 pack 生成器
+├── 99-runner/                  # runner 文档
+├── adapters/intake/            # 用户上传材料与 intake 元数据
+├── core/                       # 确定性核心逻辑
+├── examples/                   # 最小可运行示例
 ├── tests/                      # 回归测试
 ├── run_check_once.py           # 一键检查
-└── run_fix_cycle.py            # 一键修复循环
+└── run_fix_cycle.py            # 一键修复
 ```
 
 ## 快速开始
 
-### 1. 对现有 LaTeX 项目做一轮检查
+### 运行一轮完整的确定性检查
 
 ```bash
 python run_check_once.py --project-root examples/minimal-latex-project --ruleset university-generic --skip-compile
 ```
 
-### 2. 根据检查报告做最小修复预览
+### 根据 report 预览最小修复
 
 ```bash
 python run_fix_cycle.py --project-root examples/minimal-latex-project --ruleset university-generic --apply false
 ```
 
-### 3. 从上传材料元数据生成 draft pack
+### 从上传材料元数据生成 draft pack
 
 ```bash
 python 90-rules/create_draft_pack.py --intake adapters/intake/example-intake.json
 ```
 
-### 4. 把 Word/intake 资产导入 LaTeX 项目
+### 把 intake 资产迁入目标 LaTeX 项目
 
 ```bash
 python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root <latex-project> --spec <migration.json> --apply false
 ```
 
-## 增强版 intake 规范
+## 增强版 Intake 规范
 
-当前版本的 `migration.json` 已经支持更强的结构化字段：
+当前 `migration.json` 已经支持结构化字段，而不只是文件复制列表。
+
+支持的顶层字段包括：
 
 - `document_metadata`
 - `word_style_mappings`
@@ -186,7 +186,7 @@ python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root 
 - `chapter_mappings`
 - `bibliography_mappings`
 
-一个典型示例：
+示例：
 
 ```json
 {
@@ -211,26 +211,26 @@ python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root 
 }
 ```
 
-这使得迁移步骤不再只是“复制文件”，而是能显式保留 Word 样式意图、章节逻辑角色和文献来源信息。
+这意味着迁移步骤不再只是“复制文件”，而是能显式保留 Word 样式意图、章节逻辑角色和文献来源语义。
 
-## 适配其他学校或期刊
+## 适配其他学校与期刊
 
-这套项目已经不再局限于清华模板。对其他学校/期刊，建议用户准备这些材料：
+如果要接入其他学校或期刊，建议准备这些材料：
 
-- 官方写作指南：`PDF / HTML / 纯文本`
-- 官方模板：`DOCX / DOTX / CLS / STY / TEX`
-- 至少 1 份合规样例：`PDF` 或源码
-- 可选样式文件：`BST / BBX / CBX / CSL`
+- 官方写作指南：`PDF`、`HTML` 或纯文本
+- 官方模板：`DOCX`、`DOTX`、`CLS`、`STY`、`TEX`
+- 至少一份合规样例：优先源码，否则 `PDF`
+- 可选样式文件：`BST`、`BBX`、`CBX`、`CSL`
 - 可选截图：题名页、摘要页、图表页、参考文献页
 
-如果想快速开始：
+推荐起点：
 
-- 学校论文从 `90-rules/packs/university-generic/` 起步
-- 期刊模板从 `90-rules/packs/journal-generic/` 起步
+- 学位论文从 `90-rules/packs/university-generic/` 开始
+- 期刊模板从 `90-rules/packs/journal-generic/` 开始
 
 ## 主流模板链接
 
-这些链接适合作为“先下载模板，再接入 thesis-skills”的起点。使用前仍建议以学校或期刊的官方指南为准。
+这些仓库适合作为“先下载模板，再接入 thesis-skills”的跳转入口。实际使用时仍建议以学校或期刊官方规范为准。
 
 ### 中国高校
 
@@ -239,7 +239,7 @@ python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root 
 - 中国科学技术大学：`ustctug/ustcthesis` - https://github.com/ustctug/ustcthesis
 - 电子科技大学：`tinoryj/UESTC-Thesis-Latex-Template` - https://github.com/tinoryj/UESTC-Thesis-Latex-Template
 - 中国科学院大学：`mohuangrui/ucasthesis` - https://github.com/mohuangrui/ucasthesis
-- 北京大学：`CasperVector/pkuthss`，也可参考维护中的 fork，如 `Thesharing/pkuthss`
+- 北京大学：`CasperVector/pkuthss`，以及维护中的 fork，如 `Thesharing/pkuthss`
 
 ### 国际高校
 
@@ -248,20 +248,22 @@ python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root 
 - University of Oxford：`mcmanigle/OxThesis` - https://github.com/mcmanigle/OxThesis
 - EPFL：`HexHive/thesis_template` - https://github.com/HexHive/thesis_template
 - ETH Zurich：`tuxu/ethz-thesis` - https://github.com/tuxu/ethz-thesis
-- MIT（社区广泛使用，非官方）：`alinush/mit-thesis-template` - https://github.com/alinush/mit-thesis-template
+- MIT（社区常用，非官方）：`alinush/mit-thesis-template` - https://github.com/alinush/mit-thesis-template
 
-## 当前版本的完成度
+## 详细架构文档
+
+如果你想看更完整的 runner 设计、规则包结构、intake 流程与扩展边界，请查看 `docs/architecture.md`。
+
+## 当前状态
 
 当前仓库已经具备：
 
-- 可运行的 `check -> fix` 闭环
+- 可运行的 `check -> fix` 主闭环
 - 可运行的 `Word -> LaTeX` 迁移入口
-- 可运行的 `uploaded materials -> draft pack` 规则包脚手架
-- 可复用的 `tsinghua-thesis / university-generic / journal-generic` starter packs
-- 覆盖关键流程的测试集合
+- 可运行的 `uploaded materials -> draft pack` 脚手架链路
+- `tsinghua-thesis`、`university-generic`、`journal-generic` 三个 starter packs
+- 覆盖主流程的回归测试集合
 
-## 项目定位总结
+一句话总结：
 
-一句话概括：
-
-`thesis-skills` 不是“帮你写论文”的 AI 工具，而是“帮你把论文迁移、规范、检查、修复、适配流程工程化”的 AI + Python 协作基础设施。
+`thesis-skills` 不是“帮你写论文”的 AI 工具，而是一个把迁移、规范、检查、修复、接入流程工程化的 AI + Python 协作基础设施。
