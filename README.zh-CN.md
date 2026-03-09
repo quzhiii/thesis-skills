@@ -1,215 +1,72 @@
-# Thesis LaTeX Skills
+# Thesis Skills
 
-![Python](https://img.shields.io/badge/python-3.x-blue?logo=python&logoColor=white)
-![License](https://img.shields.io/github/license/quzhiii/thesis-skills)
-![Platform](https://img.shields.io/badge/platform-windows%20%7C%20linux%20%7C%20macos-lightgrey)
-![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
-
-> **Word → LaTeX 迁移，不再掉坑。**
-> 确定性 AI Skill 流水线，适用于学位论文与期刊投稿的 LaTeX 质检——引用完整性、中文语言规范、格式验证、Zotero/EndNote 文献质检。无幻觉，不改内容，只输出精确的问题报告。
-
-[English README](README.md)
-
----
-
-## 为什么做这个
-
-论文格式是否规范，是顺利毕业的重要前提之一。Word 上手容易，但在整篇论文中维持格式一致并不轻松——标题层级、引用样式、标点规范、图表编号，任何一处出错都可能在送审时被打回。LaTeX 对学术排版的支持更完整，输出更为规范美观，但上手曲线较陡，对于从 Word 迁移而来的同学尤为如此。
-
-从 Word 切换到 LaTeX 是一场迁移战：参考文献引用键断掉、交叉引用找不到、中英文标点混用、图表标签丢失、bib 文件缺少 GB7714-2015 要求的 `langid` 和必填字段……这些问题不会主动报错，只会在最后关头集中爆发。
-
-**Thesis LaTeX Skills** 是一套为 Word→LaTeX 迁移及 LaTeX 写作全程设计的 AI Skill 流水线。无论你正处于迁移阶段，还是已经在 LaTeX 中写作，每个 Skill 模块都对格式规范中容易积累的机械性问题做确定性检查——引用完整性、Zotero 文献质量、中文语言规范、格式结构完整性——精确报告需要修复的位置，不改动你的研究内容。
-
-首先为**清华大学** `thuthesis` 模板流程构建，可扩展到任何拥有 LaTeX 模板的学校，以及各类期刊的 LaTeX 投稿模板。
-
----
-
-## 做什么（以及不做什么）
-
-| ✅ 会做 | ❌ 不做 |
-|---|---|
-| 交叉验证 `\cite{key}` 与 `.bib` 文件 | 生成或改写你的论点 |
-| 检测孤立文献条目 | 修改你的研究方法或结论 |
-| 检查中文标点与引号风格一致性 | 自动编辑正文段落 |
-| 验证图表标签与 `\ref` 完整性 | 默认改写章节内容 |
-| 扫描并去重符号与缩略词 | 替代导师的审阅 |
-| 检查章节结构完整性 | 对内容质量做主观判断 |
-| 通过 YAML 规则集执行学校格式要求 | 处理非 LaTeX（Word）提交 |
-
----
-
-## Skill 模块
-
-```
-thesis-latex-skills/
-├── 00-zotero/      # Zotero → .bib 导出与质量检查（在 01-migrate 之前运行）
-├── 00-endnote/     # EndNote → BibTeX 导出、条目类型规范化、字段清理
-├── 01-migrate/     # Word → LaTeX 迁移工作流
-├── 02-content/     # 结构、摘要、符号/缩略词检查
-├── 03-references/  # 引用完整性与文献库规范
-├── 04-language/    # 中文标点与引号风格检查
-├── 05-format/      # 图、表、公式、交叉引用验证
-└── 06-rules/       # 可插拔 YAML 规则集（内置清华规则，支持自定义扩展）
-```
-
-### `00-zotero` — Zotero `.bib` 导出与质量检查
-
-如果你在 Word 中使用 **Zotero** 插入参考文献，在运行 `01-migrate` **之前**先运行此 Skill。它验证从 Zotero Better BibLaTeX 导出的 `.bib` 文件进入流水线前的质量。检查项目包括：缺少 `langid` 字段（GB7714-2015 / ThuThesis 强制要求）、必填字段不完整、DOI 格式异常、`.bib` 与 `.tex` 引用键不匹配；同时检测非标准条目类型（属于 EndNote 导出产物的误放情况）。
-
-**输入：** `ref/refs-import.bib`（从 Zotero Better BibLaTeX 导出）
-**报告：** `00-zotero/check_bib_quality-report.json`
-
-### `00-endnote` — EndNote `.bib` 导出与规范化
-
-针对 **EndNote** 用户的专属工作流 Skill：引导从 EndNote 导出 BibTeX、利用 **JabRef** 规范非标准条目类型（`@Electronic` → `@online`、`@Conference` → `@inproceedings` 等）、修復字段名差异并补充 `langid`，最后交由 `00-zotero/check_bib_quality.py` 做最终验证。
-
-**何时用：** Word 文档使用 EndNote 插件 → 选 `00-endnote`；使用 Zotero → 选 `00-zotero`。
-
-### `01-migrate` — Word → LaTeX 迁移
-
-将 Word 导出的 LaTeX（`from_word_full.tex`）转换为干净的 `thuthesis` 兼容章节结构。将引用标记规范化为 `\cite{...}` 格式，并重新生成清理后的参考文献导入文件。保留所有历史迁移脚本——该 Skill 是编排者，而非替代者。
-
-**关键输出：** `data/chap02.tex` … `data/chap06.tex`，`ref/refs-import.bib`
-
-### `02-content` — 内容结构与符号扫描
-
-检查论文是否具备所需章节流程（问题→方法→结果→讨论→结论），摘要是否在中英文中都包含四个必要要素（目的、方法、结果、结论），以及关键词数量是否在限制内。同时扫描所有章节中的符号/缩略词候选项，去重，标记冲突，并可选地修补 `denotation.tex`。
-
-**两种模式：** `--mode report`（安全，只读）→ `--mode patch`（可选写入）
-
-### `03-references` — 引用完整性
-
-对 `\cite{key}` 调用与 `.bib` 文件进行确定性交叉验证。捕捉：
-- **缺失键**（错误）— 文中已引用但 bib 中不存在
-- **孤立条目**（警告）— bib 中存在但从未被引用
-- **重复标题候选**（警告）— 可能的重复条目
-- **引用顺序不单调**（提示）— 数字引用风格违规
-
-### `04-language` — 中文语言风格
-
-检查容易忽略的中文学术写作规范：
-- 同一段落中混用中文弯引号与直引号
-- 中文与拉丁字符之间缺少空格
-- 重复标点异常（`。。`，`，，`）
-- 可配置的弱表达检测（"众所周知"、"不难看出"等）
-
-### `05-format` — 结构与交叉引用完整性
-
-验证 LaTeX 源码的机械结构：
-- 每个 `\figure` 和 `\table` 环境都有 `\caption` 和 `\label`
-- 所有 `\ref{key}` 调用在某处都有匹配的 `\label{key}`
-- 长表格延续标记完整（`\endfirsthead`、`\endhead`、`\endfoot`、`\endlastfoot`）
-- 主 tex 文件中包含图目录和表目录
-- 与现有 `thesis_quality_loop.ps1` 编译闭环集成
-
-### `06-rules` — 可插拔规则集
-
-所有检查器从 `06-rules/rules/<ruleset>/` 下的 YAML 文件读取规则。内置的 `tsinghua` 规则集编码了清华研究生论文要求。添加新学校只需填写四个 YAML 文件：`format.yaml`、`citation.yaml`、`structure.yaml`、`language.yaml`。
-
----
-
-## 架构与技术栈
-
-```
-┌─────────────────────────────────────────────────────┐
-│                  AI 编程助手                         │
-│         (Claude / OpenCode / Cursor / 等)           │
-└────────────────────┬────────────────────────────────┘
-                     │  调用 Skill 模块
-┌────────────────────▼────────────────────────────────┐
-│              run_check_once.py（编排器）             │
-│    ┌──────────────────────────────────────────┐     │
-│    │  00-zotero（bib 预检查）                   │     │
-│    │  00-endnote（EndNOte 用户，经 JabRef 转换） │     │
-│    ├──────────────────────────────────────────┤     │
-│    │  03-references  │  04-language  │  05-format │  │
-│    │  02-content     │  （可选编译闭环）        │  │
-│    └──────────────────────────────────────────┘     │
-│                        │                            │
-│                 从以下路径读取规则集                  │
-│         06-rules/rules/<ruleset>/*.yaml             │
-└────────────────────┬────────────────────────────────┘
-                     │
-         ┌───────────▼───────────┐
-         │  你的 LaTeX 项目       │
-         │  (thuthesis 或其他)   │
-         └───────────────────────┘
-```
-
-**技术栈：**
-- Python 3.x 检查器（除标准库外无外部依赖）
-- YAML 驱动的规则集配置
-- PowerShell 编译闭环（`thesis_quality_loop.ps1`）— 可选，Windows
-- 每个检查器输出 JSON 结构化报告
-- 退出码约定：`0` 通过 · `1` 质量发现 · `2` 配置错误 · `3` 运行时故障
-
-**Skill 格式：** 兼容 OpenCode / Claude Skill 系统——每个模块随附 `THESIS_*.md` Skill 提示词和对应的 Python 检查器。
-
----
+面向论文和期刊投稿的确定性技能仓库：保留 `Python + Skills` 主线，提供一键检查、一键修复循环、真实 YAML 规则包，以及面向其他学校/期刊的适配入口。
 
 ## 快速开始
 
-### 清华用户（`thuthesis`）
-
 ```bash
-# 一次性运行所有检查（在本仓库根目录执行）
-python run_check_once.py --project-root "../thuthesis-v7.6.0" --rules tsinghua
+python run_check_once.py --project-root examples/minimal-latex-project --ruleset university-generic --skip-compile
+python run_fix_cycle.py --project-root examples/minimal-latex-project --ruleset university-generic --apply false
+python 90-rules/create_pack.py --pack-id my-university --display-name "My University Thesis" --starter university-generic --kind university-thesis
+python 90-rules/create_draft_pack.py --intake adapters/intake/example-intake.json
+python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root <latex-project> --spec <migration.json> --apply false
 ```
 
-按顺序执行：
-1. `00-zotero/check_bib_quality.py` — 文献导出质量（Zotero/langid/DOI）
-2. `03-references/check_references.py` — 引用审计
-3. `04-language/check_language.py` — 语言风格
-4. `05-format/check_structure.py` — 结构完整性
-5. `02-content/scan_symbols.py --mode report` — 符号扫描
-6. 编译闭环（`thesis_quality_loop.ps1`）— 使用 `--skip-compile` 可跳过
+## 目录说明
 
-跳过编译（更快，适合迭代检查）：
-```bash
-python run_check_once.py --project-root "../thuthesis-v7.6.0" --rules tsinghua --skip-compile
-```
+- `00-bib-zotero/`、`00-bib-endnote/`、`01-word-to-latex/`：输入/迁移侧技能
+- `10-check-*`：确定性 checker，只产出 report
+- `20-fix-*`：读取 report 做最小修复
+- `90-rules/packs/`：学校与期刊规则包
+- `adapters/intake/`：新学校/期刊接入时应上传什么
+- `examples/minimal-latex-project/`：本地闭环验证样例
 
-### 其他学校用户
+## 新增的接入辅助工具
 
-1. 复制模板规则集：
-   ```
-   06-rules/rules/custom/template/  →  06-rules/rules/my-university/
-   ```
-2. 在四个 YAML 文件中填写本校要求。
-3. 运行：
-   ```bash
-   python run_check_once.py --project-root "../your-thesis-project" --rules my-university --skip-compile
-   ```
+- `90-rules/create_pack.py`：从 starter pack 一键生成新的学校或期刊规则包
+- `90-rules/create_draft_pack.py`：直接根据上传材料元数据生成 draft pack
+- `01-word-to-latex/migrate_project.py`：按显式映射把 intake 资产导入目标 LaTeX 项目
+- `adapters/intake/README.md`：说明新接入方应上传哪些材料
 
-`06-rules/rules/my-university/` 中已提供可直接使用的入门示例。
+增强后的 migration intake 规范已经支持：
 
----
+- `document_metadata`
+- `word_style_mappings`
+- `chapter_role_mappings`
+- 显式 `chapter_mappings` 与 `bibliography_mappings`
 
-## 路线图
+## 模板链接
 
-| 版本 | 状态 | 内容 |
-|---|---|---|
-| **v0.1** | ✅ 已发布 | 7 个 Skill 模块（含 Zotero 文献检查器）、清华规则集、一键运行器 |
-| **v0.2** | 🔜 计划中 | `07-literature-review` Skill、`08-reviewer-audit` Skill、整合 `run-summary.json` |
-| **未来** | 💡 待办 | 供导师审阅的 LaTeX diff 助手、编译日志解析器、答辩幻灯片导出指引 |
+下面这些仓库适合做“先下载模板，再接入 thesis-skills”的跳转入口。使用前仍建议以学校或期刊官方写作指南为准。
 
----
+### 中国高校
 
-## 适用人群
+- 清华大学：`tuna/thuthesis` - https://github.com/tuna/thuthesis
+- 上海交通大学：`sjtug/SJTUThesis` - https://github.com/sjtug/SJTUThesis
+- 中国科学技术大学：`ustctug/ustcthesis` - https://github.com/ustctug/ustcthesis
+- 电子科技大学：`tinoryj/UESTC-Thesis-Latex-Template` - https://github.com/tinoryj/UESTC-Thesis-Latex-Template
+- 中国科学院大学：`mohuangrui/ucasthesis` - https://github.com/mohuangrui/ucasthesis
+- 北京大学：`CasperVector/pkuthss`，也可参考维护中的 fork，如 `Thesharing/pkuthss`
 
-- **清华研究生**，使用 `thuthesis` 写作 — 开箱即用，零配置
-- **其他学校学生**，已有 LaTeX 模板 — 填写四个 YAML 文件即可
-- **导师和助教**，希望在接收章节草稿前有可复现的质量门控
-- **任何人**，希望对 LaTeX 论文进行确定性、无 AI 幻觉的检查
+### 国际高校
 
----
+- Stanford University：`dcroote/stanford-thesis-example` - https://github.com/dcroote/stanford-thesis-example
+- University of Cambridge：`cambridge/thesis` - https://github.com/cambridge/thesis
+- University of Oxford：`mcmanigle/OxThesis` - https://github.com/mcmanigle/OxThesis
+- EPFL：`HexHive/thesis_template` - https://github.com/HexHive/thesis_template
+- ETH Zurich：`tuxu/ethz-thesis` - https://github.com/tuxu/ethz-thesis
+- MIT（社区广泛使用，非官方）：`alinush/mit-thesis-template` - https://github.com/alinush/mit-thesis-template
 
-## 致谢
+## 面向其他学校或期刊
 
-基于 TUNA 维护的优秀 [`thuthesis`](https://github.com/tuna/thuthesis) 模板构建。
+建议用户至少上传：
 
----
+- 官方写作指南 `PDF/HTML/纯文本`
+- 官方模板 `DOCX/DOTX` 或 `CLS/STY/TEX`
+- 1 份合规样例 `PDF` 或源码
+- 可选样式文件：`BST/BBX/CBX/CSL`
 
-## 许可证
+然后从这两个 starter pack 复制一份开始：
 
-详见 [LICENSE](LICENSE)。第三方声明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+- `90-rules/packs/university-generic/`
+- `90-rules/packs/journal-generic/`

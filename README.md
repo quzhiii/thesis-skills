@@ -1,215 +1,82 @@
-# Thesis LaTeX Skills
+# Thesis Skills
 
-![Python](https://img.shields.io/badge/python-3.x-blue?logo=python&logoColor=white)
-![License](https://img.shields.io/github/license/quzhiii/thesis-skills)
-![Platform](https://img.shields.io/badge/platform-windows%20%7C%20linux%20%7C%20macos-lightgrey)
-![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
+Deterministic thesis and journal writing skills with Python checkers, safe fixers, YAML rule packs, and one-click runners.
 
-> **Word → LaTeX migration, done right.**
-> A deterministic AI skill pipeline for LaTeX academic writing QA — citation integrity, CJK style, format validation, and Zotero/EndNote bib hygiene. Works for theses and journal submissions alike. No hallucinations. No rewrites. Precise error reports only.
+## What changed
 
-[中文版说明](README.zh-CN.md)
+- Keep `Python + Skills` as the main product shape.
+- Split `check` and `fix` into separate modules.
+- Make `90-rules` actually drive checker behavior.
+- Add starter packs for `tsinghua-thesis`, `university-generic`, and `journal-generic`.
+- Add intake guidance for other schools and journals.
 
----
-
-## The Problem
-
-Getting thesis formatting right is a real prerequisite for graduation. Word is approachable, but keeping formatting consistent across a full thesis — citation styles, cross-references, punctuation rules, figure numbering — is tedious and error-prone. LaTeX handles academic typesetting more robustly and produces cleaner, publication-quality output, but the learning curve is steep, especially when migrating an existing draft from Word.
-
-When you make that switch, problems pile up silently: broken citation keys, orphaned cross-references, mixed CJK/Latin punctuation, missing figure labels, bib entries that fail GB7714-2015 validation. They don't throw errors. They surface all at once on submission day.
-
-**Thesis LaTeX Skills** catches them before your advisor does — whether you're mid-migration from Word or already writing natively in LaTeX.
-
-Built first for **Tsinghua University** (`thuthesis`). Extensible to any university thesis template or journal LaTeX submission template.
-
----
-
-## What It Does (and What It Doesn't)
-
-| ✅ Does | ❌ Does Not |
-|---|---|
-| Cross-validates `\cite{key}` against `.bib` files | Generate or rewrite your arguments |
-| Detects orphan bibliography entries | Change your research methods or conclusions |
-| Checks CJK punctuation & quote style consistency | Automatically edit chapter prose |
-| Validates figure/table labels and `\ref` integrity | Rewrite chapter content by default |
-| Scans and deduplicates symbols & abbreviations | Replace your advisor's review |
-| Checks chapter structure completeness | Make judgment calls on content quality |
-| Enforces school-specific format rules via YAML rulesets | Handle non-LaTeX (Word) submissions |
-
----
-
-## Skill Modules
-
-```
-thesis-latex-skills/
-├── 00-zotero/      # Zotero → .bib export & quality check (run before 01-migrate)
-├── 00-endnote/     # EndNote → BibTeX export, entry-type normalisation, field clean-up
-├── 01-migrate/     # Word → LaTeX migration workflow
-├── 02-content/     # Structure, abstract, and symbol/acronym checks
-├── 03-references/  # Citation integrity and bibliography hygiene
-├── 04-language/    # CJK punctuation and quote style checks
-├── 05-format/      # Figure, table, equation, cross-reference validation
-└── 06-rules/       # Pluggable YAML rulesets (Tsinghua built-in, custom extensible)
-```
-
-### `00-zotero` — Zotero `.bib` Export & Quality Check
-
-If you inserted references in Word using **Zotero**, run this skill **before** `01-migrate`. It validates the `.bib` file exported from Zotero Better BibLaTeX before it enters the pipeline. Catches missing `langid` fields (required by GB7714-2015 / ThuThesis), incomplete required fields, malformed DOIs, and cite-key mismatches between the `.bib` and your `.tex` files. Also detects non-standard entry types that indicate an EndNote export was placed here by mistake.
-
-**Inputs:** `ref/refs-import.bib` (exported from Zotero Better BibLaTeX)
-**Report:** `00-zotero/check_bib_quality-report.json`
-
-### `00-endnote` — EndNote `.bib` Export & Normalisation
-
-For **EndNote** users: a dedicated workflow skill that guides you through exporting BibTeX from EndNote, normalising non-standard entry types (`@Electronic` → `@online`, `@Conference` → `@inproceedings`, etc.) using **JabRef**, fixing field name differences, and adding `langid`. Hands off to `00-zotero/check_bib_quality.py` for final validation.
-
-**When to use:** Choose `00-endnote` if your Word document uses the EndNote plugin. Choose `00-zotero` if you use Zotero.
-
-### `01-migrate` — Word → LaTeX Migration
-
-Converts Word-exported LaTeX (`from_word_full.tex`) into a clean `thuthesis`-compatible chapter structure. Normalizes citation markers into `\cite{...}` format and regenerates the sanitized bibliography import. Preserves all legacy migration scripts — this skill orchestrates them, not replaces them.
-
-**Key outputs:** `data/chap02.tex` … `data/chap06.tex`, `ref/refs-import.bib`
-
-### `02-content` — Content Structure & Symbol Scan
-
-Checks that your thesis has the required chapter flow (problem → method → result → discussion → conclusion), that your abstract contains all four required elements (objective, method, result, conclusion) in both Chinese and English, and that keyword count is within limits. Also scans all chapters for symbol/abbreviation candidates, deduplicates them, flags conflicts, and optionally patches `denotation.tex`.
-
-**Two modes:** `--mode report` (safe, read-only) → `--mode patch` (optional write)
-
-### `03-references` — Citation Integrity
-
-Deterministic cross-validation between your `\cite{key}` calls and your `.bib` files. Catches:
-- **Missing keys** (error) — cited in text but absent from bib
-- **Orphan entries** (warning) — in bib but never cited
-- **Duplicate title candidates** (warning) — possible double entries
-- **Non-monotonic citation order** (info) — numeric style violations
-
-### `04-language` — CJK Language Style
-
-Checks Chinese academic writing conventions that are easy to overlook:
-- Mixed Chinese curly-quotes and straight-quotes in the same paragraph
-- Missing space between CJK and Latin tokens
-- Repeated punctuation anomalies (`。。`, `，，`)
-- Configurable weak-phrase detection ("众所周知", "不难看出", etc.)
-
-### `05-format` — Structure & Cross-Reference Integrity
-
-Validates the mechanical structure of your LaTeX source:
-- Every `\figure` and `\table` environment has `\caption` and `\label`
-- All `\ref{key}` calls have a matching `\label{key}` somewhere
-- Longtable continuation markers are complete (`\endfirsthead`, `\endhead`, `\endfoot`, `\endlastfoot`)
-- List of figures and list of tables are present in main tex
-- Integrates with the existing `thesis_quality_loop.ps1` compile loop
-
-### `06-rules` — Pluggable Rulesets
-
-All checkers read their rules from YAML files under `06-rules/rules/<ruleset>/`. The built-in `tsinghua` ruleset encodes Tsinghua graduate thesis requirements. Adding a new university requires filling four YAML files: `format.yaml`, `citation.yaml`, `structure.yaml`, `language.yaml`.
-
----
-
-## Architecture & Technical Stack
-
-```
-┌─────────────────────────────────────────────────────┐
-│                  AI Coding Assistant                │
-│         (Claude / OpenCode / Cursor / etc.)         │
-└────────────────────┬────────────────────────────────┘
-                     │  invokes skill modules
-┌────────────────────▼────────────────────────────────┐
-│              run_check_once.py  (orchestrator)      │
-│    ┌──────────────────────────────────────────┐     │
-│    │  00-zotero (bib pre-check)               │     │
-│    │  00-endnote (via JabRef, if EndNOte)     │     │
-│    ├──────────────────────────────────────────┤     │
-│    │  03-references  │  04-language  │  05-format │  │
-│    │  02-content     │  (optional compile loop)  │  │
-│    └──────────────────────────────────────────┘     │
-│                        │                            │
-│                 reads ruleset from                  │
-│         06-rules/rules/<ruleset>/*.yaml             │
-└────────────────────┬────────────────────────────────┘
-                     │
-         ┌───────────▼───────────┐
-         │  Your LaTeX project   │
-         │  (thuthesis or other) │
-         └───────────────────────┘
-```
-
-**Stack:**
-- Python 3.x checkers (no external dependencies beyond stdlib)
-- YAML-driven ruleset configuration
-- PowerShell compile loop (`thesis_quality_loop.ps1`) — optional, Windows
-- JSON structured reports from each checker
-- Exit code contract: `0` pass · `1` quality findings · `2` config error · `3` runtime failure
-
-**Skill format:** Compatible with OpenCode / Claude skill system — each module ships a `THESIS_*.md` skill prompt alongside its Python checker.
-
----
-
-## Quick Start
-
-### For Tsinghua users (`thuthesis`)
+## Quick start
 
 ```bash
-# Run all checks at once (from this repository root)
-python run_check_once.py --project-root "../thuthesis-v7.6.0" --rules tsinghua
+python run_check_once.py --project-root examples/minimal-latex-project --ruleset university-generic --skip-compile
+python run_fix_cycle.py --project-root examples/minimal-latex-project --ruleset university-generic --apply false
+python 90-rules/create_pack.py --pack-id my-university --display-name "My University Thesis" --starter university-generic --kind university-thesis
+python 90-rules/create_draft_pack.py --intake adapters/intake/example-intake.json
+python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root <latex-project> --spec <migration.json> --apply false
 ```
 
-This runs, in order:
-1. `00-zotero/check_bib_quality.py` — bibliography export quality (Zotero/langid/DOI)
-2. `03-references/check_references.py` — citation audit
-3. `04-language/check_language.py` — language style
-4. `05-format/check_structure.py` — structural integrity
-5. `02-content/scan_symbols.py --mode report` — symbol scan
-6. Compile loop (`thesis_quality_loop.ps1`) — unless `--skip-compile`
+## Repository map
 
-Skip compile (faster, for iterative checks):
-```bash
-python run_check_once.py --project-root "../thuthesis-v7.6.0" --rules tsinghua --skip-compile
-```
+- `00-bib-zotero/`, `00-bib-endnote/`, `01-word-to-latex/` - migration-side workflows
+- `10-check-*` - deterministic report generators
+- `20-fix-*` - safe patch/fix workflows reading reports
+- `90-rules/packs/` - reusable school and journal packs
+- `adapters/intake/` - what users should upload for a new pack
+- `examples/minimal-latex-project/` - runnable sample project
 
-### For other universities
+## New pack and migration helpers
 
-1. Copy the template ruleset:
-   ```
-   06-rules/rules/custom/template/  →  06-rules/rules/my-university/
-   ```
-2. Fill in your school's requirements in all four YAML files.
-3. Run:
-   ```bash
-   python run_check_once.py --project-root "../your-thesis-project" --rules my-university --skip-compile
-   ```
+- `90-rules/create_pack.py` creates a new school or journal pack from a starter.
+- `90-rules/create_draft_pack.py` generates a draft pack directly from uploaded-material metadata.
+- `01-word-to-latex/migrate_project.py` applies an explicit migration spec from intake assets to a LaTeX project.
+- `adapters/intake/README.md` documents what users should upload before adaptation.
 
-A working starter example is included at `06-rules/rules/my-university/`.
+The stronger migration spec now supports:
 
----
+- `document_metadata`
+- `word_style_mappings`
+- `chapter_role_mappings`
+- explicit `chapter_mappings` and `bibliography_mappings`
 
-## Roadmap
+## Other schools and journals
 
-| Version | Status | What's included |
-|---|---|---|
-| **v0.1** | ✅ Released | 7 skill modules (incl. Zotero bib checker), Tsinghua ruleset, one-command runner |
-| **v0.2** | 🔜 Planned | `07-literature-review` skill, `08-reviewer-audit` skill, consolidated `run-summary.json` |
-| **Future** | 💡 Backlog | LaTeX diff helper for advisor review, compile log parser, defense slide export guidance |
+Users can start a new pack by copying either:
 
----
+- `90-rules/packs/university-generic/`
+- `90-rules/packs/journal-generic/`
 
-## Who Is This For
+Then provide:
 
-- **Tsinghua graduates** writing with `thuthesis` — drop-in, zero config
-- **Other university students** with an existing LaTeX template — fill four YAML files, done
-- **Advisors and TAs** who want a reproducible quality gate before accepting chapter drafts
-- **Anyone** who wants deterministic, non-AI-hallucinated checks on their LaTeX thesis
+- official guide (`pdf`, `html`, or plain text)
+- official template (`docx`, `dotx`, `cls`, `sty`, `tex`)
+- one compliant sample (`pdf` or source)
+- optional bibliography style files (`bst`, `bbx`, `cbx`, `csl`)
 
----
+See `adapters/intake/README.md` and `90-rules/THESIS_RULE_PACKS.md`.
 
-## Acknowledgements
+## Template links
 
-Built on top of the excellent [`thuthesis`](https://github.com/tuna/thuthesis) template maintained by TUNA.
+Use these repositories as jump-off points before running migration or rule-pack onboarding. Always verify the current university or journal rules against the official guide.
 
----
+### China
 
-## License
+- Tsinghua University - `tuna/thuthesis` - https://github.com/tuna/thuthesis
+- Shanghai Jiao Tong University - `sjtug/SJTUThesis` - https://github.com/sjtug/SJTUThesis
+- USTC - `ustctug/ustcthesis` - https://github.com/ustctug/ustcthesis
+- UESTC - `tinoryj/UESTC-Thesis-Latex-Template` - https://github.com/tinoryj/UESTC-Thesis-Latex-Template
+- UCAS - `mohuangrui/ucasthesis` - https://github.com/mohuangrui/ucasthesis
+- Peking University - `CasperVector/pkuthss` or maintained forks such as `Thesharing/pkuthss`
 
-See [LICENSE](LICENSE). Third-party notices in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+### International
+
+- Stanford University - `dcroote/stanford-thesis-example` - https://github.com/dcroote/stanford-thesis-example
+- University of Cambridge - `cambridge/thesis` - https://github.com/cambridge/thesis
+- University of Oxford - `mcmanigle/OxThesis` - https://github.com/mcmanigle/OxThesis
+- EPFL - `HexHive/thesis_template` - https://github.com/HexHive/thesis_template
+- ETH Zurich - `tuxu/ethz-thesis` - https://github.com/tuxu/ethz-thesis
+- MIT (widely used unofficial) - `alinush/mit-thesis-template` - https://github.com/alinush/mit-thesis-template
