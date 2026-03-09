@@ -2,7 +2,7 @@
 
 `Thesis Skills` 是一个面向论文写作、期刊投稿、模板接入与 `Word -> LaTeX` 迁移的 `Python + Skills` 工作流仓库。
 
-它不是一个“提示词集合”，而是一套可执行、可验证、可复用的学术写作基础设施：把学术规范转化为确定性检查、报告驱动修复，以及可复用的规则包。
+它不是“提示词集合”，而是一套可执行、可验证、可复用的学术写作基础设施：把学术规范转成确定性检查、报告驱动修复，以及可复用的规则包。
 
 ## 目录
 
@@ -10,6 +10,7 @@
 - [为什么要做这个项目](#为什么要做这个项目)
 - [项目优势](#项目优势)
 - [技术路线图](#技术路线图)
+- [常见使用场景](#常见使用场景)
 - [仓库结构](#仓库结构)
 - [快速开始](#快速开始)
 - [增强版 Intake 规范](#增强版-intake-规范)
@@ -39,15 +40,15 @@
 
 ## 为什么要做这个项目
 
-很多 AI 写作辅助方案停留在“提示词”层面。它们适合 brainstorming，但一旦进入学校模板、期刊规范、长周期论文维护，就很容易因为上下文漂移而失去稳定性。
+很多 AI 写作辅助方案停留在“提示词”层。它们适合 brainstorming，但在学校模板、期刊规范、长周期论文维护这种强约束场景里，稳定性往往不够。
 
-这个项目的目标，就是把能编码的部分编码，把不该全交给模型的部分从模型手里拿出来：
+这个项目的目标，就是把能编码的部分编码，把不该完全交给模型的部分从模型手里拿出来：
 
 1. Python 负责确定性扫描、文件发现、规则判断和报告输出。
 2. Skills 负责流程编排、解释、辅助决策和最小修改协作。
 3. Rule packs 负责承载学校 / 期刊的具体要求。
 
-这样就不需要让模型“记住整本写作指南”，而是把规范沉淀成可重复执行的流程。
+这样就不需要让模型“记住整本写作指南”，而是把规范沉淀为可重复执行的流程。
 
 ## 项目优势
 
@@ -58,7 +59,7 @@
 ### 2. 把 AI 擅长和程序擅长的部分分开
 
 - Python 负责扫描、匹配、规则判断、报告输出
-- Skills / AI 负责解释、迁移辅助、最小修改建议
+- Skills / AI 负责解释、迁移辅助和最小修改建议
 
 这样既减少幻觉，也减少机械劳动。
 
@@ -82,47 +83,80 @@
 
 ## 技术路线图
 
-```mermaid
-flowchart TD
-    A[上传材料或现有项目] --> B[adapters/intake]
-    B --> B1[example-intake.json]
-    B --> B2[migration.json]
-    B --> C[01-word-to-latex/migrate_project.py]
-    A --> D[90-rules/create_draft_pack.py]
-    D --> E[90-rules/packs/<ruleset>]
-    E --> E1[pack.yaml]
-    E --> E2[rules.yaml]
-    E --> E3[mappings.yaml]
-    E --> E4[draft-notes.md]
-    C --> F[目标 LaTeX 项目]
-    E --> G[run_check_once.py]
-    F --> G
-    G --> H1[00-bib-zotero/check_bib_quality.py]
-    G --> H2[10-check-references/check_references.py]
-    G --> H3[11-check-language/check_language.py]
-    G --> H4[12-check-format/check_format.py]
-    G --> H5[13-check-content/check_content.py]
-    H1 --> I[JSON reports]
-    H2 --> I
-    H3 --> I
-    H4 --> I
-    H5 --> I
-    I --> J[run_fix_cycle.py]
-    J --> K1[20-fix-references]
-    J --> K2[21-fix-language-style]
-    J --> K3[22-fix-format-structure]
-    K1 --> L[最小修复结果]
-    K2 --> L
-    K3 --> L
+```text
+上传材料或现有 LaTeX 项目
+    |
+    +-- 官方指南 / 模板 / 合规样例 / 文献导出文件
+    v
+adapters/intake/
+    |
+    +-- example-intake.json
+    +-- migration.json
+    v
+01-word-to-latex/migrate_project.py
+    |
+    +-- document_metadata
+    +-- word_style_mappings
+    +-- chapter_role_mappings
+    +-- chapter_mappings
+    +-- bibliography_mappings
+    v
+目标 LaTeX 项目
+    |
+    +-- run_check_once.py
+           |
+           +-- 00-bib-zotero/check_bib_quality.py
+           +-- 10-check-references/check_references.py
+           +-- 11-check-language/check_language.py
+           +-- 12-check-format/check_format.py
+           +-- 13-check-content/check_content.py
+           v
+         JSON reports
+           |
+           +-- run_fix_cycle.py
+                  |
+                  +-- 20-fix-references/fix_references.py
+                  +-- 21-fix-language-style/fix_language_style.py
+                  +-- 22-fix-format-structure/fix_format_structure.py
+                  v
+                最小修复结果
+
+上传材料元数据
+    |
+    +-- pack_id / display_name / starter / sources / mappings
+    v
+90-rules/create_draft_pack.py
+    v
+90-rules/packs/<ruleset>/
+    |
+    +-- pack.yaml
+    +-- rules.yaml
+    +-- mappings.yaml
+    +-- draft-notes.md
 ```
 
-用文字概括就是：
+## 常见使用场景
 
-1. 收集材料，或者直接指向一个现有 LaTeX 项目。
-2. 用 intake 元数据驱动迁移与 draft pack 生成。
-3. 跑确定性检查，生成机器可读报告。
-4. 基于报告运行安全 fixer。
-5. 反复迭代，直到项目满足目标 ruleset。
+### 1. 你已经有 Word 草稿
+
+- 整理章节资产和参考文献导出文件
+- 编写 `migration.json`
+- 运行 `01-word-to-latex/migrate_project.py`
+- 再运行 `run_check_once.py` 和 `run_fix_cycle.py`
+
+### 2. 你已经有 LaTeX 项目
+
+- 选择现有 pack，例如 `university-generic` 或 `tsinghua-thesis`
+- 运行 `run_check_once.py`
+- 阅读生成的 reports
+- 用 `run_fix_cycle.py` 做安全、最小的修复
+
+### 3. 你要接入新的学校或期刊
+
+- 收集官方指南、模板、合规样例
+- 填写 `adapters/intake/example-intake.json` 一类元数据
+- 运行 `90-rules/create_draft_pack.py`
+- 基于样例项目继续修订生成的 pack
 
 ## 仓库结构
 
@@ -142,6 +176,7 @@ thesis-skills/
 ├── 99-runner/                  # runner 文档
 ├── adapters/intake/            # 用户上传材料与 intake 元数据
 ├── core/                       # 确定性核心逻辑
+├── docs/                       # 架构与补充说明文档
 ├── examples/                   # 最小可运行示例
 ├── tests/                      # 回归测试
 ├── run_check_once.py           # 一键检查
@@ -162,7 +197,7 @@ python run_check_once.py --project-root examples/minimal-latex-project --ruleset
 python run_fix_cycle.py --project-root examples/minimal-latex-project --ruleset university-generic --apply false
 ```
 
-### 从上传材料元数据生成 draft pack
+### 根据上传材料元数据生成 draft pack
 
 ```bash
 python 90-rules/create_draft_pack.py --intake adapters/intake/example-intake.json
@@ -252,7 +287,7 @@ python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root 
 
 ## 详细架构文档
 
-如果你想看更完整的 runner 设计、规则包结构、intake 流程与扩展边界，请查看 `docs/architecture.md`。
+如果你想看更完整的 runner 设计、规则包结构、pack 生命周期以及 check/fix 时序，请查看 `docs/architecture.md`。
 
 ## 当前状态
 

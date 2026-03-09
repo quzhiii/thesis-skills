@@ -1,8 +1,8 @@
 # Thesis Skills
 
-`Thesis Skills` is a `Python + Skills` workflow repository for thesis writing, journal submission, template onboarding, and Word-to-LaTeX migration.
+`Thesis Skills` is a `Python + Skills` workflow repository for thesis writing, journal submission, template onboarding, and `Word -> LaTeX` migration.
 
-It is not just a prompt collection. It is an executable, testable, reusable pipeline for turning academic writing rules into deterministic checks, report-driven fixes, and reusable rule packs.
+It is not a prompt bundle. It is an executable, testable workflow that turns academic writing policies into deterministic checks, report-driven fixes, and reusable rule packs.
 
 ## Table of Contents
 
@@ -10,6 +10,7 @@ It is not just a prompt collection. It is an executable, testable, reusable pipe
 - [Why This Project Exists](#why-this-project-exists)
 - [Advantages](#advantages)
 - [Technical Roadmap](#technical-roadmap)
+- [Common Use Cases](#common-use-cases)
 - [Repository Layout](#repository-layout)
 - [Quick Start](#quick-start)
 - [Enhanced Intake Schema](#enhanced-intake-schema)
@@ -20,7 +21,7 @@ It is not just a prompt collection. It is an executable, testable, reusable pipe
 
 ## Overview
 
-`thesis-skills` focuses on the parts of academic writing that are repetitive, error-prone, and highly suitable for structured automation.
+`thesis-skills` focuses on the parts of academic writing that are repetitive, error-prone, and suitable for structured automation.
 
 It gives you:
 
@@ -30,99 +31,132 @@ It gives you:
 - YAML rule packs for universities and journals
 - draft-pack scaffolding from uploaded-material metadata
 
-This means the repository is best understood as:
+This makes the repository useful as:
 
 - a migration assistant
 - a template onboarding toolkit
-- a thesis/journal quality gate
+- a thesis and journal quality gate
 - an AI + Python collaboration layer for academic writing workflows
 
 ## Why This Project Exists
 
-Most AI writing helpers stop at prompting. That works for brainstorming, but it breaks down when users need stable, repeatable results across templates, schools, journals, and long writing cycles.
+Most AI writing helpers stop at prompting. That is useful for brainstorming, but weak for long-lived, policy-heavy workflows such as dissertations and journal submissions.
 
-This repository exists to separate concerns clearly:
+This project separates responsibilities clearly:
 
-1. Python handles deterministic scanning, file discovery, and report generation.
-2. Skills handle orchestration, explanation, and selective human-in-the-loop edits.
+1. Python handles deterministic scanning, file discovery, rule evaluation, and report generation.
+2. Skills handle orchestration, interpretation, and selective human-in-the-loop editing.
 3. Rule packs hold school- and journal-specific requirements in reusable form.
 
-Instead of asking a model to "remember the whole thesis style guide," you codify what can be codified and let AI help only where AI is actually useful.
+Instead of asking a model to remember an entire style guide, you encode what can be encoded and keep AI focused on the parts where AI is actually helpful.
 
 ## Advantages
 
-### 1. Executable workflow, not just prompts
+### 1. Executable workflow instead of prompt-only behavior
 
-The main loop is real code: `run_check_once.py`, `run_fix_cycle.py`, deterministic checkers, and reusable packs. That makes behavior more stable and easier to verify.
+The main loop is real code: `run_check_once.py`, `run_fix_cycle.py`, deterministic checkers, and starter packs. That makes the workflow more stable and more verifiable.
 
-### 2. AI and deterministic logic are split cleanly
+### 2. Clear split between AI work and deterministic work
 
 - Python does scanning, matching, rule evaluation, and report output.
 - Skills and AI help with interpretation, migration decisions, and minimal edits.
 
-That reduces hallucination while preserving flexibility.
+This reduces hallucination while preserving flexibility.
 
-### 3. Built for reuse beyond one school
+### 3. Reusable beyond one school
 
-The current starters already include:
+The repository already includes:
 
 - `tsinghua-thesis`
 - `university-generic`
 - `journal-generic`
 
-So the architecture is already prepared for other universities, departments, and journals.
+So the structure is ready for additional universities, departments, and journals.
 
 ### 4. Migration and policy are separate layers
 
-`01-word-to-latex` moves assets into a project. `90-rules` defines policy. `run_check_once.py` and `run_fix_cycle.py` consume project state plus rules. This separation keeps the system understandable and extensible.
+`01-word-to-latex` moves assets into a project. `90-rules` defines policy. `run_check_once.py` and `run_fix_cycle.py` consume project state plus rules. This keeps the system easier to understand and extend.
 
-### 5. Beginner-friendly without sacrificing engineering quality
+### 5. Beginner-friendly while still engineering-grade
 
-Users can start with one-click commands, while contributors still get a modular repository with tests, core utilities, starter packs, and explicit contracts.
+Users can start with one-click commands, while contributors still get explicit module boundaries, tests, examples, and contracts.
 
 ## Technical Roadmap
 
-```mermaid
-flowchart TD
-    A[Uploaded materials or existing project] --> B[adapters/intake]
-    B --> B1[example-intake.json]
-    B --> B2[migration.json]
-    B --> C[01-word-to-latex/migrate_project.py]
-    A --> D[90-rules/create_draft_pack.py]
-    D --> E[90-rules/packs/<ruleset>]
-    E --> E1[pack.yaml]
-    E --> E2[rules.yaml]
-    E --> E3[mappings.yaml]
-    E --> E4[draft-notes.md]
-    C --> F[Target LaTeX project]
-    E --> G[run_check_once.py]
-    F --> G
-    G --> H1[00-bib-zotero/check_bib_quality.py]
-    G --> H2[10-check-references/check_references.py]
-    G --> H3[11-check-language/check_language.py]
-    G --> H4[12-check-format/check_format.py]
-    G --> H5[13-check-content/check_content.py]
-    H1 --> I[JSON reports]
-    H2 --> I
-    H3 --> I
-    H4 --> I
-    H5 --> I
-    I --> J[run_fix_cycle.py]
-    J --> K1[20-fix-references]
-    J --> K2[21-fix-language-style]
-    J --> K3[22-fix-format-structure]
-    K1 --> L[Minimal fixes]
-    K2 --> L
-    K3 --> L
+```text
+Uploaded materials or existing LaTeX project
+    |
+    +-- official guide / template / sample / bibliography exports
+    v
+adapters/intake/
+    |
+    +-- example-intake.json
+    +-- migration.json
+    v
+01-word-to-latex/migrate_project.py
+    |
+    +-- document_metadata
+    +-- word_style_mappings
+    +-- chapter_role_mappings
+    +-- chapter_mappings
+    +-- bibliography_mappings
+    v
+Target LaTeX project
+    |
+    +-- run_check_once.py
+           |
+           +-- 00-bib-zotero/check_bib_quality.py
+           +-- 10-check-references/check_references.py
+           +-- 11-check-language/check_language.py
+           +-- 12-check-format/check_format.py
+           +-- 13-check-content/check_content.py
+           v
+         JSON reports
+           |
+           +-- run_fix_cycle.py
+                  |
+                  +-- 20-fix-references/fix_references.py
+                  +-- 21-fix-language-style/fix_language_style.py
+                  +-- 22-fix-format-structure/fix_format_structure.py
+                  v
+                Minimal fixes
+
+Uploaded-material metadata
+    |
+    +-- pack_id / display_name / starter / sources / mappings
+    v
+90-rules/create_draft_pack.py
+    v
+90-rules/packs/<ruleset>/
+    |
+    +-- pack.yaml
+    +-- rules.yaml
+    +-- mappings.yaml
+    +-- draft-notes.md
 ```
 
-In plain terms:
+## Common Use Cases
 
-1. Gather materials or point the tool at an existing LaTeX project.
-2. Use intake metadata to drive migration and draft rule-pack generation.
-3. Run deterministic checks to produce machine-readable reports.
-4. Run safe fixers against those reports.
-5. Iterate until the project matches the selected ruleset.
+### 1. You already have a Word draft
+
+- Export or organize chapter assets and bibliography files
+- Create `migration.json`
+- Run `01-word-to-latex/migrate_project.py`
+- Run `run_check_once.py` and then `run_fix_cycle.py`
+
+### 2. You already have a LaTeX project
+
+- Choose an existing pack such as `university-generic` or `tsinghua-thesis`
+- Run `run_check_once.py`
+- Review the generated reports
+- Run `run_fix_cycle.py` for safe, minimal changes
+
+### 3. You need to onboard a new university or journal
+
+- Gather the official guide, template, and compliant sample
+- Fill in `adapters/intake/example-intake.json` style metadata
+- Run `90-rules/create_draft_pack.py`
+- Refine the generated pack and validate it against sample projects
 
 ## Repository Layout
 
@@ -142,6 +176,7 @@ thesis-skills/
 ├── 99-runner/                  # Runner documentation
 ├── adapters/intake/            # User-provided intake metadata
 ├── core/                       # Deterministic core logic
+├── docs/                       # Architecture and supporting docs
 ├── examples/                   # Minimal runnable examples
 ├── tests/                      # Regression tests
 ├── run_check_once.py           # One-click check runner
@@ -211,8 +246,6 @@ Example:
 }
 ```
 
-This gives migration enough structure to preserve Word-style intent, logical chapter roles, and bibliography-source context.
-
 ## Adapting Other Universities and Journals
 
 To onboard another school or journal, prepare as many of these as possible:
@@ -252,7 +285,7 @@ Use these as jump-off repositories before migration or rule-pack onboarding. Alw
 
 ## Detailed Architecture Doc
 
-For a more detailed explanation of runners, packs, intake flow, and extension boundaries, see `docs/architecture.md`.
+For a more detailed explanation of runners, rule packs, intake flow, pack lifecycle, and check/fix sequencing, see `docs/architecture.md`.
 
 ## Current Status
 
