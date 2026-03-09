@@ -1,0 +1,24 @@
+{
+  "include": [
+    "core",
+    "tests",
+    "run_check_once.py",
+    "run_fix_cycle.py",
+    "00-bib-zotero",
+    "10-check-references",
+    "11-check-language",
+    "12-check-format",
+    "13-check-content",
+    "20-fix-references",
+    "21-fix-language-style",
+    "22-fix-format-structure"
+  ],
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "extraPaths": [
+        "."
+      ]
+    }
+  ]
+}
