@@ -2,8 +2,10 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.bak0
 .pytest_cache/
 .coverage
+examples/minimal-latex-project/reports/
 examples/generated-packs/
 examples/generated-packs-final/
 examples/generated-draft-packs/
