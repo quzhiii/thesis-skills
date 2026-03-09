@@ -1,14 +1,18 @@
 # Thesis Skills
 
-`Thesis Skills` 是一个面向论文写作、期刊投稿、模板接入与 `Word -> LaTeX` 迁移的 `Python + Skills` 工作流仓库。
+英文说明：[`README.md`](README.md)
+
+`Thesis Skills` 是一个面向论文写作、期刊投稿、模板接入、稿件格式预检查与 `Word -> LaTeX` 迁移的 `Python + Skills` 工作流仓库。
 
 它不是“提示词集合”，而是一套可执行、可验证、可复用的学术写作基础设施：把学术规范转成确定性检查、报告驱动修复，以及可复用的规则包。
 
 ## 目录
 
 - [项目概览](#项目概览)
-- [为什么要做这个项目](#为什么要做这个项目)
-- [项目优势](#项目优势)
+- [项目特色](#项目特色)
+- [最简单的上手方式](#最简单的上手方式)
+- [OpenClaw 支持](#openclaw-支持)
+- [主要功能](#主要功能)
 - [技术路线图](#技术路线图)
 - [常见使用场景](#常见使用场景)
 - [仓库结构](#仓库结构)
@@ -31,28 +35,16 @@
 - 面向学校与期刊的 YAML 规则包
 - 基于上传材料元数据生成 draft pack 的脚手架
 
-因此，这个仓库更适合被理解为：
+因此，这个仓库适合：
 
-- 论文迁移助手
-- 模板接入工具包
-- 学位论文 / 期刊投稿质量门控工具
-- AI + Python 协作的学术写作基础设施层
+- 学生和研究者整理学位论文
+- 作者准备期刊投稿稿件
+- 导师、审稿人、编辑支持人员对稿件做格式和一致性预检查
+- 团队接入新的学校模板或期刊规范
 
-## 为什么要做这个项目
+## 项目特色
 
-很多 AI 写作辅助方案停留在“提示词”层。它们适合 brainstorming，但在学校模板、期刊规范、长周期论文维护这种强约束场景里，稳定性往往不够。
-
-这个项目的目标，就是把能编码的部分编码，把不该完全交给模型的部分从模型手里拿出来：
-
-1. Python 负责确定性扫描、文件发现、规则判断和报告输出。
-2. Skills 负责流程编排、解释、辅助决策和最小修改协作。
-3. Rule packs 负责承载学校 / 期刊的具体要求。
-
-这样就不需要让模型“记住整本写作指南”，而是把规范沉淀为可重复执行的流程。
-
-## 项目优势
-
-### 1. 不是只靠提示词，而是可执行闭环
+### 1. 可执行闭环，而不是只靠提示词
 
 核心流程是代码，不是想象：`run_check_once.py`、`run_fix_cycle.py`、deterministic checkers 和 rule packs 组成了真正可执行的主链路，因此结果更稳定，也更容易验证。
 
@@ -63,7 +55,7 @@
 
 这样既减少幻觉，也减少机械劳动。
 
-### 3. 不只服务一个学校模板
+### 3. 规则包可复用
 
 当前 starter packs 已经包含：
 
@@ -71,15 +63,103 @@
 - `university-generic`
 - `journal-generic`
 
-所以它已经不是“清华专用工具”，而是一个可扩展到其他高校、院系和期刊的规则包架构。
+这让仓库天然适合扩展到更多学校、院系和期刊。
 
 ### 4. 迁移与规范边界清晰
 
 `01-word-to-latex` 只负责迁移资产；`90-rules` 只负责定义规范；`run_check_once.py` 与 `run_fix_cycle.py` 只负责消费项目状态与规则。这种边界能显著降低复杂度。
 
-### 5. 对新手友好，但仍保留工程质量
+### 5. 对新手友好
 
-新用户可以直接跑一键命令；高级用户和贡献者则能看到清晰的模块、测试、starter packs 和 intake contracts，便于维护和扩展。
+不需要先理解整个仓库结构，也可以直接从一个命令开始。需要深入时，再逐步进入 packs、intake、checker、fixer 的分层设计。
+
+## 最简单的上手方式
+
+如果你是第一次使用，优先用下面三种最简单入口：
+
+### 方案 A：你已经有 LaTeX 项目
+
+```bash
+python run_check_once.py --project-root <你的LaTeX项目> --ruleset university-generic --skip-compile
+```
+
+如果你还想预览最小修复：
+
+```bash
+python run_fix_cycle.py --project-root <你的LaTeX项目> --ruleset university-generic --apply false
+```
+
+### 方案 B：你想直接支持 OpenClaw
+
+```bash
+python install_openclaw.py
+```
+
+这个命令会把生成好的 skill 目录安装到 `~/.openclaw/skills`。
+
+### 方案 C：你已经有 Word 草稿
+
+1. 先填写 `migration.json`
+2. 再运行：
+
+```bash
+python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root <latex-project> --spec <migration.json> --apply false
+```
+
+## OpenClaw 支持
+
+可以支持，而且现在已经补了一键安装。
+
+OpenClaw 支持本地 skill 目录，每个 skill 目录中包含 `SKILL.md`。本仓库新增了安装脚本：
+
+```bash
+python install_openclaw.py
+```
+
+它会：
+
+- 读取 `skills-manifest.json`
+- 生成 OpenClaw 可识别的 skill 目录
+- 默认安装到 `~/.openclaw/skills`
+
+如果你要指定安装位置：
+
+```bash
+python install_openclaw.py --target /path/to/openclaw/skills
+```
+
+## 主要功能
+
+### 1. 确定性检查
+
+当前可以检查：
+
+- 文献条目质量
+- 引用 key 缺失与孤立文献条目
+- 中英混排空格与重复标点
+- 图表标题、标签、交叉引用问题
+- 必要章节和摘要关键词数量
+
+### 2. 基于 report 的安全修复
+
+fixer 不是重新读完整篇稿件自由发挥，而是读取结构化 report，只做受约束、可回溯的最小改动。
+
+### 3. Word -> LaTeX 迁移
+
+迁移过程保留：
+
+- 文档元数据
+- Word 样式意图
+- 章节角色映射
+- 文献来源上下文
+
+### 4. 新规则包接入
+
+仓库可以根据上传材料元数据先生成 draft pack，再让你基于真实样例逐步修订。
+
+### 5. 审稿与预检查场景
+
+这个项目不只适合作者本人使用。审稿人、导师、编辑支持人员，也可以用它来预检查稿件是否大致符合目标格式规范，再进入更深层的学术内容判断。
 
 ## 技术路线图
 
@@ -179,6 +259,7 @@ thesis-skills/
 ├── docs/                       # 架构与补充说明文档
 ├── examples/                   # 最小可运行示例
 ├── tests/                      # 回归测试
+├── install_openclaw.py         # OpenClaw 一键安装脚本
 ├── run_check_once.py           # 一键检查
 └── run_fix_cycle.py            # 一键修复
 ```
@@ -203,10 +284,10 @@ python run_fix_cycle.py --project-root examples/minimal-latex-project --ruleset 
 python 90-rules/create_draft_pack.py --intake adapters/intake/example-intake.json
 ```
 
-### 把 intake 资产迁入目标 LaTeX 项目
+### 安装 OpenClaw skills
 
 ```bash
-python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root <latex-project> --spec <migration.json> --apply false
+python install_openclaw.py
 ```
 
 ## 增强版 Intake 规范
@@ -220,33 +301,6 @@ python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root 
 - `chapter_role_mappings`
 - `chapter_mappings`
 - `bibliography_mappings`
-
-示例：
-
-```json
-{
-  "document_metadata": {
-    "source_format": "word-exported-tex",
-    "bibliography_source": "zotero",
-    "template_family": "university-generic"
-  },
-  "word_style_mappings": [
-    {"style": "Heading 1", "role": "chapter", "latex_command": "chapter"},
-    {"style": "Heading 2", "role": "section", "latex_command": "section"}
-  ],
-  "chapter_role_mappings": [
-    {"source": "chapters/chapter1.tex", "role": "introduction", "target": "chapters/01-introduction.tex"}
-  ],
-  "chapter_mappings": [
-    {"from": "chapters/chapter1.tex", "to": "chapters/01-introduction.tex", "role": "introduction", "word_style": "Heading 1"}
-  ],
-  "bibliography_mappings": [
-    {"from": "refs-import.bib", "to": "ref/refs-import.bib"}
-  ]
-}
-```
-
-这意味着迁移步骤不再只是“复制文件”，而是能显式保留 Word 样式意图、章节逻辑角色和文献来源语义。
 
 ## 适配其他学校与期刊
 
@@ -301,4 +355,4 @@ python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root 
 
 一句话总结：
 
-`thesis-skills` 不是“帮你写论文”的 AI 工具，而是一个把迁移、规范、检查、修复、接入流程工程化的 AI + Python 协作基础设施。
+`thesis-skills` 是一个把迁移、规范、检查、修复、接入流程工程化的 AI + Python 协作基础设施。

@@ -1,14 +1,18 @@
 # Thesis Skills
 
-`Thesis Skills` is a `Python + Skills` workflow repository for thesis writing, journal submission, template onboarding, and `Word -> LaTeX` migration.
+Chinese README: [README.zh-CN.md](README.zh-CN.md)
 
-It is not a prompt bundle. It is an executable, testable workflow that turns academic writing policies into deterministic checks, report-driven fixes, and reusable rule packs.
+`Thesis Skills` is a `Python + Skills` workflow repository for thesis writing, journal submission, template onboarding, manuscript formatting review, and `Word -> LaTeX` migration.
+
+It is an executable workflow that turns academic writing policies into deterministic checks, report-driven fixes, and reusable rule packs.
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [Why This Project Exists](#why-this-project-exists)
-- [Advantages](#advantages)
+- [Project Highlights](#project-highlights)
+- [Very Simple Start](#very-simple-start)
+- [OpenClaw Support](#openclaw-support)
+- [Main Capabilities](#main-capabilities)
 - [Technical Roadmap](#technical-roadmap)
 - [Common Use Cases](#common-use-cases)
 - [Repository Layout](#repository-layout)
@@ -31,55 +35,109 @@ It gives you:
 - YAML rule packs for universities and journals
 - draft-pack scaffolding from uploaded-material metadata
 
-This makes the repository useful as:
+This makes the repository useful for:
 
-- a migration assistant
-- a template onboarding toolkit
-- a thesis and journal quality gate
-- an AI + Python collaboration layer for academic writing workflows
+- students preparing theses or dissertations
+- authors preparing journal submissions
+- supervisors, reviewers, or editors who want to pre-check formatting and consistency
+- teams onboarding new university or journal templates
 
-## Why This Project Exists
+## Project Highlights
 
-Most AI writing helpers stop at prompting. That is useful for brainstorming, but weak for long-lived, policy-heavy workflows such as dissertations and journal submissions.
+- deterministic `check -> report -> fix` loop
+- explicit `Word -> LaTeX` migration contracts
+- reusable rule packs for schools and journals
+- safe, minimal fixes instead of whole-document rewrites
+- one-click OpenClaw skill installation support
+- beginner-friendly entrypoints for people who do not want to learn the full repository layout first
 
-This project separates responsibilities clearly:
+## Very Simple Start
 
-1. Python handles deterministic scanning, file discovery, rule evaluation, and report generation.
-2. Skills handle orchestration, interpretation, and selective human-in-the-loop editing.
-3. Rule packs hold school- and journal-specific requirements in reusable form.
+If you are new and just want the easiest path, use one of these:
 
-Instead of asking a model to remember an entire style guide, you encode what can be encoded and keep AI focused on the parts where AI is actually helpful.
+### Option A: You already have a LaTeX project
 
-## Advantages
+```bash
+python run_check_once.py --project-root <your-latex-project> --ruleset university-generic --skip-compile
+```
 
-### 1. Executable workflow instead of prompt-only behavior
+Then, if you want a safe preview of suggested fixes:
 
-The main loop is real code: `run_check_once.py`, `run_fix_cycle.py`, deterministic checkers, and starter packs. That makes the workflow more stable and more verifiable.
+```bash
+python run_fix_cycle.py --project-root <your-latex-project> --ruleset university-generic --apply false
+```
 
-### 2. Clear split between AI work and deterministic work
+### Option B: You want OpenClaw support with one command
 
-- Python does scanning, matching, rule evaluation, and report output.
-- Skills and AI help with interpretation, migration decisions, and minimal edits.
+```bash
+python install_openclaw.py
+```
 
-This reduces hallucination while preserving flexibility.
+This installs generated skill folders into `~/.openclaw/skills`.
 
-### 3. Reusable beyond one school
+### Option C: You have a Word draft
 
-The repository already includes:
+1. Fill in `migration.json`
+2. Run:
 
-- `tsinghua-thesis`
-- `university-generic`
-- `journal-generic`
+```bash
+python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root <latex-project> --spec <migration.json> --apply false
+```
 
-So the structure is ready for additional universities, departments, and journals.
+## OpenClaw Support
 
-### 4. Migration and policy are separate layers
+Yes, this project can work with OpenClaw.
 
-`01-word-to-latex` moves assets into a project. `90-rules` defines policy. `run_check_once.py` and `run_fix_cycle.py` consume project state plus rules. This keeps the system easier to understand and extend.
+OpenClaw supports local skill folders that contain `SKILL.md`. This repository now includes a one-click installer:
 
-### 5. Beginner-friendly while still engineering-grade
+```bash
+python install_openclaw.py
+```
 
-Users can start with one-click commands, while contributors still get explicit module boundaries, tests, examples, and contracts.
+What it does:
+
+- reads `skills-manifest.json`
+- generates OpenClaw-compatible skill folders
+- installs them into `~/.openclaw/skills` by default
+
+If you want a custom install target:
+
+```bash
+python install_openclaw.py --target /path/to/openclaw/skills
+```
+
+## Main Capabilities
+
+### 1. Deterministic checking
+
+The repository can check:
+
+- bibliography quality
+- missing citation keys and orphan bibliography entries
+- CJK/Latin spacing and repeated punctuation
+- figure/table captions, labels, and broken refs
+- required sections and abstract keyword counts
+
+### 2. Report-driven fixing
+
+Instead of asking AI to rewrite the document, fixers read structured reports and only apply bounded, mechanical changes.
+
+### 3. Word-to-LaTeX migration
+
+Migration is explicit. It preserves:
+
+- document metadata
+- Word style intent
+- chapter-role mappings
+- bibliography-source context
+
+### 4. Rule-pack onboarding
+
+The project can scaffold a new pack from uploaded-material metadata, then let you refine it against real samples.
+
+### 5. Review and quality-gate use
+
+This repository is not only useful for authors. Reviewers, supervisors, and editorial support staff can also use it to check whether a manuscript appears to follow a target formatting policy before deeper review.
 
 ## Technical Roadmap
 
@@ -139,24 +197,24 @@ Uploaded-material metadata
 
 ### 1. You already have a Word draft
 
-- Export or organize chapter assets and bibliography files
-- Create `migration.json`
-- Run `01-word-to-latex/migrate_project.py`
-- Run `run_check_once.py` and then `run_fix_cycle.py`
+- export or organize chapter assets and bibliography files
+- create `migration.json`
+- run `01-word-to-latex/migrate_project.py`
+- run `run_check_once.py` and then `run_fix_cycle.py`
 
 ### 2. You already have a LaTeX project
 
-- Choose an existing pack such as `university-generic` or `tsinghua-thesis`
-- Run `run_check_once.py`
-- Review the generated reports
-- Run `run_fix_cycle.py` for safe, minimal changes
+- choose a pack such as `university-generic` or `tsinghua-thesis`
+- run `run_check_once.py`
+- review generated reports
+- run `run_fix_cycle.py` for safe, minimal changes
 
 ### 3. You need to onboard a new university or journal
 
-- Gather the official guide, template, and compliant sample
-- Fill in `adapters/intake/example-intake.json` style metadata
-- Run `90-rules/create_draft_pack.py`
-- Refine the generated pack and validate it against sample projects
+- gather the official guide, template, and compliant sample
+- fill in `adapters/intake/example-intake.json` style metadata
+- run `90-rules/create_draft_pack.py`
+- refine the generated pack and validate it against sample projects
 
 ## Repository Layout
 
@@ -179,6 +237,7 @@ thesis-skills/
 ├── docs/                       # Architecture and supporting docs
 ├── examples/                   # Minimal runnable examples
 ├── tests/                      # Regression tests
+├── install_openclaw.py         # One-click OpenClaw installer
 ├── run_check_once.py           # One-click check runner
 └── run_fix_cycle.py            # One-click fix runner
 ```
@@ -203,10 +262,10 @@ python run_fix_cycle.py --project-root examples/minimal-latex-project --ruleset 
 python 90-rules/create_draft_pack.py --intake adapters/intake/example-intake.json
 ```
 
-### Migrate intake assets into a target LaTeX project
+### Install OpenClaw skills
 
 ```bash
-python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root <latex-project> --spec <migration.json> --apply false
+python install_openclaw.py
 ```
 
 ## Enhanced Intake Schema
@@ -220,31 +279,6 @@ Supported top-level fields:
 - `chapter_role_mappings`
 - `chapter_mappings`
 - `bibliography_mappings`
-
-Example:
-
-```json
-{
-  "document_metadata": {
-    "source_format": "word-exported-tex",
-    "bibliography_source": "zotero",
-    "template_family": "university-generic"
-  },
-  "word_style_mappings": [
-    {"style": "Heading 1", "role": "chapter", "latex_command": "chapter"},
-    {"style": "Heading 2", "role": "section", "latex_command": "section"}
-  ],
-  "chapter_role_mappings": [
-    {"source": "chapters/chapter1.tex", "role": "introduction", "target": "chapters/01-introduction.tex"}
-  ],
-  "chapter_mappings": [
-    {"from": "chapters/chapter1.tex", "to": "chapters/01-introduction.tex", "role": "introduction", "word_style": "Heading 1"}
-  ],
-  "bibliography_mappings": [
-    {"from": "refs-import.bib", "to": "ref/refs-import.bib"}
-  ]
-}
-```
 
 ## Adapting Other Universities and Journals
 
@@ -299,4 +333,4 @@ The repository currently provides:
 
 In one sentence:
 
-`thesis-skills` is not an AI thesis writer; it is an AI + Python infrastructure layer for migration, compliance, checking, fixing, and onboarding academic writing workflows.
+`thesis-skills` is an AI + Python infrastructure layer for migration, compliance, checking, fixing, and onboarding academic writing workflows.
