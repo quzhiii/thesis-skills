@@ -1,8 +1,0 @@
-quote_style:
-  chinese_primary: true
-  mixed_quote_warning: true
-punctuation:
-  repeated_punctuation_error: true
-cjk_latin_spacing:
-  enabled: true
-weak_phrase_patterns: []

@@ -1,0 +1,10 @@
+mappings:
+  source_styles:
+    heading1: Heading 1
+    heading2: Heading 2
+    abstract_cn: 中文摘要
+    abstract_en: Abstract
+  latex_roles:
+    main_tex: thuthesis-example.tex
+    chapters_dir: data/
+    bibliography_dir: ref/

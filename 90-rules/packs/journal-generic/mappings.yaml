@@ -1,0 +1,7 @@
+mappings:
+  source_styles:
+    title: Title
+    abstract: Abstract
+  latex_roles:
+    main_tex: manuscript.tex
+    sections_dir: sections/
