@@ -1,11 +1,14 @@
 __pycache__/
 *.pyc
-
-# Generated reports
-*-report.json
-*-edge.json
-
-# Local runtime artifacts
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+examples/generated-packs/
+examples/generated-packs-final/
+examples/generated-draft-packs/
+examples/generated-draft-packs-2/
+examples/generated-draft-packs-final/
+examples/minimal-latex-project-verify/
+examples/migration-demo/target/
 *.log
-*.tmp
-*.bak0
