@@ -1,6 +1,0 @@
-id: journal-generic
-kind: journal
-display_name: Generic Journal Submission Pack
-version: 1
-precedence: guide_over_template
-starter: true

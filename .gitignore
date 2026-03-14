@@ -1,16 +1,14 @@
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-*.bak0
-.pytest_cache/
-.coverage
-examples/minimal-latex-project/reports/
-examples/generated-packs/
-examples/generated-packs-final/
-examples/generated-draft-packs/
-examples/generated-draft-packs-2/
-examples/generated-draft-packs-final/
-examples/minimal-latex-project-verify/
-examples/migration-demo/target/
+
+# Generated reports
+*-report.json
+*-edge.json
+
+# Local runtime artifacts
 *.log
+*.tmp
+*.bak0
+
+# Word formatter generated artifacts
+07-word/pro/out/

@@ -1,0 +1,8 @@
+main_tex: thuthesis-example.tex
+chapter_glob: data/chap*.tex
+exclude_glob:
+  - data/*.bak*
+  - data/*.template_backup.tex
+crossref_policy: error_on_missing_label
+require_list_of_figures: true
+require_list_of_tables: true

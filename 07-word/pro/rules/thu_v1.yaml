@@ -1,0 +1,24 @@
+{
+  "ruleset": "thu_v1",
+  "school": "tsinghua",
+  "supported_actions": [
+    "APPLY_STYLE",
+    "SET_PARAGRAPH_FORMAT",
+    "CONVERT_PSEUDO_HEADING",
+    "ENSURE_CAPTION",
+    "SET_TABLE_BORDERS",
+    "ENSURE_INLINE_SHAPE",
+    "UPDATE_FIELDS",
+    "REBUILD_TOC",
+    "EXPORT_PDF"
+  ],
+  "heading_patterns": [
+    "^\\s*[0-9]+\\s+",
+    "^\\s*[0-9]+\\.[0-9]+\\s+",
+    "^\\s*[0-9]+\\.[0-9]+\\.[0-9]+\\s+"
+  ],
+  "safe_guards": {
+    "skip_tables_inner_paragraphs": true,
+    "skip_bibliography_section": true
+  }
+}

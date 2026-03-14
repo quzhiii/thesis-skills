@@ -1,0 +1,23 @@
+numbering:
+  figure_separator: "-"
+  table_separator: "-"
+  equation_separator: "-"
+figure:
+  require_centering: true
+  require_caption: true
+  require_label: true
+table:
+  require_caption: true
+  require_label: true
+longtable:
+  required_markers:
+    - "\\endfirsthead"
+    - "\\endhead"
+    - "\\endfoot"
+    - "\\endlastfoot"
+equation:
+  allowed_env:
+    - equation
+    - aligned
+    - gathered
+  disallow_table_wrapper: true
