@@ -1,6 +1,28 @@
-# Thesis Skills v1.2.0
+<div align="center">
+  <img src="https://raw.githubusercontent.com/tuna/thuthesis/master/logo.png" alt="Tsinghua University Logo" width="120"/>
 
-> Deterministic thesis and journal writing skills with Python checkers, safe fixers, YAML rule packs, and one-click runners.
+  # Thesis Skills v0.3.0
+
+  **Deterministic thesis and journal writing skills with Python checkers, safe fixers, YAML rule packs, and one-click runners**
+
+  [![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+  [![License](https://img.shields.io/github/license/quzhiii/thesis-skills)](LICENSE)
+  [![Platform](https://img.shields.io/badge/platform-windows%20%7C%20linux%20%7C%20macos-lightgrey)](https://github.com/quzhiii/thesis-skills)
+
+  [**中文文档**](README.zh-CN.md) | [English](README.md)
+
+  [Quick Start](#quick-start) • [Features](#core-features) • [Documentation](docs/architecture.md) • [Contributing](CONTRIBUTING.md)
+</div>
+
+---
+
+## Acknowledgments
+
+**Special thanks to [tuna/thuthesis](https://github.com/tuna/thuthesis)** for their open-source LaTeX thesis template, which has greatly benefited Tsinghua University students and inspired this project.
+
+---
+
+## Why Thesis Skills?
 
 ## Why Thesis Skills?
 
@@ -11,7 +33,7 @@
 - Manual mapping to `ref001, ref002, ...` is error-prone and time-consuming
 - Every citation change in Word requires re-syncing to LaTeX
 
-**Solution**: Thesis Skills v1.2.0 Zotero sync
+**Solution**: Thesis Skills v0.3.0 Zotero sync
 - Auto-extract Zotero citations from Word docx (parses embedded CSL_CITATION JSON)
 - Auto-create Zotero key ↔ LaTeX ref mapping
 - Incremental updates: only handle new/removed citations, no need to regenerate entire bibliography
@@ -153,7 +175,7 @@ python 01-word-to-latex/migrate_project.py \
 
 ## Core Features
 
-### Zotero Sync (NEW in v1.2.0)
+### Zotero Sync
 
 ```bash
 # BibTeX quality check

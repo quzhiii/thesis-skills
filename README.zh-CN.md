@@ -1,6 +1,26 @@
-# Thesis Skills v1.2.0
+<div align="center">
+  <img src="https://raw.githubusercontent.com/tuna/thuthesis/master/logo.png" alt="清华大学校徽" width="120"/>
 
-> 面向论文和期刊投稿的确定性技能仓库：保留 `Python + Skills` 主线，提供一键检查、一键修复循环、真实 YAML 规则包，以及面向其他学校/期刊的适配入口。
+  # Thesis Skills v0.3.0
+
+  **面向论文和期刊投稿的确定性技能仓库：保留 `Python + Skills` 主线，提供一键检查、一键修复循环、真实 YAML 规则包，以及面向其他学校/期刊的适配入口**
+
+  [![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+  [![License](https://img.shields.io/github/license/quzhiii/thesis-skills)](LICENSE)
+  [![Platform](https://img.shields.io/badge/platform-windows%20%7C%20linux%20%7C%20macos-lightgrey)](https://github.com/quzhiii/thesis-skills)
+
+  [中文文档](README.zh-CN.md) • [**English**](README.md)
+
+  [快速开始](#快速开始) • [核心功能](#核心功能) • [技术文档](docs/architecture.md) • [贡献指南](CONTRIBUTING.md)
+</div>
+
+---
+
+## 致谢
+
+**特别感谢 [tuna/thuthesis](https://github.com/tuna/thuthesis)** 开源 LaTeX 论文模板，该项目造福了众多清华师生，也启发了本项目的开发。
+
+---
 
 ## 为什么需要 Thesis Skills？
 
@@ -11,7 +31,7 @@
 - 需要手动映射为 `ref001, ref002, ...`，工作量大且容易出错
 - 每次在 Word 中修改引用，都要重新同步到 LaTeX
 
-**解决方案**：Thesis Skills v1.2.0 新增 Zotero 同步功能
+**解决方案**：Thesis Skills v0.3.0 新增 Zotero 同步功能
 - 自动从 Word docx 中提取 Zotero 引用（解析内嵌的 CSL_CITATION JSON）
 - 自动创建 Zotero key ↔ LaTeX ref 的映射
 - 增量更新：只处理新增/删除的引用，不用重新生成整个参考文献
@@ -153,7 +173,7 @@ python 01-word-to-latex/migrate_project.py \
 
 ## 核心功能
 
-### Zotero 同步（v1.2.0 新增）
+### Zotero 同步
 
 ```bash
 # BibTeX 质量检查
