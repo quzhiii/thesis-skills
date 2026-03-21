@@ -24,8 +24,6 @@
 
 ## Why Thesis Skills?
 
-## Why Thesis Skills?
-
 ### Pain Point 1: Chaotic citation management when converting Word → LaTeX
 
 **Problem**: When writing in Word with Zotero and converting to LaTeX:
