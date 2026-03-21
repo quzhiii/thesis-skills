@@ -1,220 +1,322 @@
-# Thesis Skills
+# Thesis Skills v1.2.0
 
-![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white)
-![License](https://img.shields.io/github/license/quzhiii/thesis-skills)
-![Platform](https://img.shields.io/badge/platform-windows%20%7C%20linux%20%7C%20macos-lightgrey)
+> 面向论文和期刊投稿的确定性技能仓库：保留 `Python + Skills` 主线，提供一键检查、一键修复循环、真实 YAML 规则包，以及面向其他学校/期刊的适配入口。
 
-英文说明：[`README.md`](README.md)
+## 为什么需要 Thesis Skills？
 
-`thesis-skills` 是一个面向论文、学位论文和期刊投稿场景的确定性工作流仓库。它把 Python runners、可复用 skills、报告驱动 fixer 和规则包结合起来，让学术写作规范从“参考建议”变成“可执行流程”。
+### 痛点 1：Word → LaTeX 转换时文献引用混乱
 
-`v0.3.0` 的目标不是堆更多功能，而是把这个仓库整理成一个更适合公开发布、结构更清楚、边界更诚实的 GitHub 项目。
+**问题**：在 Word 中用 Zotero 写论文，需要转换为 LaTeX 格式时：
+- Zotero 的 citation-key（如 `WuZeXinZhongYiYouShiBingZhongNaRuDRGDIPFuFeiGuiFanFenXia`）在 LaTeX 中无法使用
+- 需要手动映射为 `ref001, ref002, ...`，工作量大且容易出错
+- 每次在 Word 中修改引用，都要重新同步到 LaTeX
 
-> 如果你要的是给学生直接安装使用的一键 Word 插件，
-> 请使用独立仓库：`thu-word-plugin-lite`。
-
-## 为什么做这个仓库
-
-学术写作工具通常会落入两种问题：
-
-- 太依赖人工，流程重复且脆弱
-- 太依赖 AI，结果难验证、难复现
-
-`thesis-skills` 选择第三条路：
-
-- 用代码做确定性检查、映射和受约束修复
-- 用规则包隔离学校或期刊政策
-- 让 AI/skills 留在辅助层，而不是偷偷接管最终结果
-
-它不替代学术判断，但可以显著减少格式、引用、迁移和接入上的重复劳动。
-
-## 项目亮点
-
-- 确定性的 `check -> report -> fix` 闭环
-- 显式的 `Word -> LaTeX` 迁移契约
-- 面向学校与期刊的可复用规则包
-- 读取 report 的安全 fixer，而不是全文自由改写
-- 带回归测试的 Zotero / migration 主流程
-- 面向 GitHub 公开发布重新整理的中英文文档
-
-## 支持矩阵
-
-| 工作流 | v0.3.0 状态 | 含义 |
-|---|---|---|
-| Zotero BibTeX 质量检查 | 稳定 | 检查导出的文献条目质量 |
-| Zotero Word 引用同步 | 稳定 | 从 Word 提取引用、对比映射、更新 `citation-lock.tex` |
-| EndNote 导出接入 | 已支持 | 从 EndNote 导出 BibTeX，规范化后进入同一检查链路 |
-| EndNote 直接同步 | 暂未实现 | 本版本不做过度承诺 |
-| Word -> LaTeX 迁移 | 稳定 | 基于结构化迁移规范 |
-| 确定性 checker | 稳定 | 引用、语言、格式、内容结构 |
-| report 驱动 fixer | 稳定 | 最小、机械、可回溯的修复 |
-| 规则包生成 | 稳定 | 支持 starter 和 draft-pack 两条路径 |
-
-## v0.3.0 的重点变化
-
-- 把仓库重新整理为“按工作流层次理解”的公开结构
-- 保留本地更强的工程实现层（`core/`、`tests/`、fixers、CI）
-- 明确把 Zotero 作为当前最强的文献工作流
-- 保留 EndNote，但只把它定义为“导出接入链路”
-- 补齐公开发布需要的打包与发布元数据
-
-## 最简单的上手方式
-
-### 方案 A：你已经有 LaTeX 项目
+**解决方案**：Thesis Skills v1.2.0 新增 Zotero 同步功能
+- 自动从 Word docx 中提取 Zotero 引用（解析内嵌的 CSL_CITATION JSON）
+- 自动创建 Zotero key ↔ LaTeX ref 的映射
+- 增量更新：只处理新增/删除的引用，不用重新生成整个参考文献
 
 ```bash
-python run_check_once.py --project-root <你的-latex-项目> --ruleset university-generic --skip-compile
-python run_fix_cycle.py --project-root <你的-latex-项目> --ruleset university-generic --apply false
+# 从 Word 同步引用到 LaTeX
+python 00-bib-zotero/sync_from_word.py --project-root thesis --word-file thesis.docx --apply
 ```
 
-### 方案 B：你先从 Word 草稿迁移
+### 痛点 2：文献引用编号不稳定
+
+**问题**：当 Word 中删除某个引用时：
+- 如果直接删除对应的 bib 条目，后续所有引用编号都会改变
+- 例如：删除 ref005 后，ref006 变成 ref005，所有 `\cite{ref006}` 都要修改
+
+**解决方案**：Citation Lock 机制
+- 生成 `citation-lock.tex`，用 `\nocite{}` 锁定所有引用编号
+- 删除引用时保留 bib 条目（只是不在文中出现）
+- 引用编号始终保持稳定
+
+```latex
+% citation-lock.tex 自动生成
+\nocite{ref001,ref002,ref003,...}
+```
+
+### 痛点 3：不同学校/期刊格式要求不同
+
+**问题**：每个学校、期刊都有自己的格式规范：
+- 参考文献格式（作者名格式、年份位置等）
+- 章节结构要求
+- 图表编号和引用规则
+
+**解决方案**：YAML 规则包系统
+- 规则用 YAML 定义，易读易改
+- 提供 Starter Pack（university-generic、journal-generic）
+- 一键生成新学校的规则包
 
 ```bash
-python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root <latex-project> --spec <migration.json> --apply false
+# 从 Starter Pack 创建新学校规则包
+python 90-rules/create_pack.py --pack-id my-university \
+  --display-name "My University Thesis" \
+  --starter university-generic \
+  --kind university-thesis
 ```
 
-### 方案 C：你要做 Zotero Word 引用同步
+### 痛点 4：检查和修复流程不清晰
+
+**问题**：传统 LaTeX 项目：
+- 编译错误信息难以理解
+- 不知道哪些地方不符合格式要求
+- 修复后需要重新编译检查
+
+**解决方案**：确定性检查 + 安全修复
+- 检查器输出 JSON 报告，清晰列出所有问题
+- 修复器读取报告，做最小化修改
+- 一键运行，支持 dry-run 预览
 
 ```bash
-python 00-bib-zotero/sync_from_word.py --project-root <latex-project> --word-file <word.docx>
+# 一键检查（跳过编译）
+python run_check_once.py --project-root thesis --ruleset tsinghua-thesis --skip-compile
+
+# 一键修复循环（dry-run 预览）
+python run_fix_cycle.py --project-root thesis --ruleset tsinghua-thesis --apply false
 ```
 
-### 方案 D：你要安装本地 skills
+## 使用场景
+
+### 场景 1：在 Word 中写论文，需要转换为 LaTeX
 
 ```bash
-python install_openclaw.py
+# 1. 从 Word 同步 Zotero 引用到 LaTeX
+python 00-bib-zotero/sync_from_word.py \
+  --project-root thesis \
+  --word-file 论文初稿.docx \
+  --apply
+
+# 2. 运行检查
+python run_check_once.py \
+  --project-root thesis \
+  --ruleset tsinghua-thesis \
+  --skip-compile
+
+# 3. 查看报告
+cat thesis/reports/sync_from_word-report.json
+cat thesis/reports/run-summary.json
 ```
 
-## 工作流分层
+### 场景 2：已有 LaTeX 项目，需要适配新学校格式
 
-### 1. 文献接入层
+```bash
+# 1. 创建新学校的规则包
+python 90-rules/create_pack.py \
+  --pack-id peking-thesis \
+  --display-name "Peking University Thesis" \
+  --starter university-generic \
+  --kind university-thesis
 
-- `00-bib-zotero/`
-- `00-bib-endnote/`
-- `core/zotero_extract.py`
-- `core/citation_mapping.py`
-
-这一层负责在进入主流程前处理文献质量和引用接入。
-
-### 2. Word-to-LaTeX 迁移层
-
-- `01-word-to-latex/`
-- `core/migration.py`
-- `adapters/intake/`
-
-迁移是显式的，仓库优先相信结构化映射，而不是猜文件名。
-
-### 3. 确定性检查层
-
-- `run_check_once.py`
-- `10-check-references/`
-- `11-check-language/`
-- `12-check-format/`
-- `13-check-content/`
-
-checker 只生成 JSON report，不直接偷偷改项目。
-
-### 4. report 驱动修复层
-
-- `run_fix_cycle.py`
-- `20-fix-references/`
-- `21-fix-language-style/`
-- `22-fix-format-structure/`
-
-fixer 读取 report，只做受约束、最小化的修改。
-
-### 5. 规则包与接入层
-
-- `90-rules/`
-- `90-rules/packs/`
-- `core/rules.py`
-- `core/pack_generator.py`
-
-规范放在 pack 里，而不是散落在脚本里。
-
-## 技术路线图
-
-高层路线图见：[`docs/roadmap.md`](docs/roadmap.md)
-
-详细架构见：[`docs/architecture.md`](docs/architecture.md)
-
-当前的总体方向是：
-
-- 保持顶层目录对用户可理解
-- 保持 `core/` 作为可复用实现层
-- 先把 Zotero 路径做强
-- EndNote 只有在数据契约清楚之后才扩展到直接同步
-
-## 仓库结构
-
-```text
-thesis-skills/
-├── 00-bib-zotero/              # Zotero 文献接入与同步
-├── 00-bib-endnote/             # EndNote 导出接入说明
-├── 01-word-to-latex/           # Word -> LaTeX 迁移入口
-├── 10-check-references/        # 引用完整性检查
-├── 11-check-language/          # 语言与中英混排检查
-├── 12-check-format/            # 图表、格式、交叉引用检查
-├── 13-check-content/           # 内容结构检查
-├── 20-fix-references/          # 基于 report 的引用修复
-├── 21-fix-language-style/      # 基于 report 的语言修复
-├── 22-fix-format-structure/    # 基于 report 的格式修复
-├── 90-rules/                   # 规则包与 pack 生成器
-├── 99-runner/                  # runner 文档
-├── adapters/intake/            # intake 元数据与迁移规范
-├── core/                       # 可复用的确定性核心逻辑
-├── docs/                       # 架构与路线图文档
-├── examples/                   # 最小可运行示例
-├── tests/                      # 回归测试
-├── install_openclaw.py         # 一键安装 skills
-├── run_check_once.py           # 一键检查
-└── run_fix_cycle.py            # 一键修复
+# 2. 编辑 90-rules/packs/peking-thesis/rules.yaml
+# 3. 运行检查
+python run_check_once.py \
+  --project-root thesis \
+  --ruleset peking-thesis \
+  --skip-compile
 ```
 
-## 主要使用场景
+### 场景 3：Word → LaTeX 完整迁移
 
-### 你已经有论文项目
+```bash
+# 1. 准备迁移规范
+cat > migration.json << EOF
+{
+  "document_metadata": {
+    "source_format": "word-exported-tex",
+    "bibliography_source": "zotero"
+  },
+  "chapter_mappings": [
+    {"from": "chapters/chapter1.tex", "to": "chapters/01-introduction.tex"}
+  ],
+  "bibliography_mappings": [
+    {"from": "refs.bib", "to": "ref/refs.bib"}
+  ]
+}
+EOF
 
-- 选择规则包，例如 `university-generic` 或 `tsinghua-thesis`
-- 运行 `run_check_once.py`
-- 查看 JSON report
-- 再用 `run_fix_cycle.py` 做最小修复或修复预览
+# 2. 执行迁移（dry-run）
+python 01-word-to-latex/migrate_project.py \
+  --source-root intake \
+  --target-root thesis \
+  --spec migration.json \
+  --apply false
 
-### 你需要从 Word 迁移
+# 3. 确认后应用
+python 01-word-to-latex/migrate_project.py \
+  --source-root intake \
+  --target-root thesis \
+  --spec migration.json \
+  --apply true
+```
 
-- 准备 intake 元数据与迁移规范
-- 使用 `01-word-to-latex/migrate_project.py` 导入资产
-- 再进入确定性检查和最小修复流程
+## 核心功能
 
-### 你要规范文献接入
+### Zotero 同步（v1.2.0 新增）
 
-- Zotero：可以做质量检查，也可以做 Word 引用同步
-- EndNote：先导出 BibTeX、规范化，再进入同一质量门禁
+```bash
+# BibTeX 质量检查
+python 00-bib-zotero/check_bib_quality.py --project-root thesis --ruleset tsinghua-thesis
 
-### 你要适配新的学校或期刊
+# Word → LaTeX 引用同步
+python 00-bib-zotero/sync_from_word.py --project-root thesis --word-file thesis.docx
+```
 
-- 收集官方指南、模板和合规样例
-- 用 `90-rules/create_pack.py` 或 `90-rules/create_draft_pack.py`
-- 再基于样例项目修订规则包
+**特性**：
+- 从 Word docx 提取 Zotero 引用（CSL_CITATION JSON）
+- 维护 Zotero key ↔ LaTeX ref 映射（`ref/citation-mapping.json`）
+- 生成引用锁文件（`citation-lock.tex`）
+- 检测新增/删除的引用
+- 支持 dry-run 预览
 
-## 适配其他学校与期刊
+### 检查器（10-check-*）
 
-建议准备这些输入：
+```bash
+# 一键运行所有检查
+python run_check_once.py --project-root thesis --ruleset tsinghua-thesis
+```
 
-- 官方指南（`PDF`、`HTML` 或纯文本）
-- 官方模板（`DOCX`、`DOTX`、`CLS`、`STY`、`TEX`）
-- 至少一份合规样例（`PDF` 或源码）
-- 可选样式文件（`BST`、`BBX`、`CBX`、`CSL`）
-- 可选截图（题名页、图表页、参考文献页）
+**检查项**：
+- `10-check-references`：引用完整性检查（缺失的 key、孤立的条目、重复标题）
+- `11-check-language`：语言检查（中英文间距、重复标点、混合引号、弱表达）
+- `12-check-format`：格式检查（图表目录、图表居中）
+- `13-check-content`：内容检查（必需章节、摘要关键词数量）
 
-推荐起点：
+### 修复器（20-fix-*）
+
+```bash
+# 一键修复循环
+python run_fix_cycle.py --project-root thesis --ruleset tsinghua-thesis --apply false
+```
+
+**特性**：
+- 读取检查报告，做最小化修复
+- 支持 dry-run 预览
+- 生成修复报告
+
+## 规则包系统
+
+### Starter Pack
+
+```bash
+90-rules/packs/
+├── university-generic/    # 通用大学论文 Starter Pack
+├── journal-generic/       # 通用期刊 Starter Pack
+└── tsinghua-thesis/       # 清华大学论文 Pack（示例）
+```
+
+### 规则包结构
+
+```yaml
+# pack.yaml
+id: tsinghua-thesis
+kind: university-thesis
+display_name: Tsinghua Graduate Thesis Pack
+version: 1
+precedence: guide_over_template
+starter: false
+
+# rules.yaml（部分示例）
+project:
+  main_tex_candidates: [thuthesis-example.tex, thesis.tex, main.tex]
+  chapter_globs: [chapters/*.tex, data/chap*.tex]
+  bibliography_files: [ref/refs.bib, ref/refs-import.bib]
+
+reference:
+  missing_key:
+    severity: error
+  orphan_entry:
+    severity: warning
+
+language:
+  cjk_latin_spacing:
+    enabled: true
+    severity: warning
+  weak_phrases:
+    enabled: true
+    severity: info
+    patterns: [众所周知, 不难看出, 本文将]
+```
+
+### 创建新规则包
+
+```bash
+# 方法 1：从 Starter Pack 创建
+python 90-rules/create_pack.py \
+  --pack-id my-university \
+  --display-name "My University Thesis" \
+  --starter university-generic \
+  --kind university-thesis
+
+# 方法 2：从上传材料生成 Draft Pack
+python 90-rules/create_draft_pack.py \
+  --intake adapters/intake/example-intake.json
+```
+
+## 为其他学校/期刊创建规则包
+
+建议用户至少上传：
+
+- **官方写作指南**：`PDF`/`HTML`/纯文本
+- **官方模板**：`DOCX`/`DOTX` 或 `CLS`/`STY`/`TEX`
+- **合规样例**：1 份 `PDF` 或源码
+- **可选样式文件**：`BST`/`BBX`/`CBX`/`CSL`
+
+然后从这两个 Starter Pack 复制一份开始：
 
 - `90-rules/packs/university-generic/`
 - `90-rules/packs/journal-generic/`
 
+详细指南：`adapters/intake/README.md`
+
+## 技术架构
+
+Thesis Skills 采用模块化设计：
+
+```
+thesis-skills/
+├── core/                    # 核心模块
+│   ├── zotero_extract.py   # Zotero 引用提取
+│   ├── citation_mapping.py # 引用映射管理
+│   ├── project.py          # 项目发现
+│   └── reports.py          # 报告生成
+├── 00-bib-zotero/          # Zotero 工作流
+│   ├── check_bib_quality.py
+│   └── sync_from_word.py
+├── 01-word-to-latex/       # Word 迁移工作流
+│   └── migrate_project.py
+├── 10-check-*/             # 确定性检查器
+├── 20-fix-*/               # 安全修复器
+├── 90-rules/               # 规则包系统
+│   ├── create_pack.py
+│   ├── create_draft_pack.py
+│   └── packs/              # 学校/期刊规则包
+├── adapters/intake/        # 接入指南
+├── run_check_once.py       # 一键检查
+├── run_fix_cycle.py        # 一键修复
+└── examples/               # 示例项目
+```
+
+**工作流程**：
+
+```
+Word (Zotero) → [sync_from_word.py] → LaTeX Project
+                                          ↓
+                                    [run_check_once.py]
+                                          ↓
+                                      JSON Reports
+                                          ↓
+                                    [run_fix_cycle.py]
+                                          ↓
+                                      Fixed LaTeX
+```
+
+详细技术文档：`docs/architecture.md`
+
 ## 模板链接
 
-这些仓库适合作为迁移和规则包接入前的跳转入口。实际使用时仍以学校或期刊官方规范为准。
+下面这些仓库适合做"先下载模板，再接入 thesis-skills"的跳转入口。使用前仍建议以学校或期刊官方写作指南为准。
 
 ### 中国高校
 
@@ -223,7 +325,7 @@ thesis-skills/
 - 中国科学技术大学：`ustctug/ustcthesis` - https://github.com/ustctug/ustcthesis
 - 电子科技大学：`tinoryj/UESTC-Thesis-Latex-Template` - https://github.com/tinoryj/UESTC-Thesis-Latex-Template
 - 中国科学院大学：`mohuangrui/ucasthesis` - https://github.com/mohuangrui/ucasthesis
-- 北京大学：`CasperVector/pkuthss`，以及维护中的 fork，如 `Thesharing/pkuthss`
+- 北京大学：`CasperVector/pkuthss`，也可参考维护中的 fork，如 `Thesharing/pkuthss`
 
 ### 国际高校
 
@@ -232,23 +334,22 @@ thesis-skills/
 - University of Oxford：`mcmanigle/OxThesis` - https://github.com/mcmanigle/OxThesis
 - EPFL：`HexHive/thesis_template` - https://github.com/HexHive/thesis_template
 - ETH Zurich：`tuxu/ethz-thesis` - https://github.com/tuxu/ethz-thesis
-- MIT（社区常用，非官方）：`alinush/mit-thesis-template` - https://github.com/alinush/mit-thesis-template
+- MIT（社区广泛使用，非官方）：`alinush/mit-thesis-template` - https://github.com/alinush/mit-thesis-template
 
-## 当前状态
+## 快速开始
 
-当前仓库已经具备：
+```bash
+# 克隆项目
+git clone https://github.com/quzhiii/thesis-skills.git
+cd thesis-skills
 
-- 可运行的 `check -> report -> fix` 闭环
-- 可运行的 `Word -> LaTeX` 迁移路径
-- Zotero 文献质量检查与引用同步
-- EndNote 导出接入说明
-- 面向学校和期刊的 starter packs
-- 覆盖主要公开工作流的回归测试
-
-一句话总结：
-
-`thesis-skills` 是一个把学术写作迁移、规范检查、最小修复与模板接入工程化的公开工作流仓库。
+# 运行示例
+python run_check_once.py \
+  --project-root examples/minimal-latex-project \
+  --ruleset university-generic \
+  --skip-compile
+```
 
 ## 许可证
 
-详见 [LICENSE](LICENSE)。第三方声明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+MIT License

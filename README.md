@@ -1,221 +1,322 @@
-# Thesis Skills
+# Thesis Skills v1.2.0
 
-![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white)
-![License](https://img.shields.io/github/license/quzhiii/thesis-skills)
-![Platform](https://img.shields.io/badge/platform-windows%20%7C%20linux%20%7C%20macos-lightgrey)
+> Deterministic thesis and journal writing skills with Python checkers, safe fixers, YAML rule packs, and one-click runners.
 
-Chinese README: [README.zh-CN.md](README.zh-CN.md)
+## Why Thesis Skills?
 
-`thesis-skills` is a deterministic workflow repository for thesis and journal writing. It combines Python runners, reusable skill modules, report-driven fixers, and rulesets so that academic writing policies become executable instead of purely advisory.
+### Pain Point 1: Chaotic citation management when converting Word → LaTeX
 
-`v0.3.0` is the release that makes the public repository clearer: stronger architecture, bilingual docs, tested runners, and a practical bibliography path that treats Zotero and EndNote with explicit support levels.
+**Problem**: When writing in Word with Zotero and converting to LaTeX:
+- Zotero citation-keys (like `WuZeXinZhongYiYouShiBingZhongNaRuDRGDIPFuFeiGuiFanFenXia`) don't work in LaTeX
+- Manual mapping to `ref001, ref002, ...` is error-prone and time-consuming
+- Every citation change in Word requires re-syncing to LaTeX
 
-> Looking for the student-facing Word plugin?
-> Use the separate repository: `thu-word-plugin-lite`.
-
-## Why This Repo Exists
-
-Most academic writing tooling fails in one of two ways:
-
-- it is too manual and brittle
-- or it is too AI-heavy and hard to verify
-
-`thesis-skills` takes a different route:
-
-- code handles deterministic checks, mappings, and bounded fixes
-- rulesets isolate school or journal policy from implementation
-- AI/skills stay in the assistive layer instead of silently owning the result
-
-The goal is not to replace academic judgment. The goal is to reduce avoidable formatting, reference, and migration work.
-
-## Highlights
-
-- deterministic `check -> report -> fix` loop
-- explicit `Word -> LaTeX` migration contracts
-- reusable rule packs for universities and journals
-- safe fixers that read reports instead of rewriting whole chapters
-- regression-tested bibliography and migration paths
-- bilingual public documentation designed for GitHub readers
-
-## Support Matrix
-
-| Workflow | Status in v0.3.0 | What it means |
-|---|---|---|
-| Zotero BibTeX quality check | Stable | validate exported bibliography before import |
-| Zotero Word citation sync | Stable | extract Word citations, compare mappings, update `citation-lock.tex` |
-| EndNote export intake | Supported | export BibTeX, normalize, then enter the same validation pipeline |
-| EndNote direct sync | Not yet | intentionally not claimed in this release |
-| Word -> LaTeX migration | Stable | explicit migration spec with structured metadata |
-| Deterministic checkers | Stable | references, language, format, content |
-| Report-driven fixers | Stable | bounded, mechanical, minimal edits |
-| Rule pack generation | Stable | starter-based and draft-pack generation both supported |
-
-## What v0.3.0 Changes
-
-- clarifies the repository around workflow layers instead of loose scripts
-- keeps the stronger local engineering structure (`core/`, `tests/`, fixers, CI)
-- positions Zotero as the strongest bibliography path today
-- keeps EndNote in the release, but honestly as an export-based intake path
-- refreshes packaging and release metadata for public GitHub use
-
-## Very Simple Start
-
-### Option A: You already have a LaTeX project
+**Solution**: Thesis Skills v1.2.0 Zotero sync
+- Auto-extract Zotero citations from Word docx (parses embedded CSL_CITATION JSON)
+- Auto-create Zotero key ↔ LaTeX ref mapping
+- Incremental updates: only handle new/removed citations, no need to regenerate entire bibliography
 
 ```bash
-python run_check_once.py --project-root <your-latex-project> --ruleset university-generic --skip-compile
-python run_fix_cycle.py --project-root <your-latex-project> --ruleset university-generic --apply false
+# Sync citations from Word to LaTeX
+python 00-bib-zotero/sync_from_word.py --project-root thesis --word-file thesis.docx --apply
 ```
 
-### Option B: You have a Word draft and want migration first
+### Pain Point 2: Unstable citation numbering
+
+**Problem**: When deleting a citation in Word:
+- If you delete the corresponding bib entry, all subsequent citation numbers shift
+- Example: deleting ref005 makes ref006 become ref005, breaking all `\cite{ref006}` references
+
+**Solution**: Citation Lock mechanism
+- Generate `citation-lock.tex` using `\nocite{}` to lock all reference numbers
+- Preserve bib entries when deleting citations (they just don't appear in text)
+- Citation numbers remain stable
+
+```latex
+% citation-lock.tex auto-generated
+\nocite{ref001,ref002,ref003,...}
+```
+
+### Pain Point 3: Different formatting requirements for schools/journals
+
+**Problem**: Each school/journal has unique formatting rules:
+- Bibliography format (author name format, year position, etc.)
+- Chapter structure requirements
+- Figure/table numbering and reference rules
+
+**Solution**: YAML rule pack system
+- Rules defined in YAML, easy to read and modify
+- Starter Packs provided (university-generic, journal-generic)
+- One-click generate new school rule packs
 
 ```bash
-python 01-word-to-latex/migrate_project.py --source-root <intake> --target-root <latex-project> --spec <migration.json> --apply false
+# Create new school rule pack from Starter Pack
+python 90-rules/create_pack.py --pack-id my-university \
+  --display-name "My University Thesis" \
+  --starter university-generic \
+  --kind university-thesis
 ```
 
-### Option C: You need Zotero citation sync from Word
+### Pain Point 4: Unclear check and fix workflow
+
+**Problem**: Traditional LaTeX projects:
+- Compile error messages are hard to understand
+- Unclear which parts don't meet formatting requirements
+- Need to recompile after fixes to verify
+
+**Solution**: Deterministic checks + safe fixes
+- Checkers output JSON reports clearly listing all issues
+- Fixers read reports and make minimal changes
+- One-click execution with dry-run preview
 
 ```bash
-python 00-bib-zotero/sync_from_word.py --project-root <latex-project> --word-file <word.docx>
+# One-click check (skip compile)
+python run_check_once.py --project-root thesis --ruleset tsinghua-thesis --skip-compile
+
+# One-click fix cycle (dry-run preview)
+python run_fix_cycle.py --project-root thesis --ruleset tsinghua-thesis --apply false
 ```
 
-### Option D: You want local skill installation
+## Use Cases
+
+### Use Case 1: Writing in Word, need to convert to LaTeX
 
 ```bash
-python install_openclaw.py
+# 1. Sync Zotero citations from Word to LaTeX
+python 00-bib-zotero/sync_from_word.py \
+  --project-root thesis \
+  --word-file thesis.docx \
+  --apply
+
+# 2. Run checks
+python run_check_once.py \
+  --project-root thesis \
+  --ruleset tsinghua-thesis \
+  --skip-compile
+
+# 3. View reports
+cat thesis/reports/sync_from_word-report.json
+cat thesis/reports/run-summary.json
 ```
 
-## Workflow Layers
+### Use Case 2: Existing LaTeX project, adapt to new school format
 
-### 1. Bibliography Intake
+```bash
+# 1. Create new school rule pack
+python 90-rules/create_pack.py \
+  --pack-id peking-thesis \
+  --display-name "Peking University Thesis" \
+  --starter university-generic \
+  --kind university-thesis
 
-- `00-bib-zotero/`
-- `00-bib-endnote/`
-- `core/zotero_extract.py`
-- `core/citation_mapping.py`
-
-This layer handles bibliography entry quality and citation intake before the rest of the workflow runs.
-
-### 2. Word-to-LaTeX Migration
-
-- `01-word-to-latex/`
-- `core/migration.py`
-- `adapters/intake/`
-
-Migration is explicit. The repository prefers structured mappings over magical filename guessing.
-
-### 3. Deterministic Checking
-
-- `run_check_once.py`
-- `10-check-references/`
-- `11-check-language/`
-- `12-check-format/`
-- `13-check-content/`
-
-Checkers emit JSON reports instead of making hidden edits.
-
-### 4. Report-Driven Fixing
-
-- `run_fix_cycle.py`
-- `20-fix-references/`
-- `21-fix-language-style/`
-- `22-fix-format-structure/`
-
-Fixers consume reports and apply minimal, bounded changes.
-
-### 5. Rulesets and Onboarding
-
-- `90-rules/`
-- `90-rules/packs/`
-- `core/rules.py`
-- `core/pack_generator.py`
-
-Policy lives in packs, not scattered across scripts.
-
-## Technical Roadmap
-
-High-level roadmap: [docs/roadmap.md](docs/roadmap.md)
-
-Detailed architecture: [docs/architecture.md](docs/architecture.md)
-
-Current direction:
-
-- keep the top-level layout easy to read
-- keep `core/` as the reusable implementation layer
-- keep Zotero strong today
-- expand EndNote only when the data contract is explicit enough to be trustworthy
-
-## Repository Layout
-
-```text
-thesis-skills/
-├── 00-bib-zotero/              # Zotero bibliography intake and sync
-├── 00-bib-endnote/             # EndNote export workflow guidance
-├── 01-word-to-latex/           # Word -> LaTeX migration entrypoint
-├── 10-check-references/        # Citation integrity checks
-├── 11-check-language/          # Language and spacing checks
-├── 12-check-format/            # Figure/table/ref/format checks
-├── 13-check-content/           # Content structure checks
-├── 20-fix-references/          # Report-driven reference fixes
-├── 21-fix-language-style/      # Report-driven language fixes
-├── 22-fix-format-structure/    # Report-driven format fixes
-├── 90-rules/                   # Rulesets and pack generators
-├── 99-runner/                  # Runner documentation
-├── adapters/intake/            # Intake metadata and migration specs
-├── core/                       # Reusable deterministic core logic
-├── docs/                       # Architecture and roadmap docs
-├── examples/                   # Minimal runnable examples
-├── tests/                      # Regression tests
-├── install_openclaw.py         # One-command skill installer
-├── run_check_once.py           # One-command check runner
-└── run_fix_cycle.py            # One-command fix runner
+# 2. Edit 90-rules/packs/peking-thesis/rules.yaml
+# 3. Run checks
+python run_check_once.py \
+  --project-root thesis \
+  --ruleset peking-thesis \
+  --skip-compile
 ```
 
-## Main Use Cases
+### Use Case 3: Complete Word → LaTeX migration
 
-### You already have a thesis project
+```bash
+# 1. Prepare migration spec
+cat > migration.json << EOF
+{
+  "document_metadata": {
+    "source_format": "word-exported-tex",
+    "bibliography_source": "zotero"
+  },
+  "chapter_mappings": [
+    {"from": "chapters/chapter1.tex", "to": "chapters/01-introduction.tex"}
+  ],
+  "bibliography_mappings": [
+    {"from": "refs.bib", "to": "ref/refs.bib"}
+  ]
+}
+EOF
 
-- choose a ruleset such as `university-generic` or `tsinghua-thesis`
-- run `run_check_once.py`
-- inspect JSON reports
-- preview or apply bounded fixes with `run_fix_cycle.py`
+# 2. Execute migration (dry-run)
+python 01-word-to-latex/migrate_project.py \
+  --source-root intake \
+  --target-root thesis \
+  --spec migration.json \
+  --apply false
 
-### You need to migrate from Word
+# 3. Apply after confirmation
+python 01-word-to-latex/migrate_project.py \
+  --source-root intake \
+  --target-root thesis \
+  --spec migration.json \
+  --apply true
+```
 
-- prepare intake metadata and migration spec
-- migrate assets with `01-word-to-latex/migrate_project.py`
-- run the deterministic checks
-- then apply minimal fixes if needed
+## Core Features
 
-### You need bibliography intake discipline
+### Zotero Sync (NEW in v1.2.0)
 
-- Zotero: validate or sync citations from Word
-- EndNote: export BibTeX, normalize, then validate through the same quality gate
+```bash
+# BibTeX quality check
+python 00-bib-zotero/check_bib_quality.py --project-root thesis --ruleset tsinghua-thesis
 
-### You need a new school or journal pack
+# Word → LaTeX citation sync
+python 00-bib-zotero/sync_from_word.py --project-root thesis --word-file thesis.docx
+```
 
-- collect guide, template, and compliant sample
-- use `90-rules/create_pack.py` or `90-rules/create_draft_pack.py`
-- refine pack rules against sample projects
+**Features**:
+- Extract Zotero citations from Word docx (CSL_CITATION JSON)
+- Maintain Zotero key ↔ LaTeX ref mapping (`ref/citation-mapping.json`)
+- Generate citation lock file (`citation-lock.tex`)
+- Detect new/removed citations
+- Support dry-run preview
 
-## Adapting Other Universities and Journals
+### Checkers (10-check-*)
 
-Useful input materials:
+```bash
+# Run all checks with one command
+python run_check_once.py --project-root thesis --ruleset tsinghua-thesis
+```
 
-- official guide (`PDF`, `HTML`, or plain text)
-- official template (`DOCX`, `DOTX`, `CLS`, `STY`, `TEX`)
-- at least one compliant sample (`PDF` or source)
-- optional style files (`BST`, `BBX`, `CBX`, `CSL`)
-- optional screenshots for title pages, figures, tables, and references
+**Check items**:
+- `10-check-references`: Reference integrity (missing keys, orphan entries, duplicate titles)
+- `11-check-language`: Language checks (CJK-Latin spacing, repeated punctuation, mixed quotes, weak phrases)
+- `12-check-format`: Format checks (figure/table lists, figure centering)
+- `13-check-content`: Content checks (required sections, abstract keyword count)
 
-Recommended starting points:
+### Fixers (20-fix-*)
+
+```bash
+# One-click fix cycle
+python run_fix_cycle.py --project-root thesis --ruleset tsinghua-thesis --apply false
+```
+
+**Features**:
+- Read check reports, make minimal fixes
+- Support dry-run preview
+- Generate fix reports
+
+## Rule Pack System
+
+### Starter Packs
+
+```bash
+90-rules/packs/
+├── university-generic/    # Generic university thesis Starter Pack
+├── journal-generic/       # Generic journal Starter Pack
+└── tsinghua-thesis/       # Tsinghua University thesis Pack (example)
+```
+
+### Rule Pack Structure
+
+```yaml
+# pack.yaml
+id: tsinghua-thesis
+kind: university-thesis
+display_name: Tsinghua Graduate Thesis Pack
+version: 1
+precedence: guide_over_template
+starter: false
+
+# rules.yaml (partial example)
+project:
+  main_tex_candidates: [thuthesis-example.tex, thesis.tex, main.tex]
+  chapter_globs: [chapters/*.tex, data/chap*.tex]
+  bibliography_files: [ref/refs.bib, ref/refs-import.bib]
+
+reference:
+  missing_key:
+    severity: error
+  orphan_entry:
+    severity: warning
+
+language:
+  cjk_latin_spacing:
+    enabled: true
+    severity: warning
+  weak_phrases:
+    enabled: true
+    severity: info
+    patterns: [众所周知, 不难看出, 本文将]
+```
+
+### Create New Rule Pack
+
+```bash
+# Method 1: Create from Starter Pack
+python 90-rules/create_pack.py \
+  --pack-id my-university \
+  --display-name "My University Thesis" \
+  --starter university-generic \
+  --kind university-thesis
+
+# Method 2: Generate Draft Pack from uploaded materials
+python 90-rules/create_draft_pack.py \
+  --intake adapters/intake/example-intake.json
+```
+
+## Creating Rule Packs for Other Schools/Journals
+
+Recommended to upload at least:
+
+- **Official writing guide**: `PDF`/`HTML`/plain text
+- **Official template**: `DOCX`/`DOTX` or `CLS`/`STY`/`TEX`
+- **Compliant sample**: 1 `PDF` or source
+- **Optional style files**: `BST`/`BBX`/`CBX`/`CSL`
+
+Then start by copying one of these Starter Packs:
 
 - `90-rules/packs/university-generic/`
 - `90-rules/packs/journal-generic/`
 
+Detailed guide: `adapters/intake/README.md`
+
+## Technical Architecture
+
+Thesis Skills uses a modular design:
+
+```
+thesis-skills/
+├── core/                    # Core modules
+│   ├── zotero_extract.py   # Zotero citation extraction
+│   ├── citation_mapping.py # Citation mapping management
+│   ├── project.py          # Project discovery
+│   └── reports.py          # Report generation
+├── 00-bib-zotero/          # Zotero workflow
+│   ├── check_bib_quality.py
+│   └── sync_from_word.py
+├── 01-word-to-latex/       # Word migration workflow
+│   └── migrate_project.py
+├── 10-check-*/             # Deterministic checkers
+├── 20-fix-*/               # Safe fixers
+├── 90-rules/               # Rule pack system
+│   ├── create_pack.py
+│   ├── create_draft_pack.py
+│   └── packs/              # School/journal rule packs
+├── adapters/intake/        # Onboarding guide
+├── run_check_once.py       # One-click check
+├── run_fix_cycle.py        # One-click fix
+└── examples/               # Example projects
+```
+
+**Workflow**:
+
+```
+Word (Zotero) → [sync_from_word.py] → LaTeX Project
+                                          ↓
+                                    [run_check_once.py]
+                                          ↓
+                                      JSON Reports
+                                          ↓
+                                    [run_fix_cycle.py]
+                                          ↓
+                                      Fixed LaTeX
+```
+
+Detailed technical docs: `docs/architecture.md`
+
 ## Template Links
 
-These are useful jump-off repositories before migration or ruleset onboarding. Always verify against the latest official guide.
+These repositories are good starting points before running migration or rule-pack onboarding. Always verify current university/journal rules against official guides.
 
 ### China
 
@@ -224,7 +325,7 @@ These are useful jump-off repositories before migration or ruleset onboarding. A
 - USTC - `ustctug/ustcthesis` - https://github.com/ustctug/ustcthesis
 - UESTC - `tinoryj/UESTC-Thesis-Latex-Template` - https://github.com/tinoryj/UESTC-Thesis-Latex-Template
 - UCAS - `mohuangrui/ucasthesis` - https://github.com/mohuangrui/ucasthesis
-- Peking University - `CasperVector/pkuthss` and maintained forks such as `Thesharing/pkuthss`
+- Peking University - `CasperVector/pkuthss` or maintained forks such as `Thesharing/pkuthss`
 
 ### International
 
@@ -235,21 +336,20 @@ These are useful jump-off repositories before migration or ruleset onboarding. A
 - ETH Zurich - `tuxu/ethz-thesis` - https://github.com/tuxu/ethz-thesis
 - MIT (widely used unofficial) - `alinush/mit-thesis-template` - https://github.com/alinush/mit-thesis-template
 
-## Current Status
+## Quick Start
 
-The repository currently provides:
+```bash
+# Clone project
+git clone https://github.com/quzhiii/thesis-skills.git
+cd thesis-skills
 
-- a working `check -> report -> fix` loop
-- a working `Word -> LaTeX` migration path
-- Zotero bibliography quality checks and citation sync support
-- EndNote export-based intake guidance
-- reusable starter packs for theses and journals
-- regression tests covering the main public workflow
-
-In one sentence:
-
-`thesis-skills` is a public-facing workflow repository that makes academic writing infrastructure more testable, more reusable, and easier to explain.
+# Run example
+python run_check_once.py \
+  --project-root examples/minimal-latex-project \
+  --ruleset university-generic \
+  --skip-compile
+```
 
 ## License
 
-See [LICENSE](LICENSE). Third-party notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+MIT License
