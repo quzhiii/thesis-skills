@@ -1,6 +1,6 @@
-<div align="center">
-  # Thesis Skills v0.3.0
+# Thesis Skills v0.3.0
 
+<div align="center">
   **Deterministic thesis and journal writing skills with Python checkers, safe fixers, YAML rule packs, and one-click runners**
 
   [![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)

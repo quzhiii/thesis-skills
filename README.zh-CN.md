@@ -1,6 +1,6 @@
-<div align="center">
-  # Thesis Skills v0.3.0
+# Thesis Skills v0.3.0
 
+<div align="center">
   **面向论文和期刊投稿的确定性技能仓库：保留 `Python + Skills` 主线，提供一键检查、一键修复循环、真实 YAML 规则包，以及面向其他学校/期刊的适配入口**
 
   [![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
