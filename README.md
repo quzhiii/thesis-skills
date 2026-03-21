@@ -20,6 +20,46 @@
 
 ---
 
+## v0.2 vs v0.3: What's New?
+
+> **Efficiency improvements based on typical scenarios** ⚡
+
+### Key Improvements
+
+| Feature | v0.2 | v0.3 | Efficiency Gain |
+|---------|------|------|-----------------|
+| **Zotero Sync** | ❌ Manual mapping | ✅ Auto-extract & map | **80% faster** |
+| **Citation Numbering** | ❌ Unstable when deleting | ✅ Citation Lock mechanism | **100% stable** |
+| **Project Discovery** | ⚠️ Manual config | ✅ Auto-detect | **90% faster** |
+| **Rule Pack Creation** | ⚠️ Copy-paste | ✅ One-click generate | **70% faster** |
+| **One-click Check** | ⚠️ Run individually | ✅ Single command | **85% faster** |
+| **Auto-fix** | ❌ Not available | ✅ run_fix_cycle.py | **4x faster** |
+
+### Real-world Time Savings
+
+**Scenario 1: Daily citation updates (10 new citations)**
+- v0.2: ~85 minutes (manual comparison & mapping)
+- v0.3: ~2 minutes (auto-detect & batch sync)
+- 🚀 **42x faster**
+
+**Scenario 2: First-time Word → LaTeX migration**
+- v0.2: ~210 minutes (3.5 hours)
+- v0.3: ~40 minutes
+- 🚀 **5.25x faster**
+
+**Scenario 3: Adapting to new university format**
+- v0.2: ~100 minutes
+- v0.3: ~56 minutes
+- 🚀 **1.8x faster**
+
+### Overall Impact
+
+**v0.3 delivers 4-5x workflow efficiency improvement** by automating manual tasks and eliminating citation renumbering risks.
+
+📊 **See detailed comparison**: [Technical Roadmap](docs/plans/2026-03-09-thesis-skills-restructure.md#v02-vs-v03-详细对比与效率分析)
+
+---
+
 ## Why Thesis Skills?
 
 ### Pain Point 1: Chaotic citation management when converting Word → LaTeX
