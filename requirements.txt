@@ -1,0 +1,7 @@
+# Thesis Skills v0.3.0 - Runtime dependencies
+# Core workflows use Python standard library modules only.
+
+# Optional development dependencies:
+# pytest>=8.0.0
+# pytest-cov>=4.0.0
+# pyright>=1.0.0

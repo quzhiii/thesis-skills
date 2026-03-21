@@ -1,0 +1,9 @@
+mappings:
+  source_styles:
+    title: Title
+    heading1: Heading 1
+    heading2: Heading 2
+  latex_roles:
+    main_tex: main.tex
+    chapters_dir: chapters/
+    bibliography_dir: ref/

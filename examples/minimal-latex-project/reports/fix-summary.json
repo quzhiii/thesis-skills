@@ -1,0 +1,31 @@
+{
+  "ruleset": "university-generic",
+  "project_root": "E:\\BaiduSyncdisk\\koni电脑\\创业\\科研小工具\\BP\\thesis-skills\\examples\\minimal-latex-project",
+  "steps": {
+    "references": {
+      "exit_code": 0,
+      "summary": {
+        "generated_entries": 1,
+        "target": "E:/BaiduSyncdisk/koni电脑/创业/科研小工具/BP/thesis-skills/examples/minimal-latex-project/ref/refs-import.generated.bib",
+        "applied": false
+      }
+    },
+    "language": {
+      "exit_code": 0,
+      "summary": {
+        "changed_files": 1,
+        "changed": [
+          "01-introduction.tex"
+        ],
+        "applied": false
+      }
+    },
+    "format": {
+      "exit_code": 0,
+      "summary": {
+        "changed_files": 2,
+        "applied": false
+      }
+    }
+  }
+}

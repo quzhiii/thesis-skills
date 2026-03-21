@@ -1,0 +1,53 @@
+project:
+  main_tex_candidates:
+    - main.tex
+    - manuscript.tex
+  chapter_globs:
+    - sections/*.tex
+    - chapters/*.tex
+  bibliography_files:
+    - ref/refs.bib
+reference:
+  missing_key:
+    severity: error
+  orphan_entry:
+    severity: info
+  duplicate_title:
+    severity: warning
+  bib_quality:
+    require_langid: false
+    allowed_entry_types:
+      - article
+      - misc
+      - inproceedings
+    missing_langid:
+      severity: info
+    malformed_doi:
+      severity: warning
+    unsupported_entry_type:
+      severity: warning
+language:
+  cjk_latin_spacing:
+    enabled: false
+    severity: warning
+  repeated_punctuation:
+    enabled: true
+    severity: error
+  mixed_quote_style:
+    enabled: false
+    severity: warning
+  weak_phrases:
+    enabled: false
+    severity: info
+    patterns:
+      - 众所周知
+format:
+  require_list_of_figures: false
+  require_list_of_tables: false
+  figure_requires_centering: true
+content:
+  required_sections:
+    - Introduction
+  abstract_keywords:
+    min: 3
+    max: 6

@@ -1,0 +1,31 @@
+{
+  "pack_id": "demo-school",
+  "display_name": "Demo School Thesis",
+  "kind": "university-thesis",
+  "starter": "university-generic",
+  "institution": "Demo School",
+  "guide_sources": [
+    "guide.pdf"
+  ],
+  "template_sources": [
+    "template.docx",
+    "template.cls"
+  ],
+  "sample_sources": [
+    "sample.pdf"
+  ],
+  "word_style_mappings": [
+    {
+      "style": "Heading 1",
+      "role": "chapter",
+      "latex_command": "chapter"
+    }
+  ],
+  "chapter_role_mappings": [
+    {
+      "source": "chapter1",
+      "role": "introduction",
+      "target": "chapters/01-introduction.tex"
+    }
+  ]
+}

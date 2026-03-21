@@ -1,0 +1,56 @@
+[project]
+name = "thesis-skills"
+version = "0.3.0"
+description = "Deterministic thesis and journal writing workflows with Python checkers, safe fixers, YAML rule packs, and one-click runners"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Thesis Skills Contributors" }]
+keywords = ["thesis", "latex", "academic-writing", "zotero", "citation", "workflow"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Text Processing :: Markup :: LaTeX",
+  "Topic :: Scientific/Engineering"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+  "pytest-cov>=4.0.0",
+  "pyright>=1.0.0"
+]
+
+[project.scripts]
+thesis-check = "run_check_once:main"
+thesis-fix = "run_fix_cycle:main"
+
+[project.urls]
+Homepage = "https://github.com/quzhiii/thesis-skills"
+Documentation = "https://github.com/quzhiii/thesis-skills#readme"
+Repository = "https://github.com/quzhiii/thesis-skills"
+Issues = "https://github.com/quzhiii/thesis-skills/issues"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["core"]
+
+[tool.pyright]
+typeCheckingMode = "basic"
+reportMissingImports = true
+reportMissingTypeStubs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

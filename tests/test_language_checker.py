@@ -1,0 +1,54 @@
+from __future__ import annotations
+
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+from core.checkers import run_language_check
+from core.project import ThesisProject
+from core.rules import load_rule_pack
+
+
+ROOT = Path(__file__).resolve().parents[1]
+PACK = ROOT / "90-rules" / "packs" / "university-generic"
+SAMPLE = ROOT / "examples" / "minimal-latex-project"
+
+
+class LanguageCheckerTest(unittest.TestCase):
+    def test_language_check_uses_yaml_flags(self) -> None:
+        rules = load_rule_pack(PACK)
+        project = ThesisProject.discover(
+            SAMPLE,
+            rules.rules["project"]["main_tex_candidates"],
+            rules.rules["project"]["chapter_globs"],
+            rules.rules["project"]["bibliography_files"],
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            report_path = Path(tmp) / "language-report.json"
+            exit_code = run_language_check(project, rules, report_path)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(exit_code, 1)
+        codes = {item["code"] for item in report["findings"]}
+        self.assertIn("LANG_CJK_LATIN_SPACING", codes)
+        self.assertIn("LANG_REPEAT_PUNC", codes)
+
+    def test_language_check_respects_disabled_rule(self) -> None:
+        rules = load_rule_pack(PACK)
+        rules.rules["language"]["repeated_punctuation"]["enabled"] = False
+        project = ThesisProject.discover(
+            SAMPLE,
+            rules.rules["project"]["main_tex_candidates"],
+            rules.rules["project"]["chapter_globs"],
+            rules.rules["project"]["bibliography_files"],
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            report_path = Path(tmp) / "language-report.json"
+            run_language_check(project, rules, report_path)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        codes = {item["code"] for item in report["findings"]}
+        self.assertNotIn("LANG_REPEAT_PUNC", codes)
+
+
+if __name__ == "__main__":
+    unittest.main()

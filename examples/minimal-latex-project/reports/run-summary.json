@@ -1,0 +1,30 @@
+{
+  "ruleset": "university-generic",
+  "project_root": "E:\\BaiduSyncdisk\\koni电脑\\创业\\科研小工具\\BP\\thesis-skills-git\\examples\\minimal-latex-project",
+  "steps": {
+    "bib-quality": {
+      "exit_code": 0,
+      "report": "reports/check_bib_quality-report.json"
+    },
+    "references": {
+      "exit_code": 1,
+      "report": "reports/check_references-report.json"
+    },
+    "language": {
+      "exit_code": 1,
+      "report": "reports/check_language-report.json"
+    },
+    "format": {
+      "exit_code": 1,
+      "report": "reports/check_format-report.json"
+    },
+    "content": {
+      "exit_code": 1,
+      "report": "reports/check_content-report.json"
+    },
+    "compile": {
+      "status": "unavailable",
+      "reason": "No compile adapter configured in stdlib starter"
+    }
+  }
+}
