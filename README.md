@@ -1,6 +1,4 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/tuna/thuthesis/master/logo.png" alt="Tsinghua University Logo" width="120"/>
-
   # Thesis Skills v0.3.0
 
   **Deterministic thesis and journal writing skills with Python checkers, safe fixers, YAML rule packs, and one-click runners**
@@ -21,8 +19,6 @@
 **Special thanks to [tuna/thuthesis](https://github.com/tuna/thuthesis)** for their open-source LaTeX thesis template, which has greatly benefited Tsinghua University students and inspired this project.
 
 ---
-
-## Why Thesis Skills?
 
 ## Why Thesis Skills?
 

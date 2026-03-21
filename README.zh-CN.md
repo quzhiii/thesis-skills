@@ -1,6 +1,4 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/tuna/thuthesis/master/logo.png" alt="清华大学校徽" width="120"/>
-
   # Thesis Skills v0.3.0
 
   **面向论文和期刊投稿的确定性技能仓库：保留 `Python + Skills` 主线，提供一键检查、一键修复循环、真实 YAML 规则包，以及面向其他学校/期刊的适配入口**
