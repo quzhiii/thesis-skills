@@ -1,4 +1,4 @@
-# Thesis Skills v0.3.0
+# Thesis Skills v0.4.0
 
 <div align="center">
   **Deterministic thesis and journal writing skills with Python checkers, safe fixers, YAML rule packs, and one-click runners**
@@ -17,6 +17,44 @@
 ## Acknowledgments
 
 **Special thanks to [tuna/thuthesis](https://github.com/tuna/thuthesis)** for their open-source LaTeX thesis template, which has greatly benefited Tsinghua University students and inspired this project.
+
+---
+
+## v0.3 vs v0.4: What's New?
+
+> **EndNote import-first support** 🆕
+
+### Key Improvements in v0.4
+
+| Feature | v0.3 | v0.4 | Impact |
+|---------|------|------|--------|
+| **EndNote Import** | ❌ Manual BibTeX export only | ✅ XML/RIS/BibTeX auto-import | **First-class EndNote support** |
+| **Citation Canonicalization** | ❌ Zotero-specific | ✅ Source-agnostic model | **Multi-source ready** |
+| **Duplicate Detection** | ❌ None | ✅ DOI exact + low-confidence warnings | **Clean imports** |
+| **Stable refNNN** | ✅ Zotero only | ✅ EndNote + Zotero | **Consistent numbering** |
+| **Preflight Check** | ❌ None | ✅ `check_endnote_export.py` | **Catch issues early** |
+
+### EndNote Workflow (v0.4 New)
+
+```bash
+# Import EndNote XML/RIS/BibTeX
+python 00-bib-endnote/import_library.py \
+  --project-root thesis \
+  --input references.xml \
+  --apply
+
+# Preflight check before import
+python 00-bib-endnote/check_endnote_export.py \
+  --project-root thesis \
+  --input references.xml
+```
+
+**Features**:
+- Auto-detect format (XML/RIS/BibTeX)
+- DOI-based deduplication with warnings
+- Stable `refNNN` allocation (persistent across re-runs)
+- Incremental imports (reuses existing mappings)
+- Detailed JSON reports
 
 ---
 
@@ -211,6 +249,30 @@ python 01-word-to-latex/migrate_project.py \
 
 ## Core Features
 
+### EndNote Import (v0.4 New)
+
+```bash
+# Import EndNote library (XML/RIS/BibTeX)
+python 00-bib-endnote/import_library.py --project-root thesis --input refs.xml --apply
+
+# Preflight check before import
+python 00-bib-endnote/check_endnote_export.py --project-root thesis --input refs.xml
+```
+
+**Features**:
+- **Multi-format support**: XML (recommended) > RIS > BibTeX
+- **Auto canonicalization**: DOI normalization, title cleaning, author name standardization
+- **Smart deduplication**: DOI exact match (auto-merge) + low-confidence warnings (title similarity, year+author)
+- **Stable `refNNN` allocation**: Persistent across re-runs, incremental imports preserve existing keys
+- **Dry-run preview**: See what would happen before applying changes
+- **JSON reports**: Detailed import summary with warnings and statistics
+
+**Recommended workflow**:
+1. Export from EndNote: File → Export → XML (or RIS)
+2. Run preflight check: `python 00-bib-endnote/check_endnote_export.py`
+3. Dry-run import: `python 00-bib-endnote/import_library.py --input refs.xml`
+4. Apply import: `python 00-bib-endnote/import_library.py --input refs.xml --apply`
+
 ### Zotero Sync
 
 ```bash
@@ -336,9 +398,18 @@ Thesis Skills uses a modular design:
 thesis-skills/
 ├── core/                    # Core modules
 │   ├── zotero_extract.py   # Zotero citation extraction
+│   ├── citation_models.py  # Canonical reference model (NEW v0.4)
+│   ├── canonicalize.py     # Reference normalization (NEW v0.4)
+│   ├── endnote_xml.py      # EndNote XML parser (NEW v0.4)
+│   ├── endnote_ris.py      # RIS parser (NEW v0.4)
+│   ├── bib_render.py       # BibTeX output (NEW v0.4)
+│   ├── match_refs.py       # Deduplication (NEW v0.4)
 │   ├── citation_mapping.py # Citation mapping management
 │   ├── project.py          # Project discovery
 │   └── reports.py          # Report generation
+├── 00-bib-endnote/         # EndNote workflow (NEW v0.4)
+│   ├── import_library.py   # Main import CLI
+│   └── check_endnote_export.py  # Preflight checker
 ├── 00-bib-zotero/          # Zotero workflow
 │   ├── check_bib_quality.py
 │   └── sync_from_word.py
@@ -359,18 +430,130 @@ thesis-skills/
 **Workflow**:
 
 ```
-Word (Zotero) → [sync_from_word.py] → LaTeX Project
-                                          ↓
-                                    [run_check_once.py]
-                                          ↓
-                                      JSON Reports
-                                          ↓
-                                    [run_fix_cycle.py]
-                                          ↓
-                                      Fixed LaTeX
+EndNote XML/RIS/BibTeX                    Word (Zotero)
+       ↓                                        ↓
+[import_library.py]                      [sync_from_word.py]
+       ↓                                        ↓
+       └──────────────► LaTeX Project ◄─────────┘
+                              ↓
+                        [run_check_once.py]
+                              ↓
+                          JSON Reports
+                              ↓
+                        [run_fix_cycle.py]
+                              ↓
+                          Fixed LaTeX
 ```
 
 Detailed technical docs: `docs/architecture.md`
+
+## Getting Started Tutorial
+
+### Step 1: Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/quzhiii/thesis-skills.git
+cd thesis-skills
+
+# Install dependencies (optional, most features work with Python standard library)
+pip install -r requirements.txt
+```
+
+### Step 2: Prepare Your LaTeX Project
+
+Your project should have this structure:
+
+```
+my-thesis/
+├── main.tex              # Main document
+├── chapters/             # Chapter files
+│   ├── chapter1.tex
+│   └── chapter2.tex
+└── ref/                  # Bibliography folder
+    └── refs.bib          # Your references
+```
+
+### Step 3: Import References
+
+#### For EndNote Users
+
+```bash
+# 1. Export from EndNote: File → Export → Select "XML" format
+# 2. Run preflight check (optional but recommended)
+python 00-bib-endnote/check_endnote_export.py \
+  --project-root my-thesis \
+  --input exported-references.xml
+
+# 3. Dry-run import (preview without writing)
+python 00-bib-endnote/import_library.py \
+  --project-root my-thesis \
+  --input exported-references.xml
+
+# 4. Apply import
+python 00-bib-endnote/import_library.py \
+  --project-root my-thesis \
+  --input exported-references.xml \
+  --apply
+```
+
+**What happens:**
+- Creates `ref/refs-import.bib` with your references
+- Creates `ref/citation-mapping.json` for stable numbering
+- Assigns `ref001`, `ref002`, etc. to each reference
+- Detects and warns about duplicates
+
+#### For Zotero Users
+
+```bash
+# 1. Export your Word document with Zotero citations
+# 2. Sync citations from Word to LaTeX
+python 00-bib-zotero/sync_from_word.py \
+  --project-root my-thesis \
+  --word-file my-thesis.docx \
+  --apply
+```
+
+### Step 4: Run Checks
+
+```bash
+# Run all checks
+python run_check_once.py \
+  --project-root my-thesis \
+  --ruleset university-generic \
+  --skip-compile
+
+# View reports
+cat my-thesis/reports/run-summary.json
+```
+
+### Step 5: Fix Issues (Optional)
+
+```bash
+# Preview fixes (dry-run)
+python run_fix_cycle.py \
+  --project-root my-thesis \
+  --ruleset university-generic \
+  --apply false
+
+# Apply fixes
+python run_fix_cycle.py \
+  --project-root my-thesis \
+  --ruleset university-generic \
+  --apply true
+```
+
+### Quick Reference
+
+| Task | Command |
+|------|---------|
+| Import EndNote | `python 00-bib-endnote/import_library.py --project-root thesis --input refs.xml --apply` |
+| Sync Zotero | `python 00-bib-zotero/sync_from_word.py --project-root thesis --word-file thesis.docx --apply` |
+| Run checks | `python run_check_once.py --project-root thesis --ruleset university-generic --skip-compile` |
+| Fix issues | `python run_fix_cycle.py --project-root thesis --ruleset university-generic --apply` |
+| Create rule pack | `python 90-rules/create_pack.py --pack-id my-school --starter university-generic` |
+
+---
 
 ## Template Links
 
