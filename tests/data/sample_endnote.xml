@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <records>
+    <record>
+      <rec-number>1</rec-number>
+      <ref-type name="Journal Article">17</ref-type>
+      <titles>
+        <title>Deep Learning 中文</title>
+      </titles>
+      <contributors>
+        <authors>
+          <author>Doe, Jane</author>
+          <author>Smith, John</author>
+        </authors>
+      </contributors>
+      <dates>
+        <year>2024</year>
+      </dates>
+      <urls>
+        <related-urls>
+          <url>https://doi.org/10.1000/xyz</url>
+        </related-urls>
+      </urls>
+      <periodical>
+        <full-title>Journal of Tests</full-title>
+      </periodical>
+    </record>
+    <record>
+      <rec-number>2</rec-number>
+      <ref-type name="Ancient Scroll">99</ref-type>
+      <titles>
+        <title>Fallback Entry</title>
+      </titles>
+      <contributors>
+        <authors>
+          <author>Li, Lei</author>
+        </authors>
+      </contributors>
+      <dates>
+        <year>2023</year>
+      </dates>
+    </record>
+    <record>
+      <rec-number>3</rec-number>
+      <ref-type name="Conference Paper">47</ref-type>
+      <titles>
+        <title></title>
+      </titles>
+      <contributors>
+        <authors>
+          <author>Wang, Wu</author>
+        </authors>
+      </contributors>
+      <dates>
+        <year>2022</year>
+      </dates>
+      <secondary-title>Proceedings of TestConf</secondary-title>
+      <publisher>Fictional Press</publisher>
+      <isbn>978-1-23456-789-0</isbn>
+      <issn>1234-5678</issn>
+    </record>
+    <record>
+      <rec-number>4</rec-number>
+      <ref-type name="Journal Article">17</ref-type>
+      <titles>
+        <title>Deep Learning 中文 Duplicate</title>
+      </titles>
+      <contributors>
+        <authors>
+          <author>Doe, Jane</author>
+        </authors>
+      </contributors>
+      <dates>
+        <year>2024</year>
+      </dates>
+      <urls>
+        <related-urls>
+          <url>https://doi.org/10.1000/xyz</url>
+        </related-urls>
+      </urls>
+    </record>
+  </records>
+</xml>
