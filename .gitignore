@@ -10,5 +10,8 @@ __pycache__/
 *.tmp
 *.bak0
 
+# Local git worktrees
+.worktrees/
+
 # Word formatter generated artifacts
 07-word/pro/out/
