@@ -1,4 +1,4 @@
-# Thesis Skills v0.3.0
+# Thesis Skills v0.4.0
 
 <div align="center">
   **面向论文和期刊投稿的确定性技能仓库：保留 `Python + Skills` 主线，提供一键检查、一键修复循环、真实 YAML 规则包，以及面向其他学校/期刊的适配入口**
@@ -17,6 +17,44 @@
 ## 致谢
 
 **特别感谢 [tuna/thuthesis](https://github.com/tuna/thuthesis)** 开源 LaTeX 论文模板，该项目造福了众多清华师生，也启发了本项目的开发。
+
+---
+
+## v0.3 vs v0.4：有什么新变化？
+
+> **EndNote 导入优先支持** 🆕
+
+### v0.4 核心改进
+
+| 功能 | v0.3 | v0.4 | 影响 |
+|-----|------|------|------|
+| **EndNote 导入** | ❌ 仅支持手动导出 BibTeX | ✅ XML/RIS/BibTeX 自动导入 | **一等 EndNote 支持** |
+| **引用规范化** | ❌ Zotero 专用 | ✅ 来源无关的统一模型 | **多来源就绪** |
+| **重复检测** | ❌ 无 | ✅ DOI 精确去重 + 低置信度警告 | **干净导入** |
+| **稳定 refNNN** | ✅ 仅 Zotero | ✅ EndNote + Zotero | **编号一致** |
+| **预检工具** | ❌ 无 | ✅ `check_endnote_export.py` | **提前发现问题** |
+
+### EndNote 工作流（v0.4 新增）
+
+```bash
+# 导入 EndNote XML/RIS/BibTeX
+python 00-bib-endnote/import_library.py \
+  --project-root thesis \
+  --input references.xml \
+  --apply
+
+# 导入前预检
+python 00-bib-endnote/check_endnote_export.py \
+  --project-root thesis \
+  --input references.xml
+```
+
+**特性**：
+- 自动检测格式（XML/RIS/BibTeX）
+- DOI 精确去重 + 标题相似度/年份+作者 低置信度警告
+- 稳定的 `refNNN` 分配（重复运行编号不变）
+- 增量导入（复用已有映射）
+- 详细的 JSON 报告
 
 ---
 
@@ -393,6 +431,129 @@ Word (Zotero) → [sync_from_word.py] → LaTeX Project
 - EPFL：`HexHive/thesis_template` - https://github.com/HexHive/thesis_template
 - ETH Zurich：`tuxu/ethz-thesis` - https://github.com/tuxu/ethz-thesis
 - MIT（社区广泛使用，非官方）：`alinush/mit-thesis-template` - https://github.com/alinush/mit-thesis-template
+
+---
+
+## 新手入门教程
+
+### 步骤 1：安装
+
+```bash
+# 克隆仓库
+git clone https://github.com/quzhiii/thesis-skills.git
+cd thesis-skills
+
+# 安装依赖（可选，核心功能仅依赖 Python 标准库）
+pip install -r requirements.txt
+```
+
+### 步骤 2：准备你的 LaTeX 项目
+
+确保你的项目结构符合规范：
+
+```
+my-thesis/
+├── main.tex              # 主文件（或 thesis.tex）
+├── chapters/             # 章节目录
+│   ├── chapter1.tex
+│   └── chapter2.tex
+└── ref/                  # 参考文献目录
+    └── refs.bib          # 已有的参考文献（可选）
+```
+
+### 场景 A：EndNote 用户
+
+**适用于**：使用 EndNote 管理文献，需要导入到 LaTeX 项目
+
+```bash
+# 1. 从 EndNote 导出文献
+#    EndNote → File → Export → 选择 XML 格式（推荐）或 RIS 格式
+
+# 2. 预检导出文件（可选但推荐）
+python 00-bib-endnote/check_endnote_export.py \
+  --project-root my-thesis \
+  --input references.xml
+
+# 3. 预览导入结果（dry-run，不写入文件）
+python 00-bib-endnote/import_library.py \
+  --project-root my-thesis \
+  --input references.xml
+
+# 4. 正式导入
+python 00-bib-endnote/import_library.py \
+  --project-root my-thesis \
+  --input references.xml \
+  --apply
+
+# 导入后会生成：
+# - my-thesis/ref/refs-import.bib    # BibTeX 文件
+# - my-thesis/ref/citation-mapping.json  # 映射关系
+```
+
+### 场景 B：Zotero 用户
+
+**适用于**：在 Word 中用 Zotero 写论文，需要同步到 LaTeX
+
+```bash
+# 1. 确保 Word 文档中有 Zotero 引用
+
+# 2. 预览同步结果（dry-run）
+python 00-bib-zotero/sync_from_word.py \
+  --project-root my-thesis \
+  --word-file 论文初稿.docx
+
+# 3. 正式同步
+python 00-bib-zotero/sync_from_word.py \
+  --project-root my-thesis \
+  --word-file 论文初稿.docx \
+  --apply
+
+# 同步后会生成：
+# - my-thesis/ref/refs.bib           # BibTeX 文件
+# - my-thesis/ref/citation-mapping.json  # Zotero key → refNNN 映射
+# - my-thesis/citation-lock.tex      # 引用锁文件
+```
+
+### 步骤 3：运行检查（可选但推荐）
+
+```bash
+# 运行所有检查（跳过编译）
+python run_check_once.py \
+  --project-root my-thesis \
+  --ruleset university-generic \
+  --skip-compile
+
+# 查看报告
+cat my-thesis/reports/run-summary.json
+```
+
+### 步骤 4：自动修复（可选）
+
+```bash
+# 预览修复（dry-run）
+python run_fix_cycle.py \
+  --project-root my-thesis \
+  --ruleset university-generic \
+  --apply false
+
+# 应用修复
+python run_fix_cycle.py \
+  --project-root my-thesis \
+  --ruleset university-generic \
+  --apply true
+```
+
+### 常用命令速查
+
+| 任务 | 命令 |
+|------|------|
+| 导入 EndNote | `python 00-bib-endnote/import_library.py --project-root thesis --input refs.xml --apply` |
+| 同步 Zotero | `python 00-bib-zotero/sync_from_word.py --project-root thesis --word-file thesis.docx --apply` |
+| 运行检查 | `python run_check_once.py --project-root thesis --ruleset university-generic --skip-compile` |
+| 自动修复 | `python run_fix_cycle.py --project-root thesis --ruleset university-generic --apply` |
+| 创建规则包 | `python 90-rules/create_pack.py --pack-id my-school --starter university-generic` |
+
+---
 
 ## 快速开始
 
