@@ -29,24 +29,40 @@ That means the project is not trying to be a general writing assistant. It is an
 |---|---|---|
 | Zotero BibTeX quality check | Stable | `00-bib-zotero/check_bib_quality.py` |
 | Zotero Word citation sync | Stable | extract -> compare -> map -> `citation-lock.tex` |
-| EndNote export intake | Supported | export BibTeX, normalize, then run quality checks |
-| EndNote direct sync | Planned | not implemented in v0.3.0 |
+| EndNote XML/RIS import | **Stable (v0.4)** | `00-bib-endnote/import_library.py` with dry-run/apply modes |
+| EndNote BibTeX fallback | **Stable (v0.4)** | normalized import via same pipeline |
+| EndNote preflight check | **Stable (v0.4)** | `00-bib-endnote/check_endnote_export.py` |
+| EndNote direct sync | Planned (v0.5) | Word field-code extraction not implemented |
 | Word -> LaTeX migration | Stable | explicit migration spec with structured metadata |
 | Deterministic check -> fix loop | Stable | covered by regression tests |
 | Rule pack generation | Stable | starter and draft-pack paths both exist |
 
-## Why EndNote Is Not Symmetric Yet
+## EndNote Support Status
 
-Zotero support is deeper because Word documents can carry structured citation payloads that this repository can extract and map.
+**v0.4.0** delivers import-first EndNote support:
 
-EndNote support is currently positioned as a controlled intake path:
+1. **XML import** - Recommended format, best field coverage
+2. **RIS import** - Good alternative, standard interchange format
+3. **BibTeX fallback** - Compatible but may have type pollution
+4. **Preflight check** - Validate exports before import
+5. **Deduplication** - DOI-based with low-confidence warnings
+6. **Stable numbering** - `refNNN` persists across re-runs
 
-1. export from EndNote
-2. normalize BibTeX
-3. validate quality
-4. continue into the same check/fix pipeline
+The import path is:
 
-This is deliberate. It avoids promising a direct sync path before the repository has a robust EndNote field model, sample corpus, and mapping contract.
+```text
+EndNote XML/RIS/BibTeX
+  -> parse -> canonicalize -> dedupe
+  -> allocate/ref reuse refNNN
+  -> generate refs-import.bib
+  -> update citation-mapping.json
+  -> output JSON report
+```
+
+**Not yet implemented (planned for v0.5)**:
+- EndNote Word field-code parser
+- Traveling Library extraction
+- Direct Word -> LaTeX sync
 
 ## Roadmap by Release
 
@@ -61,7 +77,13 @@ This is deliberate. It avoids promising a direct sync path before the repository
 
 ### v0.4.0
 
-- add stronger bibliography intake docs and sample fixtures
+- ✅ EndNote XML/RIS/BibTeX import-first support
+- ✅ Canonical reference model with DOI normalization
+- ✅ Deduplication with DOI exact match and low-confidence warnings
+- ✅ Stable `refNNN` allocation with mapping persistence
+- ✅ Preflight checker for EndNote exports
+- ✅ Comprehensive test suite (45 tests)
+- ✅ User documentation (`00-bib-endnote/THESIS_BIB_ENDNOTE.md`)
 - improve release docs for pack onboarding
 - reduce pyright rough edges in runner typing
 - improve example coverage for non-Tsinghua rulesets
