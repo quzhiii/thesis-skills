@@ -13,7 +13,7 @@ This checklist is for publishing `thesis-skills` as a reusable public GitHub rep
 - [x] Bilingual README refresh
 - [x] CI workflow present
 
-## P1 (Included in v0.3.0)
+## P1 (Included in v0.3.0 and v0.4.0)
 
 - [x] Machine-readable consolidated result file (`run-summary.json`)
 - [x] Regression tests for migration, rules, runner, and Zotero mapping
@@ -22,6 +22,17 @@ This checklist is for publishing `thesis-skills` as a reusable public GitHub rep
 - [x] Packaging metadata (`pyproject.toml`) and dependency declaration
 - [x] Public roadmap document
 
+### v0.4.0 Additions
+
+- [x] EndNote XML/RIS/BibTeX import workflow
+- [x] Canonical reference model (`citation_models.py`)
+- [x] Reference normalization (`canonicalize.py`)
+- [x] EndNote parsers (`endnote_xml.py`, `endnote_ris.py`)
+- [x] BibTeX rendering (`bib_render.py`)
+- [x] Duplicate detection (`match_refs.py`)
+- [x] Preflight checker (`check_endnote_export.py`)
+- [x] 45 tests passing (14 Zotero + 31 EndNote)
+
 ## P2 (Next Releases)
 
 - [ ] Latex diff helper for advisor review loops
@@ -29,7 +40,7 @@ This checklist is for publishing `thesis-skills` as a reusable public GitHub rep
 - [ ] Slide-deck export guidance for thesis defense
 - [ ] Stronger EndNote structured intake contract
 
-## Acceptance Gate for v0.3.0
+## Acceptance Gate for v0.4.0
 
 Release only if all checks below pass:
 
