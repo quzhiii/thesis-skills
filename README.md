@@ -9,7 +9,7 @@
 
   [**中文文档**](README.zh-CN.md) | [English](README.md)
 
-  [Quick Start](#quick-start) • [Features](#core-features) • [Documentation](docs/architecture.md) • [Contributing](CONTRIBUTING.md)
+  [Quick Start](#quick-start) • [Getting Started Tutorial](#getting-started-tutorial) • [Features](#core-features) • [Documentation](docs/architecture.md) • [Contributing](CONTRIBUTING.md)
 </div>
 
 ---
@@ -55,6 +55,8 @@ python 00-bib-endnote/check_endnote_export.py \
 - Stable `refNNN` allocation (persistent across re-runs)
 - Incremental imports (reuses existing mappings)
 - Detailed JSON reports
+
+👉 **First time using Thesis Skills?** Jump here: [Getting Started Tutorial](#getting-started-tutorial)
 
 ---
 

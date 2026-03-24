@@ -9,7 +9,7 @@
 
   [中文文档](README.zh-CN.md) • [**English**](README.md)
 
-  [快速开始](#快速开始) • [核心功能](#核心功能) • [技术文档](docs/architecture.md) • [贡献指南](CONTRIBUTING.md)
+  [快速开始](#快速开始) • [新手入门教程](#新手入门教程) • [核心功能](#核心功能) • [技术文档](docs/architecture.md) • [贡献指南](CONTRIBUTING.md)
 </div>
 
 ---
@@ -28,11 +28,11 @@
 
 | 功能 | v0.3 | v0.4 | 影响 |
 |-----|------|------|------|
-| **EndNote 导入** | ❌ 仅支持手动导出 BibTeX | ✅ XML/RIS/BibTeX 自动导入 | **一等 EndNote 支持** |
-| **引用规范化** | ❌ Zotero 专用 | ✅ 来源无关的统一模型 | **多来源就绪** |
-| **重复检测** | ❌ 无 | ✅ DOI 精确去重 + 低置信度警告 | **干净导入** |
-| **稳定 refNNN** | ✅ 仅 Zotero | ✅ EndNote + Zotero | **编号一致** |
-| **预检工具** | ❌ 无 | ✅ `check_endnote_export.py` | **提前发现问题** |
+| **EndNote 导入** | ❌ 仅支持手动导出 BibTeX | ✅ XML/RIS/BibTeX 自动导入 | **EndNote 可直接导入使用** |
+| **引用规范化** | ❌ Zotero 专用 | ✅ 来源无关的统一模型 | **为多来源文献打基础** |
+| **重复检测** | ❌ 无 | ✅ DOI 精确去重 + 低置信度警告 | **减少重复和脏数据** |
+| **稳定 refNNN** | ✅ 仅 Zotero | ✅ EndNote + Zotero | **跨来源编号保持稳定** |
+| **预检工具** | ❌ 无 | ✅ `check_endnote_export.py` | **导入前先发现问题** |
 
 ### EndNote 工作流（v0.4 新增）
 
@@ -55,6 +55,8 @@ python 00-bib-endnote/check_endnote_export.py \
 - 稳定的 `refNNN` 分配（重复运行编号不变）
 - 增量导入（复用已有映射）
 - 详细的 JSON 报告
+
+👉 **第一次使用？直接看这里：** [新手入门教程](#新手入门教程)
 
 ---
 
