@@ -53,6 +53,60 @@
 
 ---
 
+## Thesis Skills 定位
+
+`thesis-skills` 的定位是面向学术写作项目的确定性工作流层。
+
+它重点解决的是：
+
+- Zotero / EndNote 文献接入
+- Word → LaTeX 结构化迁移
+- 基于 JSON 报告的可复现检查
+- 有边界、可审计的修复
+- 可复用的学校 / 期刊规则包
+
+它不是通用 AI 写作助手，不是论文模板仓库，也不是可以独立替代人工定稿的终稿把关系统。
+
+## 五层架构
+
+当前仓库可以直接理解成 5 层：
+
+1. 文献接入
+2. Word-to-LaTeX 迁移
+3. 确定性检查
+4. report-driven 修复
+5. 规则包建设与复用
+
+它们在目录上也是对应的：
+
+- `00-bib-*`：接入层
+- `01-word-to-latex`：迁移层
+- `10-check-*` 与 `14-check-language-deep`：检查层
+- `20-fix-*` 与 `24-fix-language-deep`：修复层
+- `90-rules`：策略 / 规则包层
+- `core/`：共享实现层
+
+## 当前能力边界
+
+`v0.5.x` 最重要的一条边界，是把基础 language lint、deep review、safe fix 和 deep patch preview 分开。
+
+- `11-check-language` 是基础确定性语言检查层
+- `14-check-language-deep` 是更高一层的结构化初筛 / 审阅层
+- `21-fix-language-style` 只做低风险自动修复
+- `24-fix-language-deep` 只做 patch preview 或选择性 deep apply
+
+因此，`deep language` 更合适的定位是“辅助筛查 + 人工复核”，不是终稿级语言把关依据。
+
+## 推荐入口
+
+- EndNote 用户：先 preflight，再 dry-run import，确认后 apply，然后跑 checks / fix preview
+- Zotero + Word 用户：先 sync citations，再跑 bib quality check 和全量 checks
+- 已有 LaTeX 项目：先选 rule pack，再跑 checks，最后保守地应用 safe fix
+- 规则包建设者：从 starter pack 开始，在 example project 上回归验证
+
+更完整的架构说明：[docs/architecture.md](docs/architecture.md)
+
+---
 ## v0.3 vs v0.4：有什么新变化？
 
 > **EndNote 导入优先支持** 🆕

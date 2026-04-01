@@ -55,6 +55,64 @@ The deep language path is positioned as a high-confidence screening assistant fo
 
 ---
 
+## What Thesis Skills Is
+
+`thesis-skills` is a deterministic workflow layer for academic writing projects.
+
+It is designed for:
+
+- bibliography intake from Zotero and EndNote
+- structured Word-to-LaTeX migration
+- repeatable checks with JSON reports
+- bounded, report-driven fixes instead of free-form rewriting
+- reusable rule packs for schools and journals
+
+It is not a general writing assistant, not a thesis template, and not a final
+sign-off system for thesis-ready prose.
+
+## Five-Layer Architecture
+
+The current repository follows five layers:
+
+1. bibliography intake
+2. Word-to-LaTeX migration
+3. deterministic checking
+4. report-driven fixing
+5. rule-pack onboarding and reuse
+
+This maps directly to the repository layout:
+
+- `00-bib-*`: intake workflows
+- `01-word-to-latex`: migration workflow
+- `10-check-*` and `14-check-language-deep`: checker layer
+- `20-fix-*` and `24-fix-language-deep`: fixer layer
+- `90-rules`: policy layer
+- `core/`: shared implementation layer
+
+## Current Boundaries
+
+The most important `v0.5.x` boundary is the split between baseline language
+lint, deep language review, safe fixes, and deep patch preview.
+
+- `11-check-language` is the baseline deterministic language lint layer.
+- `14-check-language-deep` is a structured screening layer for higher-order language issues.
+- `21-fix-language-style` stays conservative and low-risk.
+- `24-fix-language-deep` previews or selectively applies validated span-based patches.
+
+That means `deep language` should be treated as a screening assistant plus human
+review aid, not as the sole basis for final thesis language polish.
+
+## Recommended Entry Paths
+
+- EndNote user: preflight export -> dry-run import -> apply import -> run checks -> review fixes
+- Zotero + Word user: sync citations -> run bibliography quality check -> run checks -> review fixes
+- Existing LaTeX project: choose a rule pack -> run checks -> apply safe fixes conservatively
+- Rule-pack author: start from a starter pack -> adapt rules -> validate on the example project
+
+Detailed architecture notes: [docs/architecture.md](docs/architecture.md)
+
+---
+
 ## v0.3 vs v0.4: What's New?
 
 > **EndNote import-first support** 🆕
