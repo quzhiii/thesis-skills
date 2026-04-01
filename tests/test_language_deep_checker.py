@@ -74,6 +74,14 @@ class LanguageDeepCheckerTest(unittest.TestCase):
             }.issubset(codes)
         )
         self.assertEqual(report["summary"]["checker"], "check_language_deep")
+        self.assertEqual(
+            report["summary"]["coverage_mode"], "partial_latex_aware_screening"
+        )
+        self.assertEqual(report["summary"]["review_mode"], "manual_first")
+        self.assertIn("stratified_counts", report["summary"])
+        self.assertIn("coverage", report)
+        self.assertIn("uncovered_risks", report)
+        self.assertIn("review_guidance", report)
         for finding in report["findings"]:
             for key in (
                 "span",
@@ -82,6 +90,9 @@ class LanguageDeepCheckerTest(unittest.TestCase):
                 "confidence",
                 "review_required",
                 "category",
+                "original_text",
+                "rationale",
+                "risk_level",
             ):
                 self.assertIn(key, finding)
         self.assertEqual(original_intro, "因此所以，本文继续讨论。\n本文使用 DID 识别政策效应。\n本研究旨在提升效率水平。\n大型语言模型在研究中具有重要作用。\n")
@@ -114,6 +125,47 @@ class LanguageDeepCheckerTest(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(report["summary"]["warnings"], 0)
         self.assertFalse(report["findings"])
+        self.assertEqual(
+            report["summary"]["coverage_mode"], "partial_latex_aware_screening"
+        )
+        self.assertTrue(report["uncovered_risks"])
+        self.assertIn("Zero findings only means", report["uncovered_risks"][-1])
+
+    def test_deep_checker_masks_latex_command_and_environment_noise(self) -> None:
+        with workspace_tempdir("language-deep-") as base:
+            materialize_project(
+                base,
+                {
+                    "main.tex": (
+                        "\\documentclass{article}\n"
+                        "\\begin{document}\n"
+                        "\\input{chapters/01-introduction}\n"
+                        "\\bibliography{ref/refs}\n"
+                        "\\end{document}\n"
+                    ),
+                    "chapters/01-introduction.tex": (
+                        "\\section{Difference-in-Differences (DID)}\n"
+                        "\\begin{figure}\n"
+                        "\\caption{\\u56e0\\u6b64\\u6240\\u4ee5}\n"
+                        "\\end{figure}\n"
+                        "\\cite{ref1}\n"
+                    ),
+                    "ref/refs.bib": "@article{ref1,\n  title = {Reference One},\n}\n",
+                },
+            )
+            project, pack = _discover_project(base, "university-generic")
+            report_path = base / "reports" / "check_language_deep-report.json"
+            exit_code = run_language_deep_check(project, pack, report_path)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertFalse(report["findings"])
+        self.assertGreater(
+            report["coverage"]["masked_construct_counts"]["latex_commands"], 0
+        )
+        self.assertGreater(
+            report["coverage"]["masked_construct_counts"]["structured_environments"], 0
+        )
 
 
 if __name__ == "__main__":

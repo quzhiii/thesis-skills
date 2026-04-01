@@ -37,6 +37,8 @@
 
 - `14-check-language-deep` 提供句子级和跨文件的审阅型检查，首发覆盖连接词误用、搭配误用、术语一致性、缩写首次引入。
 - deep finding 现在可以携带更丰富的字段，例如 `span`、`evidence`、`suggestions`、`confidence`、`review_required`、`category`。
+- deep report 现在也会补充 `coverage`、`uncovered_risks`、`stratified_counts`，以及面向人工复核的 `original_text`、`rationale`、`risk_level`。
+- 为了降低 LaTeX / 工程侧误报，deep screening 会跳过 cite/ref 命令、数学区域、figure/table 等结构化环境中的文本。
 - `run_check_once.py` 默认流程中加入了 `language-deep`，同时支持 `--only language-deep` 的单独运行。
 - `v0.5.1` 仍然只做深度审阅报告，不做 deep patch 自动修复；下一阶段才是 deep fixer。
 
@@ -96,6 +98,12 @@
 - `24-fix-language-deep` 只做 patch preview 或选择性 deep apply
 
 因此，`deep language` 更合适的定位是“辅助筛查 + 人工复核”，不是终稿级语言把关依据。
+
+落到实际行为上，现在进一步明确为：
+
+- 结果会通过 summary 分层输出，而不是把所有 deep signal 混成一层
+- `0 findings` 只表示“在经过 LaTeX-aware masking 之后的可检查正文中，没有命中当前已配置的 deep 规则”
+- 所有 deep 建议默认都面向人工复核，强调保守改写，而不是宣称可以直接替代终稿把关
 
 ## 推荐入口
 

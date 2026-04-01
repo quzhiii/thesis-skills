@@ -56,6 +56,11 @@ class RunnerTest(unittest.TestCase):
             data["steps"]["language-deep"]["report"],
             "reports/check_language_deep-report.json",
         )
+        self.assertIn("report_summary", data["steps"]["language-deep"])
+        self.assertEqual(
+            data["steps"]["language-deep"]["report_summary"]["coverage_mode"],
+            "partial_latex_aware_screening",
+        )
         self.assertEqual(data["steps"]["compile"]["status"], "skipped")
 
     def test_run_check_once_reports_compile_unavailable_without_adapter(self) -> None:
@@ -109,6 +114,10 @@ class RunnerTest(unittest.TestCase):
         self.assertEqual(
             data["steps"]["language-deep"]["report"],
             "reports/check_language_deep-report.json",
+        )
+        self.assertEqual(
+            data["steps"]["language-deep"]["report_summary"]["review_mode"],
+            "manual_first",
         )
         self.assertEqual(data["steps"]["compile"]["status"], "unavailable")
 

@@ -27,9 +27,19 @@ Deep findings include these extra fields when present:
 - `confidence`
 - `review_required`
 - `category`
+- `original_text`
+- `rationale`
+- `risk_level`
+
+The report also carries:
+
+- `coverage`: what prose was screened and which LaTeX-side constructs were masked
+- `uncovered_risks`: what the checker intentionally does not over-claim
+- `stratified_counts`: grouped counts for deep-language vs consistency-style findings
 
 Recommended use:
 
 - run it after the basic checker
 - review findings manually before deciding on edits
 - keep deep review separate from safe auto-fix
+- treat `0 findings` as “no configured issues detected in checked prose”, not as final thesis sign-off

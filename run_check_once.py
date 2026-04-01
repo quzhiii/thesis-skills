@@ -99,10 +99,18 @@ def main() -> int:
         )
         if code in {0, 1} and not report.exists():
             code = 3
-        summary["steps"][name] = {
+        step_summary: dict[str, object] = {
             "exit_code": code,
             "report": report.relative_to(project.root).as_posix(),
         }
+        if report.exists():
+            try:
+                payload = json.loads(report.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                payload = None
+            if isinstance(payload, dict) and isinstance(payload.get("summary"), dict):
+                step_summary["report_summary"] = payload["summary"]
+        summary["steps"][name] = step_summary
         if code in {2, 3}:
             overall = code
             break

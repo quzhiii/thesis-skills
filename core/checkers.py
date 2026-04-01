@@ -469,15 +469,18 @@ def run_language_check(
 def run_language_deep_check(
     project: ThesisProject, pack: RulePack, report_path: Path
 ) -> int:
-    from core.language_deep import collect_language_deep_findings
+    from core.language_deep import collect_language_deep_report_data
 
-    findings = collect_language_deep_findings(project, pack)
+    findings, extra_summary, extra_payload = collect_language_deep_report_data(
+        project, pack
+    )
     return write_report(
         report_path,
         "check_language_deep",
         pack.ruleset,
         findings,
-        {"files_scanned": len(project.chapter_files)},
+        extra_summary,
+        extra_payload,
         fail_on_warnings=True,
     )
 

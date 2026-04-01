@@ -17,6 +17,9 @@ class Finding:
     confidence: float | None = None
     review_required: bool | None = None
     category: str = ""
+    original_text: str = ""
+    rationale: str = ""
+    risk_level: str = ""
 
     def as_dict(self) -> dict[str, object]:
         payload: dict[str, object] = {
@@ -40,4 +43,10 @@ class Finding:
             payload["review_required"] = self.review_required
         if self.category:
             payload["category"] = self.category
+        if self.original_text:
+            payload["original_text"] = self.original_text
+        if self.rationale:
+            payload["rationale"] = self.rationale
+        if self.risk_level:
+            payload["risk_level"] = self.risk_level
         return payload
