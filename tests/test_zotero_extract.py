@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import tempfile
 import unittest
 from pathlib import Path
 
@@ -18,6 +17,7 @@ from core.zotero_extract import (
     compare_citations,
     extract_zotero_citations,
 )
+from tests.helpers import workspace_tempdir
 
 
 class TestCitationMapping(unittest.TestCase):
@@ -25,15 +25,15 @@ class TestCitationMapping(unittest.TestCase):
 
     def test_load_empty(self):
         """Test loading when no mapping file exists."""
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with workspace_tempdir("zotero-extract-") as tmpdir:
             mapping = CitationMapping.load(tmpdir)
             self.assertEqual(mapping.mappings, {})
             self.assertEqual(mapping.next_ref_number, 1)
 
     def test_load_existing(self):
         """Test loading existing mapping file."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            mapping_path = Path(tmpdir) / "ref" / "citation-mapping.json"
+        with workspace_tempdir("zotero-extract-") as tmpdir:
+            mapping_path = tmpdir / "ref" / "citation-mapping.json"
             mapping_path.parent.mkdir(parents=True)
             mapping_path.write_text(json.dumps({
                 "mappings": {
@@ -49,7 +49,7 @@ class TestCitationMapping(unittest.TestCase):
 
     def test_get_or_create_latex_key(self):
         """Test getting or creating LaTeX keys."""
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with workspace_tempdir("zotero-extract-") as tmpdir:
             mapping = CitationMapping.load(tmpdir)
 
             # First key should be ref001
@@ -66,14 +66,14 @@ class TestCitationMapping(unittest.TestCase):
 
     def test_save(self):
         """Test saving mapping to file."""
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with workspace_tempdir("zotero-extract-") as tmpdir:
             mapping = CitationMapping.load(tmpdir)
             mapping.get_or_create_latex_key("ZoteroA")
             mapping.get_or_create_latex_key("ZoteroB")
             mapping.save("Test mapping")
 
             # Verify file was created
-            mapping_path = Path(tmpdir) / "ref" / "citation-mapping.json"
+            mapping_path = tmpdir / "ref" / "citation-mapping.json"
             self.assertTrue(mapping_path.exists())
 
             # Verify content
@@ -83,7 +83,7 @@ class TestCitationMapping(unittest.TestCase):
 
     def test_to_citation_lock_content(self):
         """Test generating citation-lock.tex content."""
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with workspace_tempdir("zotero-extract-") as tmpdir:
             mapping = CitationMapping.load(tmpdir)
             mapping.mappings = {
                 "KeyA": "ref001",

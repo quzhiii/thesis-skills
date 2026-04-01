@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import json
-import tempfile
 import unittest
 from pathlib import Path
 
 from core.migration import run_word_to_latex_migration
+from tests.helpers import workspace_tempdir
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,8 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class MigrationTest(unittest.TestCase):
     def test_word_to_latex_migration_maps_assets(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            base = Path(tmp)
+        with workspace_tempdir("migration-") as base:
             source = base / "intake"
             target = base / "project"
             (source / "chapters").mkdir(parents=True)
@@ -53,8 +52,7 @@ class MigrationTest(unittest.TestCase):
         self.assertIn("\\section{Intro}", migrated)
 
     def test_word_to_latex_migration_supports_style_and_role_metadata(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            base = Path(tmp)
+        with workspace_tempdir("migration-") as base:
             source = base / "intake"
             target = base / "project"
             (source / "chapters").mkdir(parents=True)

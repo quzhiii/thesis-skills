@@ -90,10 +90,31 @@ EndNote XML/RIS/BibTeX
 
 ### v0.5.0
 
-- evaluate RIS/EndNote XML intake feasibility
-- add more schools and journal packs
-- add issue templates for false positives and pack onboarding
-- improve compile-log diagnostics and user-facing error messages
+#### Phase 0: baseline hardening
+
+- align smoke workflows with the real runner fixture, flags, and ruleset ids
+- isolate runner regressions from checked-in `reports/` artifacts
+- make language-checker and fixer tests workspace-safe in sandboxed environments
+- add a preflight acceptance gate before expanding language modules
+
+#### Phase 1: basic language foundation
+
+- expand `11-check-language` into a deterministic thesis-language lint layer
+- expand `21-fix-language-style` into low-risk safe fixes only
+- keep deep review and deep patching out of `v0.5.0`
+
+### v0.5.1
+
+- add `14-check-language-deep` as a report-only deep review layer
+- support connector misuse, collocation misuse, terminology consistency, and acronym first-use
+- extend finding payloads with span, evidence, suggestions, confidence, and review-required fields
+- keep product positioning explicit: deep review is a thesis-screening assistant, not a final thesis sign-off layer
+
+### v0.5.2
+
+- add `24-fix-language-deep` for patch preview and selective apply
+- validate `old_text`, reject overlapping patches, and skip review-required findings by default
+- preserve the separation between safe fix and deep fix
 
 ### v1.0.0
 
@@ -113,8 +134,8 @@ EndNote XML/RIS/BibTeX
 
 ## Recommended Next Technical Work
 
-1. harden typing in runner and checker entrypoints
-2. add sample fixtures for malformed mapping files and noisy Word exports
-3. add more example packs beyond starter packs
-4. define a formal bibliography intake contract shared by Zotero and EndNote paths
-5. decide whether future EndNote support should target BibTeX only, RIS, or XML
+1. complete the phased v0.5 language-quality program before expanding product surface area
+2. harden typing in runner and checker entrypoints
+3. add sample fixtures for malformed mapping files, noisy Word exports, and language edge cases
+4. add more example packs beyond starter packs
+5. define a formal bibliography intake contract shared by Zotero and EndNote paths

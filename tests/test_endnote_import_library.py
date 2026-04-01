@@ -3,9 +3,10 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-import tempfile
 import unittest
 from pathlib import Path
+
+from tests.helpers import workspace_tempdir
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,8 +16,7 @@ DATA = ROOT / "tests" / "data"
 
 class TestEndNoteImportLibrary(unittest.TestCase):
     def test_dry_run_import_generates_report_without_writing_bib(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            project_root = Path(tmpdir)
+        with workspace_tempdir("endnote-import-library-") as project_root:
             (project_root / "main.tex").write_text(
                 "\\documentclass{article}\n\\begin{document}\nHello\n\\end{document}\n",
                 encoding="utf-8",
@@ -55,8 +55,7 @@ class TestEndNoteImportLibrary(unittest.TestCase):
     def test_dry_run_import_reuses_existing_mapping_for_matching_canonical_id(
         self,
     ) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            project_root = Path(tmpdir)
+        with workspace_tempdir("endnote-import-library-") as project_root:
             (project_root / "main.tex").write_text(
                 "\\documentclass{article}\n\\begin{document}\nHello\n\\end{document}\n",
                 encoding="utf-8",
@@ -96,8 +95,7 @@ class TestEndNoteImportLibrary(unittest.TestCase):
             self.assertEqual(data["mapping_preview"]["doi:10.1000/xyz"], "ref009")
 
     def test_apply_mode_writes_bib_and_mapping_file(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            project_root = Path(tmpdir)
+        with workspace_tempdir("endnote-import-library-") as project_root:
             (project_root / "main.tex").write_text(
                 "\\documentclass{article}\n\\begin{document}\nHello\n\\end{document}\n",
                 encoding="utf-8",
@@ -131,8 +129,7 @@ class TestEndNoteImportLibrary(unittest.TestCase):
             self.assertEqual(mapping_data["mappings"]["doi:10.1000/xyz"], "ref001")
 
     def test_apply_mode_reuses_existing_keys_and_keeps_new_keys_stable(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            project_root = Path(tmpdir)
+        with workspace_tempdir("endnote-import-library-") as project_root:
             (project_root / "main.tex").write_text(
                 "\\documentclass{article}\n\\begin{document}\nHello\n\\end{document}\n",
                 encoding="utf-8",

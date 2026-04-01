@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import json
-import tempfile
 import unittest
 from pathlib import Path
 
 from core.checkers import run_language_check
 from core.project import ThesisProject
 from core.rules import load_rule_pack
+from tests.helpers import workspace_tempdir
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,14 +24,24 @@ class LanguageCheckerTest(unittest.TestCase):
             rules.rules["project"]["chapter_globs"],
             rules.rules["project"]["bibliography_files"],
         )
-        with tempfile.TemporaryDirectory() as tmp:
-            report_path = Path(tmp) / "language-report.json"
+        with workspace_tempdir("language-checker-") as tmp:
+            report_path = tmp / "language-report.json"
             exit_code = run_language_check(project, rules, report_path)
             report = json.loads(report_path.read_text(encoding="utf-8"))
         self.assertEqual(exit_code, 1)
+        self.assertEqual(report["summary"]["checker"], "check_language")
+        self.assertEqual(report["summary"]["ruleset"], "university-generic")
         codes = {item["code"] for item in report["findings"]}
         self.assertIn("LANG_CJK_LATIN_SPACING", codes)
         self.assertIn("LANG_REPEAT_PUNC", codes)
+        finding = next(
+            item
+            for item in report["findings"]
+            if item["code"] == "LANG_CJK_LATIN_SPACING"
+        )
+        self.assertIn("file", finding)
+        self.assertGreater(finding["line"], 0)
+        self.assertTrue(finding["message"])
 
     def test_language_check_respects_disabled_rule(self) -> None:
         rules = load_rule_pack(PACK)
@@ -42,10 +52,11 @@ class LanguageCheckerTest(unittest.TestCase):
             rules.rules["project"]["chapter_globs"],
             rules.rules["project"]["bibliography_files"],
         )
-        with tempfile.TemporaryDirectory() as tmp:
-            report_path = Path(tmp) / "language-report.json"
+        with workspace_tempdir("language-checker-") as tmp:
+            report_path = tmp / "language-report.json"
             run_language_check(project, rules, report_path)
             report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(report["summary"]["checker"], "check_language")
         codes = {item["code"] for item in report["findings"]}
         self.assertNotIn("LANG_REPEAT_PUNC", codes)
 
