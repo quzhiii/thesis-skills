@@ -38,6 +38,7 @@
 - `14-check-language-deep` 提供句子级和跨文件的审阅型检查，首发覆盖连接词误用、搭配误用、术语一致性、缩写首次引入。
 - deep finding 现在可以携带更丰富的字段，例如 `span`、`evidence`、`suggestions`、`confidence`、`review_required`、`category`。
 - deep report 现在也会补充 `coverage`、`uncovered_risks`、`stratified_counts`，以及面向人工复核的 `original_text`、`rationale`、`risk_level`。
+- deep report 现在还会额外输出 `review_queue` 与 `review_clusters`，把重复问题收拢成更适合人工复核的清单，而不只是平铺的 findings 列表。
 - 为了降低 LaTeX / 工程侧误报，deep screening 会跳过 cite/ref 命令、数学区域、figure/table 等结构化环境中的文本。
 - `run_check_once.py` 默认流程中加入了 `language-deep`，同时支持 `--only language-deep` 的单独运行。
 - `v0.5.1` 仍然只做深度审阅报告，不做 deep patch 自动修复；下一阶段才是 deep fixer。
@@ -102,8 +103,16 @@
 落到实际行为上，现在进一步明确为：
 
 - 结果会通过 summary 分层输出，而不是把所有 deep signal 混成一层
+- deep report 会保留原始 `findings` truth，同时补充用于人工分诊的 `review_queue`，以及用于去重复核的 `review_clusters`
 - `0 findings` 只表示“在经过 LaTeX-aware masking 之后的可检查正文中，没有命中当前已配置的 deep 规则”
 - 所有 deep 建议默认都面向人工复核，强调保守改写，而不是宣称可以直接替代终稿把关
+
+当前 deep report 的结构可以理解为四层：
+
+- `findings`：完整原始 finding 列表，用于追溯
+- `review_queue`：按优先级与置信度排序的人工复核队列
+- `review_clusters`：去重后的问题簇，附带 `recommended_action`、`rewrite_hint`、`review_focus`
+- `summary.review_digest`：用于分诊与回归比较的紧凑统计
 
 ## 推荐入口
 

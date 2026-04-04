@@ -40,6 +40,7 @@ The deep language path is positioned as a high-confidence screening assistant fo
 - `14-check-language-deep` introduces sentence-aware and cross-file review for connector misuse, collocation misuse, terminology consistency, and acronym first-use.
 - deep findings now carry richer fields such as `span`, `evidence`, `suggestions`, `confidence`, `review_required`, and `category`.
 - deep reports now also expose `coverage`, `uncovered_risks`, `stratified_counts`, and review-oriented fields such as `original_text`, `rationale`, and `risk_level`.
+- deep reports now include a prioritized `review_queue` and deduplicated `review_clusters`, so repeated wording issues can be reviewed as a compact human-review checklist instead of only as a flat findings list.
 - LaTeX-facing constructs such as cite/ref commands, math regions, and figure/table environments are masked during deep screening to reduce engineering-side false positives.
 - `run_check_once.py` now supports `language-deep` in the default pipeline and also a focused path: `--only language-deep`.
 - deep review is still report-only in `v0.5.1`; deep patch preview remains the next phase.
@@ -107,8 +108,16 @@ review aid, not as the sole basis for final thesis language polish.
 Operationally that now means:
 
 - findings are grouped through summary strata instead of being presented as one undifferentiated signal
+- deep reports keep the raw `findings` truth, then add `review_queue` for triage order and `review_clusters` for deduplicated action groups
 - `0 findings` only means no configured deep issues were detected in checked prose after LaTeX-aware masking
 - all deep suggestions are framed for manual review first, with conservative rewrite guidance rather than final-signoff claims
+
+The current deep report shape is intentionally layered:
+
+- `findings`: the full raw finding list for traceability
+- `review_queue`: a sorted manual-review queue by priority and confidence
+- `review_clusters`: deduplicated issue groups with `recommended_action`, `rewrite_hint`, and `review_focus`
+- `summary.review_digest`: compact counts for triage and regression tracking
 
 ## Recommended Entry Paths
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from core.sentence_index import find_sentence, index_sentences
+from core.sentence_index import SentenceSpan, find_sentence, index_sentences
 
 
 @dataclass(frozen=True)
@@ -18,12 +18,12 @@ class TextOccurrence:
 def _build_occurrence(
     file_name: str,
     lines: list[str],
+    sentences: list[SentenceSpan],
     line_no: int,
     start: int,
     end: int,
     matched_text: str,
 ) -> TextOccurrence:
-    sentences = index_sentences("\n".join(lines))
     sentence = find_sentence(sentences, line_no, start + 1)
     return TextOccurrence(
         file=file_name,
@@ -40,6 +40,7 @@ def find_literal_occurrences(
     flags = re.IGNORECASE if ignore_case else 0
     pattern = re.compile(re.escape(literal), flags)
     lines = text.splitlines()
+    sentences = index_sentences(text)
     occurrences: list[TextOccurrence] = []
     for line_no, line in enumerate(lines, start=1):
         for match in pattern.finditer(line):
@@ -47,6 +48,7 @@ def find_literal_occurrences(
                 _build_occurrence(
                     file_name,
                     lines,
+                    sentences,
                     line_no,
                     match.start(),
                     match.end(),
@@ -63,6 +65,7 @@ def find_token_occurrences(
         rf"(?<![A-Za-z0-9_]){re.escape(token)}(?![A-Za-z0-9_])", re.IGNORECASE
     )
     lines = text.splitlines()
+    sentences = index_sentences(text)
     occurrences: list[TextOccurrence] = []
     for line_no, line in enumerate(lines, start=1):
         for match in pattern.finditer(line):
@@ -70,6 +73,7 @@ def find_token_occurrences(
                 _build_occurrence(
                     file_name,
                     lines,
+                    sentences,
                     line_no,
                     match.start(),
                     match.end(),
@@ -84,6 +88,7 @@ def find_non_overlapping_literal_occurrences(
 ) -> dict[str, list[TextOccurrence]]:
     flags = re.IGNORECASE if ignore_case else 0
     lines = text.splitlines()
+    sentences = index_sentences(text)
     occurrences: dict[str, list[TextOccurrence]] = {literal: [] for literal in literals}
     for line_no, line in enumerate(lines, start=1):
         candidates: list[tuple[int, int, str, str]] = []
@@ -100,6 +105,7 @@ def find_non_overlapping_literal_occurrences(
                 _build_occurrence(
                     file_name,
                     lines,
+                    sentences,
                     line_no,
                     start,
                     end,

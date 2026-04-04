@@ -36,6 +36,15 @@ The report also carries:
 - `coverage`: what prose was screened and which LaTeX-side constructs were masked
 - `uncovered_risks`: what the checker intentionally does not over-claim
 - `stratified_counts`: grouped counts for deep-language vs consistency-style findings
+- `review_queue`: a prioritized manual-review queue sorted for human triage
+- `review_clusters`: deduplicated issue groups with `recommended_action`, `rewrite_hint`, and `review_focus`
+- `summary.review_digest`: compact counts for priority mix and deduplicated action items
+
+The review-oriented payload is layered on purpose:
+
+- `findings` stays as the raw traceable truth
+- `review_queue` answers “what should I review first?”
+- `review_clusters` answers “which repeated issue types can I fix together?”
 
 Recommended use:
 
