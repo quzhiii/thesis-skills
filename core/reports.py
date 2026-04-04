@@ -13,6 +13,8 @@ def write_report(
     findings: list[Finding],
     extra_summary: dict[str, object] | None = None,
     extra_payload: dict[str, object] | None = None,
+    *,
+    fail_on_warnings: bool = False,
 ) -> int:
     errors = sum(1 for item in findings if item.severity == "error")
     warnings = sum(1 for item in findings if item.severity == "warning")
@@ -23,7 +25,7 @@ def write_report(
         "errors": errors,
         "warnings": warnings,
         "infos": infos,
-        "status": "FAIL" if errors else "PASS",
+        "status": "FAIL" if errors or (fail_on_warnings and warnings) else "PASS",
     }
     if extra_summary:
         summary.update(extra_summary)
@@ -38,4 +40,4 @@ def write_report(
     report_path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    return 1 if errors else 0
+    return 1 if errors or (fail_on_warnings and warnings) else 0

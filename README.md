@@ -1,4 +1,4 @@
-# Thesis Skills v0.4.0
+# Thesis Skills v0.5.2
 
 <div align="center">
   **Deterministic thesis and journal writing skills with Python checkers, safe fixers, YAML rule packs, and one-click runners**
@@ -17,6 +17,116 @@
 ## Acknowledgments
 
 **Special thanks to [tuna/thuthesis](https://github.com/tuna/thuthesis)** for their open-source LaTeX thesis template, which has greatly benefited Tsinghua University students and inspired this project.
+
+---
+
+## v0.5.2: Deep Patch Preview And Selective Apply
+
+`v0.5.2` adds the deep fixer layer without collapsing review-oriented findings into auto-rewrite behavior.
+
+The deep language path is positioned as a high-confidence screening assistant for thesis drafting, not as a final sign-off for thesis-ready prose.
+
+- `24-fix-language-deep` converts deep language findings into validated span-based patches.
+- patch previews include `file`, `start`, `end`, `old_text`, `new_text`, `issue_code`, and `confidence`.
+- deep fixes validate `old_text`, reject overlapping patches, and skip `review_required=true` on apply unless explicitly overridden.
+- `run_fix_cycle.py` now supports `--apply-mode safe|suggest|mixed`, so the old safe path remains intact while deep preview can run independently.
+
+---
+
+## v0.5.1: Deep Language Review Layer
+
+`v0.5.1` adds a separate report-only deep language checker instead of overloading the basic language lint path.
+
+- `14-check-language-deep` introduces sentence-aware and cross-file review for connector misuse, collocation misuse, terminology consistency, and acronym first-use.
+- deep findings now carry richer fields such as `span`, `evidence`, `suggestions`, `confidence`, `review_required`, and `category`.
+- deep reports now also expose `coverage`, `uncovered_risks`, `stratified_counts`, and review-oriented fields such as `original_text`, `rationale`, and `risk_level`.
+- deep reports now include a prioritized `review_queue` and deduplicated `review_clusters`, so repeated wording issues can be reviewed as a compact human-review checklist instead of only as a flat findings list.
+- LaTeX-facing constructs such as cite/ref commands, math regions, and figure/table environments are masked during deep screening to reduce engineering-side false positives.
+- `run_check_once.py` now supports `language-deep` in the default pipeline and also a focused path: `--only language-deep`.
+- deep review is still report-only in `v0.5.1`; deep patch preview remains the next phase.
+
+---
+
+## v0.5.0: Basic Language Foundation
+
+`v0.5.0` expands the deterministic language layer without shrinking the broader repository scope.
+
+- `11-check-language` now covers baseline thesis-language lint for bracket/quote balance, book-title mark consistency, unit spacing, ellipsis style, dash style, zh/en punctuation boundaries, number ranges, enum punctuation, connector blacklist, and conservative punctuation-width mixing checks.
+- `21-fix-language-style` stays low-risk and only auto-applies safe fixes: CJK/Latin spacing, repeated punctuation, unit spacing, ellipsis normalization, and conservative fullwidth/halfwidth punctuation normalization.
+- language rules in each pack are now explicit objects under `language.<rule>` with `enabled`, `severity`, `autofix_safe`, and optional `patterns`.
+- deep patch preview is planned next; it is not shipped in `v0.5.1`.
+
+---
+
+## What Thesis Skills Is
+
+`thesis-skills` is a deterministic workflow layer for academic writing projects.
+
+It is designed for:
+
+- bibliography intake from Zotero and EndNote
+- structured Word-to-LaTeX migration
+- repeatable checks with JSON reports
+- bounded, report-driven fixes instead of free-form rewriting
+- reusable rule packs for schools and journals
+
+It is not a general writing assistant, not a thesis template, and not a final
+sign-off system for thesis-ready prose.
+
+## Five-Layer Architecture
+
+The current repository follows five layers:
+
+1. bibliography intake
+2. Word-to-LaTeX migration
+3. deterministic checking
+4. report-driven fixing
+5. rule-pack onboarding and reuse
+
+This maps directly to the repository layout:
+
+- `00-bib-*`: intake workflows
+- `01-word-to-latex`: migration workflow
+- `10-check-*` and `14-check-language-deep`: checker layer
+- `20-fix-*` and `24-fix-language-deep`: fixer layer
+- `90-rules`: policy layer
+- `core/`: shared implementation layer
+
+## Current Boundaries
+
+The most important `v0.5.x` boundary is the split between baseline language
+lint, deep language review, safe fixes, and deep patch preview.
+
+- `11-check-language` is the baseline deterministic language lint layer.
+- `14-check-language-deep` is a structured screening layer for higher-order language issues.
+- `21-fix-language-style` stays conservative and low-risk.
+- `24-fix-language-deep` previews or selectively applies validated span-based patches.
+
+That means `deep language` should be treated as a screening assistant plus human
+review aid, not as the sole basis for final thesis language polish.
+
+Operationally that now means:
+
+- findings are grouped through summary strata instead of being presented as one undifferentiated signal
+- deep reports keep the raw `findings` truth, then add `review_queue` for triage order and `review_clusters` for deduplicated action groups
+- `0 findings` only means no configured deep issues were detected in checked prose after LaTeX-aware masking
+- all deep suggestions are framed for manual review first, with conservative rewrite guidance rather than final-signoff claims
+
+The current deep report shape is intentionally layered:
+
+- `findings`: the full raw finding list for traceability
+- `review_queue`: a sorted manual-review queue by priority and confidence
+- `review_clusters`: deduplicated issue groups with `recommended_action`, `rewrite_hint`, and `review_focus`
+- `summary.review_digest`: compact counts for triage and regression tracking
+
+## Recommended Entry Paths
+
+- EndNote user: preflight export -> dry-run import -> apply import -> run checks -> review fixes
+- Zotero + Word user: sync citations -> run bibliography quality check -> run checks -> review fixes
+- Existing LaTeX project: choose a rule pack -> run checks -> apply safe fixes conservatively
+- Rule-pack author: start from a starter pack -> adapt rules -> validate on the example project
+
+Detailed architecture notes: [docs/architecture.md](docs/architecture.md)
 
 ---
 
@@ -301,9 +411,12 @@ python run_check_once.py --project-root thesis --ruleset tsinghua-thesis
 
 **Check items**:
 - `10-check-references`: Reference integrity (missing keys, orphan entries, duplicate titles)
-- `11-check-language`: Language checks (CJK-Latin spacing, repeated punctuation, mixed quotes, weak phrases)
+- `11-check-language`: Deterministic language checks (CJK-Latin spacing, repeated punctuation, mixed quotes, weak phrases, bracket/quote mismatch, book-title marks, unit spacing, ellipsis, dash, zh/en punctuation boundaries, number ranges, enum punctuation, connector blacklist)
+- `14-check-language-deep`: Report-only deep language review (connector misuse, collocation misuse, terminology consistency, acronym first-use)
 - `12-check-format`: Format checks (figure/table lists, figure centering)
 - `13-check-content`: Content checks (required sections, abstract keyword count)
+
+`14-check-language-deep` is intended for structured first-pass screening plus human review, not as the sole basis for final thesis language polish.
 
 ### Fixers (20-fix-*)
 
@@ -314,8 +427,20 @@ python run_fix_cycle.py --project-root thesis --ruleset tsinghua-thesis --apply 
 
 **Features**:
 - Read check reports, make minimal fixes
+- `21-fix-language-style` only auto-applies low-risk language fixes in `v0.5.0`
+- `24-fix-language-deep` generates patch previews first and only applies selected deep patches when explicitly requested
 - Support dry-run preview
 - Generate fix reports
+
+**Deep fix example**:
+
+```bash
+python run_fix_cycle.py \
+  --project-root thesis \
+  --ruleset tsinghua-thesis \
+  --apply false \
+  --apply-mode suggest
+```
 
 ## Rule Pack System
 
@@ -355,9 +480,20 @@ language:
   cjk_latin_spacing:
     enabled: true
     severity: warning
+    autofix_safe: true
+  unit_spacing:
+    enabled: true
+    severity: warning
+    autofix_safe: true
+  connector_blacklist_simple:
+    enabled: true
+    severity: info
+    autofix_safe: false
+    patterns: [因此所以, 但是同时]
   weak_phrases:
     enabled: true
     severity: info
+    autofix_safe: false
     patterns: [众所周知, 不难看出, 本文将]
 ```
 

@@ -17,7 +17,22 @@ jobs:
           python-version: "3.11"
 
       - name: Run tsinghua rules smoke check
-        run: python run_check_once.py --project-root "examples/minimal-project" --rules tsinghua --skip-compile
+        run: |
+          set +e
+          python run_check_once.py --project-root "examples/minimal-latex-project" --ruleset "tsinghua-thesis" --skip-compile
+          status=$?
+          if [ "$status" -gt 1 ]; then
+            exit "$status"
+          fi
 
-      - name: Run my-university rules smoke check
-        run: python run_check_once.py --project-root "examples/minimal-project" --rules my-university --skip-compile
+      - name: Run university rules smoke check
+        run: |
+          set +e
+          python run_check_once.py --project-root "examples/minimal-latex-project" --ruleset "university-generic" --skip-compile
+          status=$?
+          if [ "$status" -gt 1 ]; then
+            exit "$status"
+          fi
+
+      - name: Run baseline hardening regressions
+        run: python -m unittest tests.test_language_checker tests.test_language_deep_checker tests.test_consistency tests.test_patch_preview tests.test_language_deep_fixer tests.test_fixers tests.test_manifest tests.test_runner

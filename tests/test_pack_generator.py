@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import tempfile
 import unittest
 from pathlib import Path
 
@@ -8,6 +7,7 @@ import json
 
 from core.pack_generator import create_draft_pack, create_rule_pack
 from core.rules import load_rule_pack
+from tests.helpers import workspace_tempdir
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,8 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class PackGeneratorTest(unittest.TestCase):
     def test_create_journal_pack_from_starter(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            output_root = Path(tmp)
+        with workspace_tempdir("pack-generator-") as output_root:
             pack_path = create_rule_pack(
                 repo_root=ROOT,
                 output_root=output_root,
@@ -31,8 +30,7 @@ class PackGeneratorTest(unittest.TestCase):
         self.assertIn("project", pack.rules)
 
     def test_create_draft_pack_from_intake_metadata(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            output_root = Path(tmp)
+        with workspace_tempdir("pack-generator-") as output_root:
             intake = output_root / "intake.json"
             intake.write_text(
                 json.dumps(

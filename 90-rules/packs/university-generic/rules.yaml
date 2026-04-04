@@ -32,18 +32,195 @@ language:
   cjk_latin_spacing:
     enabled: true
     severity: warning
+    autofix_safe: true
   repeated_punctuation:
     enabled: true
     severity: error
+    autofix_safe: true
   mixed_quote_style:
     enabled: true
     severity: warning
+    autofix_safe: false
   weak_phrases:
     enabled: true
     severity: info
+    autofix_safe: false
     patterns:
       - 众所周知
       - 不难看出
+  bracket_mismatch:
+    enabled: true
+    severity: error
+    autofix_safe: false
+  quote_mismatch:
+    enabled: true
+    severity: error
+    autofix_safe: false
+  booktitle_mixed_style:
+    enabled: true
+    severity: warning
+    autofix_safe: false
+  unit_spacing:
+    enabled: true
+    severity: warning
+    autofix_safe: true
+  ellipsis_style:
+    enabled: true
+    severity: warning
+    autofix_safe: true
+  dash_style:
+    enabled: true
+    severity: info
+    autofix_safe: false
+  zh_en_symbol_spacing:
+    enabled: true
+    severity: warning
+    autofix_safe: false
+  number_range_style:
+    enabled: true
+    severity: info
+    autofix_safe: false
+  enum_punctuation_style:
+    enabled: true
+    severity: info
+    autofix_safe: false
+  connector_blacklist_simple:
+    enabled: true
+    severity: info
+    autofix_safe: false
+    patterns:
+      - 因此所以
+      - 但是同时
+      - 并且同时
+  fullwidth_halfwidth_mix:
+    enabled: true
+    severity: warning
+    autofix_safe: true
+language_deep:
+  connector_misuse:
+    enabled: true
+    severity: warning
+    min_confidence: 0.72
+    review_required: true
+    patterns:
+      因此所以:
+        message: Connector chain may be redundant
+        suggestions:
+          - 因此
+          - 所以
+      但是同时:
+        message: Connector chain may be redundant
+        suggestions:
+          - 但是
+          - 同时
+  collocation_misuse:
+    enabled: true
+    severity: warning
+    min_confidence: 0.75
+    review_required: true
+    patterns:
+      提升效率水平:
+        message: Collocation may be awkward or redundant
+        suggestions:
+          - 提升效率
+          - 提高水平
+      进行优化改善:
+        message: Collocation may be awkward or redundant
+        suggestions:
+          - 进行优化
+          - 加以改善
+  formulaic_phrase:
+    enabled: true
+    severity: warning
+    min_confidence: 0.8
+    review_required: true
+    patterns:
+      值得注意的是:
+        message: Formulaic transition may sound generic in academic prose
+        suggestions:
+          - 建议直接进入具体观察或结论
+  inference_overclaim:
+    enabled: true
+    severity: warning
+    min_confidence: 0.84
+    review_required: true
+    patterns:
+      由此可见:
+        message: Inference may be stated too strongly for the available evidence
+        suggestions:
+          - 建议改为“这表明”
+          - 建议改为“结果提示”
+      这表明:
+        message: Check whether the conclusion strength matches the evidence scope
+        suggestions:
+          - 建议核对是否需要补上条件或范围限定
+      充分说明:
+        message: Conclusion strength may be overstated in academic prose
+        suggestions:
+          - 建议改为“表明”
+          - 建议改为“提示”
+      可以证明:
+        message: Proof-like wording may overstate empirical evidence
+        suggestions:
+          - 建议改为“表明”
+          - 建议改为“支持”
+  boundary_signpost:
+    enabled: true
+    severity: warning
+    min_confidence: 0.86
+    review_required: true
+    patterns:
+      需要说明的是:
+        message: Boundary or limitation statement can usually be written more directly
+        suggestions:
+          - 建议直接写明界定、例外或限制条件
+      需要注意的是:
+        message: Boundary or limitation statement can usually be written more directly
+        suggestions:
+          - 建议直接写明条件、风险或限制
+      需要指出的是:
+        message: Boundary or limitation statement can usually be written more directly
+        suggestions:
+          - 建议直接写明要点或限定范围
+  acronym_first_use:
+    enabled: true
+    severity: warning
+    min_confidence: 0.85
+    review_required: true
+    require_expansion_before_short_form: true
+    acronyms:
+      DID:
+        expansions:
+          - 双重差分
+          - Difference-in-Differences
+      PSM:
+        expansions:
+          - 倾向得分匹配
+          - Propensity Score Matching
+consistency:
+  terminology_consistency:
+    enabled: true
+    severity: warning
+    min_confidence: 0.8
+    review_required: true
+    min_occurrences: 2
+    groups:
+      双重差分:
+        variants:
+          - 双重差分法
+          - Difference-in-Differences
+      大型语言模型:
+        variants:
+          - 大语言模型
+          - LLM
+      目标试验模拟:
+        variants:
+          - 目标实验模拟
+          - Target Trial Emulation
+      增广逆概率加权:
+        variants:
+          - 增强逆概率加权
+          - Augmented Inverse Probability Weighting
 format:
   require_list_of_figures: false
   require_list_of_tables: false

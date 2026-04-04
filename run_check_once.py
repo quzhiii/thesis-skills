@@ -21,6 +21,17 @@ def main() -> int:
     )
     parser.add_argument("--project-root", required=True)
     parser.add_argument("--ruleset", default="tsinghua-thesis")
+    parser.add_argument(
+        "--only",
+        choices=[
+            "bib-quality",
+            "references",
+            "language",
+            "language-deep",
+            "format",
+            "content",
+        ],
+    )
     parser.add_argument("--skip-compile", action="store_true")
     args = parser.parse_args()
 
@@ -49,6 +60,11 @@ def main() -> int:
             project.reports_dir / "check_language-report.json",
         ),
         (
+            "language-deep",
+            repo_root / "14-check-language-deep" / "check_language_deep.py",
+            project.reports_dir / "check_language_deep-report.json",
+        ),
+        (
             "format",
             repo_root / "12-check-format" / "check_format.py",
             project.reports_dir / "check_format-report.json",
@@ -59,6 +75,8 @@ def main() -> int:
             project.reports_dir / "check_content-report.json",
         ),
     ]
+    if args.only:
+        steps = [step for step in steps if step[0] == args.only]
     summary: dict[str, object] = {
         "ruleset": args.ruleset,
         "project_root": str(project.root),
@@ -81,10 +99,18 @@ def main() -> int:
         )
         if code in {0, 1} and not report.exists():
             code = 3
-        summary["steps"][name] = {
+        step_summary: dict[str, object] = {
             "exit_code": code,
             "report": report.relative_to(project.root).as_posix(),
         }
+        if report.exists():
+            try:
+                payload = json.loads(report.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                payload = None
+            if isinstance(payload, dict) and isinstance(payload.get("summary"), dict):
+                step_summary["report_summary"] = payload["summary"]
+        summary["steps"][name] = step_summary
         if code in {2, 3}:
             overall = code
             break

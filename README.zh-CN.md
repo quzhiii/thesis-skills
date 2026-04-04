@@ -1,4 +1,4 @@
-# Thesis Skills v0.4.0
+# Thesis Skills v0.5.2
 
 <div align="center">
   **面向论文和期刊投稿的确定性技能仓库：保留 `Python + Skills` 主线，提供一键检查、一键修复循环、真实 YAML 规则包，以及面向其他学校/期刊的适配入口**
@@ -20,6 +20,110 @@
 
 ---
 
+## v0.5.2：深度补丁预览与选择性应用
+
+`v0.5.2` 新增了 deep fixer 层，但不会把审阅型 deep finding 直接变成默认自动改写。
+
+- `24-fix-language-deep` 会把 deep language finding 转成经过校验的 span-based patch。
+- patch preview 现在包含 `file`、`start`、`end`、`old_text`、`new_text`、`issue_code`、`confidence`。
+- deep fix 在 apply 前会校验 `old_text`、拒绝重叠 patch，并且默认跳过 `review_required=true` 的建议，除非显式覆盖。
+- `run_fix_cycle.py` 现在支持 `--apply-mode safe|suggest|mixed`，所以原有 safe fix 路径保持不变，deep preview 可以单独运行。
+
+---
+
+## v0.5.1：深度语言检查层
+
+`v0.5.1` 新增了独立的 report-only 深度语言检查模块，而不是把深度逻辑塞进基础语言 lint。
+
+- `14-check-language-deep` 提供句子级和跨文件的审阅型检查，首发覆盖连接词误用、搭配误用、术语一致性、缩写首次引入。
+- deep finding 现在可以携带更丰富的字段，例如 `span`、`evidence`、`suggestions`、`confidence`、`review_required`、`category`。
+- deep report 现在也会补充 `coverage`、`uncovered_risks`、`stratified_counts`，以及面向人工复核的 `original_text`、`rationale`、`risk_level`。
+- deep report 现在还会额外输出 `review_queue` 与 `review_clusters`，把重复问题收拢成更适合人工复核的清单，而不只是平铺的 findings 列表。
+- 为了降低 LaTeX / 工程侧误报，deep screening 会跳过 cite/ref 命令、数学区域、figure/table 等结构化环境中的文本。
+- `run_check_once.py` 默认流程中加入了 `language-deep`，同时支持 `--only language-deep` 的单独运行。
+- `v0.5.1` 仍然只做深度审阅报告，不做 deep patch 自动修复；下一阶段才是 deep fixer。
+
+---
+
+## v0.5.0：基础语言层升级
+
+`v0.5.0` 扩展了确定性的语言检查与安全修复能力，但不会把仓库范围收缩成只剩语言模块。
+
+- `11-check-language` 现在覆盖基础论文语言规则：括号/引号配对、书名号风格、量纲空格、省略号、连接号、中英标点边界、数字范围、枚举标点、简单连接词黑名单，以及保守的全角/半角标点混用检查。
+- `21-fix-language-style` 仍然只做低风险自动修复：中英文间距、重复标点、数字与单位空格、省略号规范化，以及明显上下文下的全角/半角标点规范化。
+- 各 rules pack 的语言规则现在统一写成 `language.<rule>` 对象，包含 `enabled`、`severity`、`autofix_safe`，必要时再加 `patterns`。
+- 深度补丁预览属于后续阶段，不包含在 `v0.5.1` 中。
+
+---
+
+## Thesis Skills 定位
+
+`thesis-skills` 的定位是面向学术写作项目的确定性工作流层。
+
+它重点解决的是：
+
+- Zotero / EndNote 文献接入
+- Word → LaTeX 结构化迁移
+- 基于 JSON 报告的可复现检查
+- 有边界、可审计的修复
+- 可复用的学校 / 期刊规则包
+
+它不是通用 AI 写作助手，不是论文模板仓库，也不是可以独立替代人工定稿的终稿把关系统。
+
+## 五层架构
+
+当前仓库可以直接理解成 5 层：
+
+1. 文献接入
+2. Word-to-LaTeX 迁移
+3. 确定性检查
+4. report-driven 修复
+5. 规则包建设与复用
+
+它们在目录上也是对应的：
+
+- `00-bib-*`：接入层
+- `01-word-to-latex`：迁移层
+- `10-check-*` 与 `14-check-language-deep`：检查层
+- `20-fix-*` 与 `24-fix-language-deep`：修复层
+- `90-rules`：策略 / 规则包层
+- `core/`：共享实现层
+
+## 当前能力边界
+
+`v0.5.x` 最重要的一条边界，是把基础 language lint、deep review、safe fix 和 deep patch preview 分开。
+
+- `11-check-language` 是基础确定性语言检查层
+- `14-check-language-deep` 是更高一层的结构化初筛 / 审阅层
+- `21-fix-language-style` 只做低风险自动修复
+- `24-fix-language-deep` 只做 patch preview 或选择性 deep apply
+
+因此，`deep language` 更合适的定位是“辅助筛查 + 人工复核”，不是终稿级语言把关依据。
+
+落到实际行为上，现在进一步明确为：
+
+- 结果会通过 summary 分层输出，而不是把所有 deep signal 混成一层
+- deep report 会保留原始 `findings` truth，同时补充用于人工分诊的 `review_queue`，以及用于去重复核的 `review_clusters`
+- `0 findings` 只表示“在经过 LaTeX-aware masking 之后的可检查正文中，没有命中当前已配置的 deep 规则”
+- 所有 deep 建议默认都面向人工复核，强调保守改写，而不是宣称可以直接替代终稿把关
+
+当前 deep report 的结构可以理解为四层：
+
+- `findings`：完整原始 finding 列表，用于追溯
+- `review_queue`：按优先级与置信度排序的人工复核队列
+- `review_clusters`：去重后的问题簇，附带 `recommended_action`、`rewrite_hint`、`review_focus`
+- `summary.review_digest`：用于分诊与回归比较的紧凑统计
+
+## 推荐入口
+
+- EndNote 用户：先 preflight，再 dry-run import，确认后 apply，然后跑 checks / fix preview
+- Zotero + Word 用户：先 sync citations，再跑 bib quality check 和全量 checks
+- 已有 LaTeX 项目：先选 rule pack，再跑 checks，最后保守地应用 safe fix
+- 规则包建设者：从 starter pack 开始，在 example project 上回归验证
+
+更完整的架构说明：[docs/architecture.md](docs/architecture.md)
+
+---
 ## v0.3 vs v0.4：有什么新变化？
 
 > **EndNote 导入优先支持** 🆕
@@ -277,7 +381,8 @@ python run_check_once.py --project-root thesis --ruleset tsinghua-thesis
 
 **检查项**：
 - `10-check-references`：引用完整性检查（缺失的 key、孤立的条目、重复标题）
-- `11-check-language`：语言检查（中英文间距、重复标点、混合引号、弱表达）
+- `11-check-language`：确定性语言检查（中英文间距、重复标点、混合引号、弱表达、括号/引号不配对、书名号风格、量纲空格、省略号、连接号、中英标点边界、数字范围、枚举标点、连接词黑名单）
+- `14-check-language-deep`：report-only 深度语言检查（连接词误用、搭配误用、术语一致性、缩写首次引入）
 - `12-check-format`：格式检查（图表目录、图表居中）
 - `13-check-content`：内容检查（必需章节、摘要关键词数量）
 
@@ -290,8 +395,20 @@ python run_fix_cycle.py --project-root thesis --ruleset tsinghua-thesis --apply 
 
 **特性**：
 - 读取检查报告，做最小化修复
+- `21-fix-language-style` 在 `v0.5.0` 中只自动应用低风险语言修复
+- `24-fix-language-deep` 默认先生成 patch preview，只有显式要求时才会应用深度补丁
 - 支持 dry-run 预览
 - 生成修复报告
+
+**deep fix 示例**：
+
+```bash
+python run_fix_cycle.py \
+  --project-root thesis \
+  --ruleset tsinghua-thesis \
+  --apply false \
+  --apply-mode suggest
+```
 
 ## 规则包系统
 
@@ -331,9 +448,20 @@ language:
   cjk_latin_spacing:
     enabled: true
     severity: warning
+    autofix_safe: true
+  unit_spacing:
+    enabled: true
+    severity: warning
+    autofix_safe: true
+  connector_blacklist_simple:
+    enabled: true
+    severity: info
+    autofix_safe: false
+    patterns: [因此所以, 但是同时]
   weak_phrases:
     enabled: true
     severity: info
+    autofix_safe: false
     patterns: [众所周知, 不难看出, 本文将]
 ```
 

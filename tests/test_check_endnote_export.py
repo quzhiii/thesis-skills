@@ -3,9 +3,10 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-import tempfile
 import unittest
 from pathlib import Path
+
+from tests.helpers import workspace_tempdir
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,8 +16,7 @@ DATA = ROOT / "tests" / "data"
 
 class TestCheckEndNoteExport(unittest.TestCase):
     def test_xml_preflight_generates_report_with_warnings(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            project_root = Path(tmpdir)
+        with workspace_tempdir("check-endnote-export-") as project_root:
             (project_root / "main.tex").write_text(
                 "\\documentclass{article}\n\\begin{document}\nHello\n\\end{document}\n",
                 encoding="utf-8",
@@ -49,8 +49,7 @@ class TestCheckEndNoteExport(unittest.TestCase):
             self.assertGreaterEqual(payload["summary"]["warnings"], 1)
 
     def test_ris_preflight_generates_report(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            project_root = Path(tmpdir)
+        with workspace_tempdir("check-endnote-export-") as project_root:
             (project_root / "main.tex").write_text(
                 "\\documentclass{article}\n\\begin{document}\nHello\n\\end{document}\n",
                 encoding="utf-8",

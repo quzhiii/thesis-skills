@@ -30,17 +30,118 @@ language:
   cjk_latin_spacing:
     enabled: false
     severity: warning
+    autofix_safe: true
   repeated_punctuation:
     enabled: true
     severity: error
+    autofix_safe: true
   mixed_quote_style:
     enabled: false
     severity: warning
+    autofix_safe: false
   weak_phrases:
     enabled: false
     severity: info
+    autofix_safe: false
     patterns:
       - 众所周知
+  bracket_mismatch:
+    enabled: true
+    severity: error
+    autofix_safe: false
+  quote_mismatch:
+    enabled: true
+    severity: error
+    autofix_safe: false
+  booktitle_mixed_style:
+    enabled: false
+    severity: warning
+    autofix_safe: false
+  unit_spacing:
+    enabled: true
+    severity: warning
+    autofix_safe: true
+  ellipsis_style:
+    enabled: false
+    severity: info
+    autofix_safe: true
+  dash_style:
+    enabled: false
+    severity: info
+    autofix_safe: false
+  zh_en_symbol_spacing:
+    enabled: false
+    severity: info
+    autofix_safe: false
+  number_range_style:
+    enabled: false
+    severity: info
+    autofix_safe: false
+  enum_punctuation_style:
+    enabled: false
+    severity: info
+    autofix_safe: false
+  connector_blacklist_simple:
+    enabled: false
+    severity: info
+    autofix_safe: false
+    patterns:
+      - 因此所以
+      - 但是同时
+  fullwidth_halfwidth_mix:
+    enabled: false
+    severity: info
+    autofix_safe: true
+language_deep:
+  connector_misuse:
+    enabled: false
+    severity: info
+    min_confidence: 0.78
+    review_required: true
+    patterns:
+      因此所以:
+        message: Connector chain may be redundant
+        suggestions:
+          - 因此
+          - 所以
+  collocation_misuse:
+    enabled: false
+    severity: info
+    min_confidence: 0.8
+    review_required: true
+    patterns:
+      提升效率水平:
+        message: Collocation may be awkward or redundant
+        suggestions:
+          - 提升效率
+          - 提高水平
+  acronym_first_use:
+    enabled: true
+    severity: warning
+    min_confidence: 0.88
+    review_required: true
+    require_expansion_before_short_form: true
+    acronyms:
+      DID:
+        expansions:
+          - 双重差分
+          - Difference-in-Differences
+      LLM:
+        expansions:
+          - 大型语言模型
+          - Large Language Model
+consistency:
+  terminology_consistency:
+    enabled: true
+    severity: warning
+    min_confidence: 0.82
+    review_required: true
+    min_occurrences: 2
+    groups:
+      大型语言模型:
+        variants:
+          - 大语言模型
+          - LLM
 format:
   require_list_of_figures: false
   require_list_of_tables: false
