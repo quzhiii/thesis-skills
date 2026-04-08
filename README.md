@@ -13,7 +13,7 @@
 
 [中文文档](README.zh-CN.md) • **English**
 
-[Quick Start](#quick-start) • [Features](#core-features) • [Changelog](#version-history) • [Architecture](docs/architecture.md) • [Contributing](CONTRIBUTING.md)
+[Quick Start](#quick-start) • [Beginner Guide (ZH)](docs/getting-started-zh.md) • [Features](#core-features) • [Changelog](#version-history) • [Architecture](docs/architecture.md) • [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -154,6 +154,12 @@ python run_check_once.py \
   --ruleset university-generic \
   --skip-compile
 ```
+
+### New to LaTeX?
+
+If you are completely new to LaTeX, start here first:
+
+- [Beginner getting-started guide (Chinese)](docs/getting-started-zh.md)
 
 ### EndNote Workflow
 

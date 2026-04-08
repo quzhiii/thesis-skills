@@ -13,7 +13,7 @@
 
 **中文文档** • [English](README.md)
 
-[快速开始](#快速开始) • [核心功能](#核心功能) • [版本历史](#版本历史) • [架构文档](docs/architecture.md) • [贡献指南](CONTRIBUTING.md)
+[快速开始](#快速开始) • [零基础入门教程](docs/getting-started-zh.md) • [核心功能](#核心功能) • [版本历史](#版本历史) • [架构文档](docs/architecture.md) • [贡献指南](CONTRIBUTING.md)
 
 </div>
 
@@ -154,6 +154,12 @@ python run_check_once.py \
   --ruleset university-generic \
   --skip-compile
 ```
+
+### 新手从这里开始
+
+如果你还没有 LaTeX 基础，建议先阅读：
+
+- [零基础入门教程：先安装 LaTeX，再使用 Thesis Skills](docs/getting-started-zh.md)
 
 ### EndNote 工作流
 
