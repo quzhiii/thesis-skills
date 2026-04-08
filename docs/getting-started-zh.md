@@ -178,11 +178,19 @@ TeX Live 2024
 
 #### 安装步骤
 
-**① 访问 TeX Live 官网下载安装器：**
+**① 访问下载安装器（国内用户优先用镜像站）：**
 
-<https://www.tug.org/texlive/acquire-netinstall.html>
+> **推荐（国内访问更快）：** <https://mirrors.tuna.tsinghua.edu.cn/CTAN/systems/texlive/>
 
-Windows 下载 `install-tl-windows.exe`。
+> **官网（备选）：** <https://www.tug.org/texlive/acquire-netinstall.html>
+
+进入清华镜像站后，找到：
+- `install-tl-windows.exe` —— Windows 在线安装器
+- 或 `tlnet/` 目录下的安装包
+
+**提示**：如果镜像站访问慢，也可以尝试：
+- 北外镜像：<https://mirrors.bfsu.edu.cn/CTAN/systems/texlive/>
+- 阿里云镜像：<https://mirrors.aliyun.com/CTAN/systems/texlive/>
 
 **② 双击运行，等待加载后看到主界面：**
 
@@ -262,11 +270,18 @@ xelatex --version
 
 ### 方案 C：macOS 安装 MacTeX
 
-官网：<https://www.tug.org/mactex/>
+**① 下载安装包（国内用户优先用镜像站）：**
 
-下载 `MacTeX.pkg`（约 4 GB），双击安装，按引导操作。
+> **推荐（国内访问更快）：** <https://mirrors.tuna.tsinghua.edu.cn/CTAN/systems/mac/mactex/>
 
-安装后验证：
+> **官网（备选）：** <https://www.tug.org/mactex/>
+
+在清华镜像站找到 `MacTeX.pkg`（约 4 GB），下载后双击安装，按引导操作。
+
+**提示**：如果镜像站访问慢，也可以尝试：
+- 北外镜像：<https://mirrors.bfsu.edu.cn/CTAN/systems/mac/mactex/>
+
+**② 安装后验证：**
 
 ```bash
 xelatex --version
@@ -279,18 +294,40 @@ xelatex --version
 
 ### 方案 D：Linux 安装 TeX Live
 
-不同发行版安装命令不同：
+不同发行版安装命令不同。
+
+#### Ubuntu / Debian
+
+使用清华镜像源加速：
 
 ```bash
-# Ubuntu / Debian
+# 添加清华镜像源
+sudo sed -i 's|http://.*ubuntu\.com|https://mirrors.tuna.tsinghua.edu.cn|' /etc/apt/sources.list
+
+# 更新并安装
+sudo apt update
 sudo apt install texlive-full
+```
 
-# Fedora
+或者直接用默认源（可能较慢）：
+
+```bash
+sudo apt install texlive-full
+```
+
+#### Fedora
+
+```bash
 sudo dnf install texlive-scheme-full
+```
 
-# Arch Linux
+#### Arch Linux
+
+```bash
 sudo pacman -S texlive-most
 ```
+
+**提示**：如果安装过程下载太慢，可以搜索对应发行版 "换源 清华镜像"。
 
 安装后验证：
 
