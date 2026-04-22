@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -74,3 +75,79 @@ def run_word_to_latex_migration(
         "bibliography_targets": bib_targets,
         "applied": apply,
     }
+
+
+def run_latex_to_word_migration(
+    project_root: str | Path,
+    output_file: str | Path,
+    profile: str,
+    apply: bool,
+) -> dict[str, object]:
+    project_root = Path(project_root).resolve()
+    output_file = Path(output_file).resolve()
+    main_tex = project_root / "main.tex"
+    if not main_tex.exists():
+        tex_candidates = sorted(project_root.glob("*.tex"))
+        if not tex_candidates:
+            raise FileNotFoundError("main tex file not found")
+        main_tex = tex_candidates[0]
+
+    chapter_files = sorted(project_root.glob("chapters/*.tex"))
+    warnings: list[str] = []
+    unsupported_constructs: list[str] = []
+    for tex in [main_tex] + chapter_files:
+        text = tex.read_text(encoding="utf-8", errors="ignore")
+        rel = tex.relative_to(project_root).as_posix()
+        if "\\begin{tikzpicture}" in text:
+            unsupported_constructs.append(f"tikzpicture:{rel}")
+        if "\\newcommand" in text or "\\renewcommand" in text:
+            warnings.append(f"custom-macro:{rel}")
+        for env in ("align", "align*", "equation", "equation*", "gather", "gather*"):
+            if f"\\begin{{{env}}}" in text:
+                warnings.append(f"math-env:{env}:{rel}")
+                break
+
+    result: dict[str, object] = {
+        "project_root": str(project_root),
+        "profile": profile,
+        "output_file": str(output_file),
+        "applied": False,
+        "main_tex": main_tex.relative_to(project_root).as_posix(),
+        "chapters": [path.relative_to(project_root).as_posix() for path in chapter_files],
+        "warnings": warnings,
+        "unsupported_constructs": unsupported_constructs,
+    }
+
+    if apply:
+        pandoc_path = shutil.which("pandoc")
+        if pandoc_path is None:
+            try:
+                import pypandoc
+                pandoc_path = pypandoc.get_pandoc_path()
+            except Exception:
+                pass
+        if pandoc_path is None:
+            result["conversion_error"] = "pandoc not found: install pandoc or pypandoc-binary to enable .docx export"
+            return result
+        try:
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            subprocess.run(
+                [
+                    pandoc_path,
+                    str(main_tex),
+                    "-f", "latex",
+                    "-t", "docx",
+                    "-o", str(output_file),
+                    "--wrap=none",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            result["applied"] = True
+        except subprocess.CalledProcessError as exc:
+            result["conversion_error"] = f"pandoc failed: {exc.stderr or exc.stdout or 'unknown error'}"
+        except Exception as exc:
+            result["conversion_error"] = f"conversion error: {exc}"
+
+    return result
