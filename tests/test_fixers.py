@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import unittest
 
-from core.fixers import apply_format_fixes, apply_language_fixes
+from core.fixers import apply_format_fixes, apply_language_fixes, apply_review_patches
 from tests.helpers import workspace_tempdir
 
 
@@ -139,6 +139,50 @@ class FixerTest(unittest.TestCase):
             content = tex.read_text(encoding="utf-8")
         self.assertIn("\\label{keep-me}", content)
         self.assertNotIn("\\label{remove-me}", content)
+
+    def test_review_fixer_supports_preview_and_apply(self) -> None:
+        with workspace_tempdir("fixers-") as base:
+            chapters = base / "chapters"
+            chapters.mkdir(parents=True)
+            tex = chapters / "01-introduction.tex"
+            tex.write_text("因此所以，本文继续讨论。\n", encoding="utf-8")
+            artifact = base / "review-ingest-artifact.json"
+            artifact.write_text(
+                json.dumps(
+                    {
+                        "artifact_type": "feedback_ingest",
+                        "summary": {"normalized_count": 1},
+                        "payload": {
+                            "selective_action": {
+                                "candidate_patches": [
+                                    {
+                                        "code": "REVIEW_LANGUAGE_LOCAL",
+                                        "file": "chapters/01-introduction.tex",
+                                        "line": 1,
+                                        "span": {"start": 1, "end": 4},
+                                        "old_text": "因此所以",
+                                        "suggestions": ["因此"],
+                                        "confidence": 0.95,
+                                        "review_required": False,
+                                        "ambiguous": False,
+                                        "category": "language",
+                                    }
+                                ]
+                            }
+                        },
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            preview = apply_review_patches(base, artifact, apply=False)
+            self.assertEqual(preview["preview_count"], 1)
+            self.assertEqual(tex.read_text(encoding="utf-8"), "因此所以，本文继续讨论。\n")
+            applied = apply_review_patches(base, artifact, apply=True)
+            content = tex.read_text(encoding="utf-8")
+        self.assertEqual(applied["changed_files"], 1)
+        self.assertEqual(len(applied["applied_patches"]), 1)
+        self.assertEqual(content, "因此，本文继续讨论。\n")
 
 
 if __name__ == "__main__":

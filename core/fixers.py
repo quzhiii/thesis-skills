@@ -8,6 +8,7 @@ from typing import Any
 from core.patches import (
     apply_patch_to_text,
     build_patch_from_finding,
+    build_patch_from_review_item,
     detect_patch_conflicts,
     validate_patch_text,
 )
@@ -329,3 +330,75 @@ def apply_format_fixes(
             if apply:
                 path.write_text(new_text, encoding="utf-8")
     return {"changed_files": changed, "applied": apply}
+
+
+def apply_review_patches(
+    project_root: str | Path,
+    artifact_path: str | Path,
+    apply: bool,
+) -> dict[str, object]:
+    project_root = Path(project_root)
+    artifact = _load_report(artifact_path)
+    payload = artifact.get("payload", {})
+    if not isinstance(payload, dict):
+        payload = {}
+    selective_action = payload.get("selective_action", {})
+    if not isinstance(selective_action, dict):
+        selective_action = {}
+    raw_items = selective_action.get("candidate_patches", [])
+    if not isinstance(raw_items, list):
+        raw_items = []
+
+    generated = []
+    blocked: list[dict[str, object]] = []
+    for item in raw_items:
+        if not isinstance(item, dict):
+            continue
+        patch, reason = build_patch_from_review_item(project_root, item)
+        if patch is None:
+            blocked.append({"reason": reason or "unsupported", "item": item})
+            continue
+        generated.append(patch)
+
+    accepted, conflicts = detect_patch_conflicts(project_root, generated)
+    preview = [patch.as_dict() for patch in accepted]
+    changed_files: set[str] = set()
+    applied_patches: list[dict[str, object]] = []
+    if apply:
+        by_file: dict[str, list[Any]] = {}
+        for patch in accepted:
+            by_file.setdefault(patch.file, []).append(patch)
+        for file_name, patches in by_file.items():
+            path = project_root / file_name
+            text = path.read_text(encoding="utf-8")
+            new_text = text
+            for patch in sorted(
+                patches,
+                key=lambda item: (
+                    item.start["line"],
+                    item.start["column"],
+                    item.end["line"],
+                    item.end["column"],
+                ),
+                reverse=True,
+            ):
+                if not validate_patch_text(new_text, patch):
+                    blocked.append({"reason": "old_text_mismatch", "item": patch.as_dict()})
+                    continue
+                new_text = apply_patch_to_text(new_text, patch)
+                applied_patches.append(patch.as_dict())
+            if new_text != text:
+                path.write_text(new_text, encoding="utf-8")
+                changed_files.add(file_name)
+
+    return {
+        "applied": apply,
+        "preview_only": not apply,
+        "preview_count": len(preview),
+        "patches": preview,
+        "applied_patches": applied_patches,
+        "changed_files": len(changed_files),
+        "changed": sorted(changed_files),
+        "blocked": blocked,
+        "conflicts": conflicts,
+    }

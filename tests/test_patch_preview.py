@@ -6,6 +6,7 @@ from core.patches import (
     TextPatch,
     apply_patch_to_text,
     build_patch_from_finding,
+    build_patch_from_review_item,
     detect_patch_conflicts,
     validate_patch_text,
 )
@@ -94,6 +95,29 @@ class PatchPreviewTest(unittest.TestCase):
             apply_patch_to_text("因此所以，本文继续讨论。\n", patch),
             "因此，本文继续讨论。\n",
         )
+
+    def test_build_patch_from_review_item_reuses_patch_safety_rules(self) -> None:
+        with workspace_tempdir("patch-preview-") as base:
+            materialize_project(base, {"chapter.tex": "因此所以，本文继续讨论。\n"})
+            patch, reason = build_patch_from_review_item(
+                base,
+                {
+                    "code": "REVIEW_LANGUAGE_LOCAL",
+                    "file": "chapter.tex",
+                    "line": 1,
+                    "span": {"start": 1, "end": 4},
+                    "old_text": "因此所以",
+                    "suggestions": ["因此"],
+                    "confidence": 0.95,
+                    "review_required": False,
+                    "ambiguous": False,
+                    "category": "language",
+                },
+            )
+        self.assertIsNone(reason)
+        assert patch is not None
+        self.assertEqual(patch.old_text, "因此所以")
+        self.assertFalse(patch.review_required)
 
 
 if __name__ == "__main__":

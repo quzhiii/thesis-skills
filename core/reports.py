@@ -41,3 +41,26 @@ def write_report(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     return 1 if errors or (fail_on_warnings and warnings) else 0
+
+
+def write_review_artifact(
+    artifact_path: str | Path,
+    *,
+    artifact_type: str,
+    summary: dict[str, object],
+    payload: dict[str, object],
+) -> None:
+    artifact_path = Path(artifact_path)
+    artifact_path.parent.mkdir(parents=True, exist_ok=True)
+    artifact_path.write_text(
+        json.dumps(
+            {
+                "artifact_type": artifact_type,
+                "summary": summary,
+                "payload": payload,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )

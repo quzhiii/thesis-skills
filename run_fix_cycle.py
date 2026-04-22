@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from core.fixers import apply_review_patches
+
 
 def _run(cmd: list[str], cwd: Path) -> dict[str, Any]:
     proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
@@ -111,6 +113,24 @@ def main() -> int:
                 "status": "skipped",
                 "reason": f"Missing report: {report.name}",
             }
+    review_artifact = reports_dir / "review-ingest-artifact.json"
+    if review_artifact.exists():
+        review_summary = apply_review_patches(project_root, review_artifact, apply=False)
+        artifact_payload = json.loads(review_artifact.read_text(encoding="utf-8"))
+        payload = artifact_payload.get("payload", {}) if isinstance(artifact_payload, dict) else {}
+        selective_action = payload.get("selective_action", {}) if isinstance(payload, dict) else {}
+        todos = selective_action.get("todos", []) if isinstance(selective_action, dict) else []
+        blocked = selective_action.get("blocked", []) if isinstance(selective_action, dict) else []
+        steps_summary["review-revision"] = {
+            "exit_code": 0,
+            "summary": {
+                "accepted_items_count": len(review_summary.get("patches", [])),
+                "pending_items_count": len(todos) if isinstance(todos, list) else 0,
+                "blocked_items_count": len(blocked) if isinstance(blocked, list) else 0,
+                "touched_files": review_summary.get("changed", []),
+                "review_required_leftovers": len(blocked) if isinstance(blocked, list) else 0,
+            },
+        }
     (reports_dir / "fix-summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
     )

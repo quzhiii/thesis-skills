@@ -139,6 +139,40 @@ def build_patch_from_finding(
     return patch, None
 
 
+def build_patch_from_review_item(
+    project_root: str | Path, item: dict[str, object]
+) -> tuple[TextPatch | None, str | None]:
+    if bool(item.get("ambiguous", False)):
+        return None, "ambiguous"
+    if bool(item.get("review_required", False)):
+        return None, "review_required"
+    old_text = item.get("old_text")
+    suggestions = item.get("suggestions")
+    span = item.get("span")
+    if not isinstance(old_text, str) or not old_text:
+        return None, "missing_old_text"
+    if not isinstance(suggestions, list) or not suggestions:
+        return None, "missing_suggestions"
+    if not isinstance(span, dict):
+        return None, "missing_span"
+    finding_like = {
+        "code": item.get("code", "REVIEW_FEEDBACK"),
+        "file": item.get("file", ""),
+        "line": item.get("line", 0),
+        "span": span,
+        "suggestions": suggestions,
+        "confidence": item.get("confidence", 0.0),
+        "review_required": item.get("review_required", False),
+        "category": item.get("category", ""),
+    }
+    patch, reason = build_patch_from_finding(project_root, finding_like)
+    if patch is None:
+        return None, reason
+    if patch.old_text != old_text:
+        return None, "old_text_mismatch"
+    return patch, None
+
+
 def detect_patch_conflicts(
     project_root: str | Path, patches: list[TextPatch]
 ) -> tuple[list[TextPatch], list[dict[str, object]]]:
