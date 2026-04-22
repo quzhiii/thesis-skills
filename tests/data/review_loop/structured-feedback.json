@@ -1,0 +1,29 @@
+{
+  "items": [
+    {
+      "source_ref": "comment-1",
+      "text": "Tighten this sentence and remove the redundant connector.",
+      "category": "language",
+      "confidence": 0.93,
+      "review_required": false,
+      "file": "chapters/01-introduction.tex",
+      "line": 1,
+      "old_text": "因此所以",
+      "suggestions": ["因此"],
+      "span": {"start": 1, "end": 4},
+      "code": "REVIEW_LANGUAGE_LOCAL",
+      "severity": "warning"
+    },
+    {
+      "source_ref": "comment-2",
+      "text": "Strengthen the argument in this section with clearer evidence limits.",
+      "category": "argument",
+      "confidence": 0.7,
+      "review_required": true,
+      "file": "chapters/02-methods.tex",
+      "line": 12,
+      "code": "REVIEW_ARGUMENT_SCOPE",
+      "severity": "warning"
+    }
+  ]
+}

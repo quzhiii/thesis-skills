@@ -1,0 +1,14 @@
+{
+  "items": [
+    {
+      "source_ref": "comment-ambiguous",
+      "text": "Maybe revise this.",
+      "category": "review",
+      "confidence": 0.4,
+      "file": "chapters/01-introduction.tex",
+      "line": 3,
+      "code": "REVIEW_AMBIGUOUS",
+      "severity": "warning"
+    }
+  ]
+}
