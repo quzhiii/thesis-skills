@@ -74,9 +74,16 @@ def main() -> int:
             repo_root / "13-check-content" / "check_content.py",
             project.reports_dir / "check_content-report.json",
         ),
+        (
+            "compile",
+            repo_root / "15-check-compile" / "check_compile.py",
+            project.reports_dir / "check_compile-report.json",
+        ),
     ]
     if args.only:
-        steps = [step for step in steps if step[0] == args.only]
+        selected = [step for step in steps if step[0] == args.only]
+        compile_steps = [step for step in steps if step[0] == "compile"]
+        steps = selected + [step for step in compile_steps if step not in selected]
     summary: dict[str, object] = {
         "ruleset": args.ruleset,
         "project_root": str(project.root),
@@ -84,6 +91,21 @@ def main() -> int:
     }
     overall = 0
     for name, script, report in steps:
+        if name == "compile" and args.skip_compile:
+            summary["steps"]["compile"] = {
+                "status": "skipped",
+                "reason": "Skipped by --skip-compile",
+            }
+            continue
+        if name == "compile" and not project.main_tex.with_suffix(".log").exists():
+            summary["steps"]["compile"] = {
+                "status": "missing-log",
+                "reason": "No compile log discovered for the main TeX file",
+                "expected_log": project.main_tex.with_suffix(".log")
+                .relative_to(project.root)
+                .as_posix(),
+            }
+            continue
         code = _run(
             [
                 sys.executable,
@@ -116,16 +138,9 @@ def main() -> int:
             break
         if code == 1 and overall == 0:
             overall = 1
-    if args.skip_compile:
-        summary["steps"]["compile"] = {
-            "status": "skipped",
-            "reason": "Skipped by --skip-compile",
-        }
-    else:
-        summary["steps"]["compile"] = {
-            "status": "unavailable",
-            "reason": "No compile adapter configured in stdlib starter",
-        }
+    compile_step = summary["steps"].get("compile")
+    if isinstance(compile_step, dict) and "report_summary" in compile_step:
+        compile_step["status"] = "parsed"
     (project.reports_dir / "run-summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
     )

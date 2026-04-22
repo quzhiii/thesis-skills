@@ -5,6 +5,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from core.common import Finding
+from core.compile_parser import parse_compile_log_file
 from core.language_rules import get_language_rule
 from core.project import ThesisProject
 from core.reports import write_report
@@ -652,3 +653,45 @@ def run_content_check(project: ThesisProject, pack: RulePack, report_path: Path)
         "acronym_candidates": sorted(acronym_candidates),
     }
     return write_report(report_path, "check_content", pack.ruleset, findings, extra)
+
+
+def run_compile_check(
+    project: ThesisProject,
+    pack: RulePack,
+    report_path: Path,
+    *,
+    log_path: Path | None = None,
+) -> int:
+    compile_rules = pack.rules.get("compile", {})
+    if not isinstance(compile_rules, dict):
+        compile_rules = {}
+    categories = compile_rules.get("categories", {})
+    if not isinstance(categories, dict):
+        categories = {}
+    severity_map: dict[str, str] = {}
+    for key, value in categories.items():
+        if isinstance(value, dict):
+            severity_map[str(key)] = str(value.get("severity", "warning"))
+    if log_path is None:
+        log_path = project.main_tex.with_suffix(".log")
+    findings = parse_compile_log_file(
+        log_path,
+        default_file=project.rel(project.main_tex),
+        severity_map=severity_map,
+    )
+    extra_summary = {
+        "log_file": project.rel(log_path)
+        if log_path.is_relative_to(project.root)
+        else str(log_path),
+        "files_scanned": 1,
+    }
+    extra_payload = {"artifacts": {"log_file": str(log_path)}}
+    return write_report(
+        report_path,
+        "check_compile",
+        pack.ruleset,
+        findings,
+        extra_summary,
+        extra_payload,
+        fail_on_warnings=True,
+    )

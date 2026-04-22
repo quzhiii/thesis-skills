@@ -152,3 +152,24 @@ content:
   abstract_keywords:
     min: 3
     max: 6
+compile:
+  enabled: true
+  severity: warning
+  engine_hint: pdflatex
+  categories:
+    undefined_control_sequence:
+      severity: error
+    missing_file_or_package:
+      severity: error
+    missing_citation:
+      severity: warning
+    missing_reference:
+      severity: warning
+    bibliography_backend_issue:
+      severity: warning
+    overfull_box:
+      severity: info
+    compile_warning_unknown:
+      severity: info
+    compile_error_unknown:
+      severity: error
