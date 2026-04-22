@@ -35,20 +35,20 @@
 
 ## 版本历史
 
-### v0.7.0 — Readiness Gate 🆕
+### v0.7.0 — 预提交判断层 🆕
 
-> **基于现有 workflow artifact 的有边界预提交 verdict**
+> **把分散在多个报告里的信息，收束成一个更容易做决定的 readiness verdict**
 
 | v0.7.0 新增 | 增加了什么 | 实际价值 |
 |:---|:---|:---|
-| `16-check-readiness` | 预提交 readiness gate | 把现有 check/fix/compile/export/review artifacts 汇总成一个明确的 go/no-go verdict |
-| Gate modes | `advisor-handoff` + `submission-prep` | 只在目标工作流确实需要时提高严格度 |
-| Runner bridge | `run-summary.json` 中的 `derived_artifacts.readiness_gate` | 在不把 runner 变成第二套 orchestration engine 的前提下暴露 readiness |
+| `16-check-readiness` | 新的预提交 Gate | 不用再来回翻多份报告，先看一个统一结论，再决定下一步 |
+| Gate modes | `advisor-handoff` + `submission-prep` | 同样是“继续往前走”，但导师预审和正式提交前的要求可以明确区分 |
+| Runner bridge | `run-summary.json` 中新增 `derived_artifacts.readiness_gate` | 现有 runner 不用重写，也能稳定暴露 readiness 结果 |
 
-**核心新增：**
-- 机器可读的 `PASS / WARN / BLOCK` readiness artifact
-- 显式 blockers、warnings、next actions 与 source references
-- 以 derived artifact 形式接入 `run_check_once.py`
+**这一版重点解决的是：**
+- 现有检查、修复、编译、导出、审阅产物已经很多，但缺少最后一层“现在能不能继续”的统一判断
+- 用户不需要自己把多份 artifact 再拼成 go / no-go 结论
+- Gate 会给出机器可读的 `PASS / WARN / BLOCK`，并明确列出 blockers、warnings、next actions 和来源
 
 ### v0.6.0 — 交付基础层
 
@@ -295,10 +295,11 @@ python 16-check-readiness/check_readiness.py \
 
 定位说明：
 
-- gate 是构建在现有报告与 workflow artifact 之上的汇总层
-- 它返回 `PASS`、`WARN`、`BLOCK`，并显式给出 blockers、warnings 与 next actions
-- 它不会重跑整条工具链、不会自动修复问题，也不会声称通用的 submission 合规认证
-- `run_check_once.py` 也可以在 `run-summary.json` 中把 readiness gate 暴露成 derived artifact reference
+- 它更像“最后一层判断”，不是新的底层工具链
+- 它会复用已有报告和 workflow artifact，把结果汇总成一个更容易理解的 readiness verdict
+- 输出不是模糊评分，而是明确的 `PASS`、`WARN`、`BLOCK`，并告诉你哪里卡住了、哪里只是有风险、下一步该先做什么
+- 它不会替你重跑整条流程、不会自动修复问题，也不会声称自己能覆盖所有学校或机构的提交规则
+- 如果你走的是 `run_check_once.py`，也可以直接在 `run-summary.json` 里看到 readiness gate 的 derived artifact 引用
 
 ---
 
