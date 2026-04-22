@@ -8,6 +8,9 @@ It is a deterministic workflow layer for academic writing projects that need:
 
 - bibliography intake from external tools such as Zotero and EndNote
 - Word-to-LaTeX migration support
+- bounded LaTeX-to-Word export support for review-oriented workflows
+- bounded review-loop workflows for revision rounds and feedback handling
+- bounded compile-log parsing for friendlier build diagnostics
 - repeatable, inspectable checks
 - bounded, report-driven fixes
 - reusable rule packs for schools and journals
@@ -16,15 +19,18 @@ The repository is designed around explicit artifacts and narrow tool contracts.
 Checkers write reports. Fixers read reports. Rule packs provide policy. Runners
 orchestrate the sequence, but do not redefine the meaning of lower-level tools.
 
-## Five-Layer Model
+## Multi-Layer Model
 
-The current repository is easiest to understand as five layers:
+The current repository is easiest to understand as layered workflows:
 
 1. Bibliography intake
 2. Word-to-LaTeX migration
-3. Deterministic checking
-4. Report-driven fixing
-5. Rule-pack onboarding and reuse
+3. LaTeX-to-Word export
+4. Review-loop workflows
+5. Compile-log diagnostics
+6. Deterministic checking
+7. Report-driven fixing
+8. Rule-pack onboarding and reuse
 
 These layers map to concrete folders and scripts rather than abstract concepts.
 
@@ -35,6 +41,7 @@ thesis-skills/
 ├── 00-bib-endnote/           EndNote intake and preflight checks
 ├── 00-bib-zotero/            Zotero bibliography and Word-sync workflows
 ├── 01-word-to-latex/         Structured migration from Word exports to LaTeX
+├── 02-latex-to-word/         Bounded LaTeX-to-Word export workflow
 ├── 10-check-references/      Deterministic reference checks
 ├── 11-check-language/        Baseline language checks
 ├── 12-check-format/          Format checks
@@ -96,7 +103,77 @@ Core support:
 
 - `core/migration.py`
 
-### 3. Deterministic Checking
+### 3. LaTeX-to-Word Export
+
+Purpose:
+
+- produce a review-friendly `.docx` from a LaTeX thesis project
+- surface unsupported constructs explicitly rather than hiding them
+- keep export policy separate from conversion mechanism
+
+Main entrypoint:
+
+- `02-latex-to-word/migrate_project.py`
+
+Core support:
+
+- `core/migration.py`
+- `core/export_profiles.py`
+
+Important boundary:
+
+- `review-friendly` is the only first-class implemented export mode in `v0.6.x`
+- `submission-friendly` exists as a profile contract but is not yet fully implemented
+- export reports are mandatory; dry-run without `--apply` is the default
+
+### 4. Review-Loop Workflows
+
+Purpose:
+
+- generate review-package and triage artifacts from the current thesis state
+- normalize bounded feedback into structured issues, TODOs, and candidate patches
+- record revision-round outcomes without collapsing into live collaboration tooling
+
+Main entrypoints:
+
+- `03-latex-review-diff/review_diff.py`
+- `04-word-review-ingest/feedback_ingest.py`
+
+Core support:
+
+- `core/review_queue.py`
+- `core/review_clusters.py`
+- `core/review_loop.py`
+- `core/reports.py`
+
+Important boundary:
+
+- the review loop preserves explicit artifacts and review-gated ambiguity
+- it does not replace Word, Overleaf, or Google Docs collaboration
+
+### 5. Compile-Log Diagnostics
+
+Purpose:
+
+- translate raw LaTeX compile logs into structured findings
+- preserve build-blocking versus warning-level distinctions
+- keep compile support bounded to parsing and discovery rather than full orchestration
+
+Main entrypoint:
+
+- `15-check-compile/check_compile.py`
+
+Core support:
+
+- `core/compile_parser.py`
+- `core/checkers.py`
+
+Important boundary:
+
+- this layer parses existing compile artifacts; it is not a replacement for `latexmk`, `xelatex`, or `bibtex`
+- missing logs should be reported explicitly rather than masked
+
+### 6. Deterministic Checking
 
 Purpose:
 
@@ -130,7 +207,7 @@ Important boundary:
   language issues
 - deep findings are intentionally not equivalent to final editorial judgment
 
-### 4. Report-Driven Fixing
+### 7. Report-Driven Fixing
 
 Purpose:
 
@@ -156,7 +233,7 @@ Important boundary:
 - deep patches validate spans and skip `review_required` items by default
 - the system prefers conservative edits over broad rewrites
 
-### 5. Rule-Pack Onboarding And Reuse
+### 8. Rule-Pack Onboarding And Reuse
 
 Purpose:
 

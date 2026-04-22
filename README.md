@@ -1,4 +1,4 @@
-# Thesis Skills v0.5.2
+# Thesis Skills v0.6.0
 
 <div align="center">
 
@@ -35,7 +35,22 @@
 
 ## Version History
 
-### v0.5.2 — Deep Patch Preview 🆕
+### v0.6.0 — Delivery Foundation 🆕
+
+> **Review-friendly export + compile diagnostics + bounded review loop**
+
+| New in v0.6.0 | What it adds | Why it matters |
+|:---|:---|:---|
+| `02-latex-to-word` | Review-friendly `.docx` export | Makes advisor and collaborator review easier |
+| `15-check-compile` | Structured compile-log parsing | Turns raw TeX failures into clearer findings |
+| `03-latex-review-diff` + `04-word-review-ingest` | Review-loop artifacts | Makes revision rounds inspectable and repeatable |
+
+**Key additions:**
+- Review-first LaTeX→Word export with explicit limitation reporting
+- Compile-log parser integrated into `run_check_once.py`
+- Review package, feedback-ingest, TODO split, and revision summary support
+
+### v0.5.2 — Deep Patch Preview
 
 > **Review-oriented findings → Selective patches**
 
@@ -114,11 +129,13 @@ v0.5.0 Coverage:
 
 ```
 ┌─────────────────────────────────────────┐
-│  Layer 5: Rule-Pack Onboarding          │  ← YAML configs, starter packs
+│  Layer 6: Rule-Pack Onboarding          │  ← YAML configs, starter packs
 ├─────────────────────────────────────────┤
-│  Layer 4: Report-Driven Fixing          │  ← 20-fix-*, 24-fix-language-deep
+│  Layer 5: Report-Driven Fixing          │  ← 20-fix-*, 24-fix-language-deep
 ├─────────────────────────────────────────┤
-│  Layer 3: Deterministic Checking        │  ← 10-check-*, 14-check-language-deep
+│  Layer 4: Deterministic Checking        │  ← 10-check-*, 14-check-language-deep
+├─────────────────────────────────────────┤
+│  Layer 3: LaTeX-to-Word Export          │  ← 02-latex-to-word
 ├─────────────────────────────────────────┤
 │  Layer 2: Word-to-LaTeX Migration       │  ← 01-word-to-latex
 ├─────────────────────────────────────────┤
@@ -132,12 +149,15 @@ v0.5.0 Coverage:
 |:---|:---|:---|
 | **EndNote Import** | ✅ v0.4 | XML/RIS/BibTeX → `refNNN` with deduplication |
 | **Zotero Sync** | ✅ v0.3 | Word docx → LaTeX citation mapping |
+| **LaTeX→Word Export** | ✅ v0.6 | Review-friendly `.docx` export with explicit limitations |
 | **Reference Check** | ✅ Stable | Missing keys, orphans, duplicates |
 | **Language Lint** | ✅ v0.5.0 | 10+ deterministic rules |
 | **Deep Language Review** | ✅ v0.5.1 | Sentence-aware screening |
 | **Deep Patch Fix** | ✅ v0.5.2 | Selective span-based fixes |
 | **Format Check** | ✅ Stable | Figures, tables, centering |
 | **Content Check** | ✅ Stable | Required sections, abstract keywords |
+| **Compile Log Parser** | ✅ v0.6 | Friendlier compile diagnostics from existing `.log` files |
+| **Review Loop** | ✅ v0.6 | Review diff, feedback ingest, TODO split, and revision summaries |
 
 ---
 
@@ -190,6 +210,63 @@ python run_fix_cycle.py \
   --project-root thesis --ruleset tsinghua-thesis --apply false
 ```
 
+### Compile Diagnostics
+
+```bash
+# Parse compile findings when a .log file is present
+python run_check_once.py \
+  --project-root thesis \
+  --ruleset tsinghua-thesis
+
+# Skip compile parsing when you only want structure/content/language checks
+python run_check_once.py \
+  --project-root thesis \
+  --ruleset tsinghua-thesis \
+  --skip-compile
+```
+
+Positioning:
+
+- compile parsing translates raw LaTeX log output into structured findings
+- it does not replace your TeX toolchain or guarantee full build orchestration
+- if no log is available, the runner reports that explicitly instead of crashing
+
+### LaTeX to Word Workflow
+
+```bash
+# Generate a review-first export summary
+python 02-latex-to-word/migrate_project.py \
+  --project-root thesis \
+  --output-file thesis-review.docx \
+  --profile review-friendly \
+  --apply false
+```
+
+First-release positioning:
+
+- review-friendly export is the primary target
+- submission-friendly export is planned as a stricter later path
+- unsupported constructs should be surfaced explicitly rather than hidden
+
+### Review Loop Workflow
+
+```bash
+# Build a review package and triage artifact from current reports
+python 03-latex-review-diff/review_diff.py \
+  --project-root thesis
+
+# Normalize bounded review feedback into structured issues
+python 04-word-review-ingest/feedback_ingest.py \
+  --project-root thesis \
+  --input review-feedback.json
+```
+
+Positioning:
+
+- review loop is a bounded workflow for revision rounds, not a collaboration platform
+- diff/triage and feedback ingest stay inspectable through explicit JSON artifacts
+- ambiguous or high-judgement changes remain review-gated rather than auto-applied
+
 ---
 
 ## Rule Pack System
@@ -225,7 +302,11 @@ thesis-skills/
 │   └── reports.py          # JSON report generation
 ├── 00-bib-*/               # Bibliography workflows
 ├── 01-word-to-latex/       # Migration workflow
+├── 02-latex-to-word/       # Review-first export workflow
+├── 03-latex-review-diff/   # Review package and triage workflow
+├── 04-word-review-ingest/  # Bounded feedback normalization workflow
 ├── 10-check-*/             # Deterministic checkers
+├── 15-check-compile/       # Compile-log diagnostic translation
 ├── 20-fix-*/               # Safe fixers
 ├── 90-rules/               # Rule pack system
 └── 99-runner/              # Entry points

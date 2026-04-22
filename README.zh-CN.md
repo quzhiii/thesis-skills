@@ -1,4 +1,4 @@
-# Thesis Skills v0.5.2
+# Thesis Skills v0.6.0
 
 <div align="center">
 
@@ -35,7 +35,22 @@
 
 ## 版本历史
 
-### v0.5.2 — 深度补丁预览与选择性应用 🆕
+### v0.6.0 — 交付基础层 🆕
+
+> **审阅优先导出 + 编译诊断 + 有边界审阅闭环**
+
+| v0.6.0 新增 | 增加了什么 | 实际价值 |
+|:---|:---|:---|
+| `02-latex-to-word` | 审阅优先 `.docx` 导出 | 更适合导师和协作者审阅 |
+| `15-check-compile` | 结构化编译日志解析 | 把原始 TeX 报错转成更清晰的 findings |
+| `03-latex-review-diff` + `04-word-review-ingest` | 审阅闭环 artifact | 让 revision round 可检查、可追踪 |
+
+**核心新增：**
+- 面向审阅的 LaTeX→Word 导出，并显式报告限制边界
+- compile-log parser 接入 `run_check_once.py`
+- review package、feedback ingest、TODO 拆分与 revision summary
+
+### v0.5.2 — 深度补丁预览与选择性应用
 
 > **审阅型发现 → 选择性补丁**
 
@@ -114,11 +129,13 @@ v0.5.0 覆盖范围：
 
 ```
 ┌─────────────────────────────────────────┐
-│  第 5 层：规则包接入层                   │  ← YAML 配置、启动包
+│  第 6 层：规则包接入层                   │  ← YAML 配置、启动包
 ├─────────────────────────────────────────┤
-│  第 4 层：报告驱动修复                   │  ← 20-fix-*、24-fix-language-deep
+│  第 5 层：报告驱动修复                   │  ← 20-fix-*、24-fix-language-deep
 ├─────────────────────────────────────────┤
-│  第 3 层：确定性检查                     │  ← 10-check-*、14-check-language-deep
+│  第 4 层：确定性检查                     │  ← 10-check-*、14-check-language-deep
+├─────────────────────────────────────────┤
+│  第 3 层：LaTeX→Word 导出                │  ← 02-latex-to-word
 ├─────────────────────────────────────────┤
 │  第 2 层：Word→LaTeX 迁移                │  ← 01-word-to-latex
 ├─────────────────────────────────────────┤
@@ -132,12 +149,15 @@ v0.5.0 覆盖范围：
 |:---|:---|:---|
 | **EndNote 导入** | ✅ v0.4 | XML/RIS/BibTeX → `refNNN` 自动去重 |
 | **Zotero 同步** | ✅ v0.3 | Word docx → LaTeX 引用映射 |
+| **LaTeX→Word 导出** | ✅ v0.6 | 面向审阅的 `.docx` 导出，并显式暴露限制 |
 | **引用检查** | ✅ 稳定 | 缺失键、孤立项、重复标题 |
 | **语言检查** | ✅ v0.5.0 | 10+ 确定性规则 |
 | **深度语言审阅** | ✅ v0.5.1 | 句子级感知筛查 |
 | **深度补丁修复** | ✅ v0.5.2 | 选择性范围修复 |
 | **格式检查** | ✅ 稳定 | 图表、居中 |
 | **内容检查** | ✅ 稳定 | 必需章节、摘要关键词 |
+| **编译日志解析** | ✅ v0.6 | 基于现有 `.log` 文件提供更友好的编译诊断 |
+| **审阅闭环** | ✅ v0.6 | 审阅 diff、反馈归一化、TODO 拆分与修订摘要 |
 
 ---
 
@@ -190,6 +210,63 @@ python run_fix_cycle.py \
   --project-root thesis --ruleset tsinghua-thesis --apply false
 ```
 
+### 编译诊断
+
+```bash
+# 当项目里已有 .log 文件时，解析编译问题
+python run_check_once.py \
+  --project-root thesis \
+  --ruleset tsinghua-thesis
+
+# 如果只想看结构、内容、语言问题，可跳过编译解析
+python run_check_once.py \
+  --project-root thesis \
+  --ruleset tsinghua-thesis \
+  --skip-compile
+```
+
+定位说明：
+
+- 编译日志解析会把原始 LaTeX 日志转换成结构化 findings
+- 它不是 TeX 工具链的替代品，也不承诺完整编译编排
+- 如果没有可用 `.log` 文件，runner 会显式报告，而不是直接崩溃
+
+### LaTeX 到 Word 工作流
+
+```bash
+# 先生成审阅优先的导出摘要
+python 02-latex-to-word/migrate_project.py \
+  --project-root thesis \
+  --output-file thesis-review.docx \
+  --profile review-friendly \
+  --apply false
+```
+
+首发边界：
+
+- 第一优先是 review-friendly（审阅友好）导出
+- submission-friendly（提交友好）导出属于后续更严格路径
+- 不支持或有降级风险的构造要显式报告，不做隐式承诺
+
+### 审阅闭环工作流
+
+```bash
+# 基于当前报告生成 review package 和 triage artifact
+python 03-latex-review-diff/review_diff.py \
+  --project-root thesis
+
+# 将有边界的审阅反馈归一化成结构化 issue
+python 04-word-review-ingest/feedback_ingest.py \
+  --project-root thesis \
+  --input review-feedback.json
+```
+
+定位说明：
+
+- 审阅闭环是面向 revision round 的有边界 workflow，不是协作文档平台
+- diff/triage 与 feedback ingest 都保留显式 JSON artifact
+- 含糊或高判断成本的修改保持 review-gated，不会静默自动应用
+
 ---
 
 ## 规则包系统
@@ -225,7 +302,11 @@ thesis-skills/
 │   └── reports.py          # JSON 报告生成
 ├── 00-bib-*/               # 文献库工作流
 ├── 01-word-to-latex/       # 迁移工作流
+├── 02-latex-to-word/       # 审阅优先导出工作流
+├── 03-latex-review-diff/   # 审阅包与分诊工作流
+├── 04-word-review-ingest/  # 有边界的反馈归一化工作流
 ├── 10-check-*/             # 确定性检查器
+├── 15-check-compile/       # 编译日志诊断翻译层
 ├── 20-fix-*/               # 安全修复器
 ├── 90-rules/               # 规则包系统
 └── 99-runner/              # 入口点

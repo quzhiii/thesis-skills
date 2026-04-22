@@ -17,9 +17,10 @@ The repository follows five layers:
 
 1. bibliography intake
 2. Word-to-LaTeX migration
-3. deterministic checking
-4. report-driven fixing
-5. ruleset onboarding and reuse
+3. LaTeX-to-Word export
+4. deterministic checking
+5. report-driven fixing
+6. ruleset onboarding and reuse
 
 That means the project is not trying to be a general writing assistant. It is an infrastructure layer for academic writing workflows that need to be repeatable, inspectable, and extensible.
 
@@ -34,6 +35,8 @@ That means the project is not trying to be a general writing assistant. It is an
 | EndNote preflight check | **Stable (v0.4)** | `00-bib-endnote/check_endnote_export.py` |
 | EndNote direct sync | Planned (v0.5) | Word field-code extraction not implemented |
 | Word -> LaTeX migration | Stable | explicit migration spec with structured metadata |
+| LaTeX -> Word export | Stable (v0.6) | review-friendly export first, submission-friendly later |
+| Compile log parsing | Stable (v0.6) | parse existing `.log` files into structured findings |
 | Deterministic check -> fix loop | Stable | covered by regression tests |
 | Rule pack generation | Stable | starter and draft-pack paths both exist |
 
@@ -122,6 +125,14 @@ EndNote XML/RIS/BibTeX
 - clearer boundary between skills, runners, and optional Word-side tooling
 - stronger test coverage for real-world bibliography and migration samples
 - documented extension contract for third-party rule packs
+
+### Planned next track after v0.5.2
+
+- add `02-latex-to-word` as a review-first export workflow
+- keep first-release export promises bounded and explicit
+- introduce stricter submission-oriented export only after the review path is proven
+- add `15-check-compile` as a bounded compile-log diagnostic translation layer
+- add review-loop workflows for review diff, feedback ingest, and revision summaries
 
 ## Repository Design Rules
 

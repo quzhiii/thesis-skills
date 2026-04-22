@@ -59,3 +59,14 @@ Recommended stronger intake schema:
 ```
 
 This gives the migration step enough information to preserve Word style intent, logical chapter roles, and bibliography source context.
+
+## Future export-aware mapping guidance
+
+When the project later needs `02-latex-to-word` export, the same intake sources can guide reverse mapping. Future export-aware mappings may include:
+
+- **heading style targets**: which Word style name (`Heading 1`, `Heading 2`) each LaTeX section level maps to
+- **caption style targets**: how `\caption{}` maps to Word's figure/table caption styles
+- **front-matter template references**: which `.docx` template supplies the title page, abstract page, and header/footer layout
+- **submission-friendly docx profile hints**: university-specific requirements (margins, fonts, line spacing) that would be enforced in a later `submission-friendly` export mode
+
+These are not yet required for `review-friendly` export, but collecting them during intake makes later submission-friendly work easier.
