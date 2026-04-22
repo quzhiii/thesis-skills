@@ -1,4 +1,4 @@
-# Thesis Skills v0.6.0
+# Thesis Skills v0.7.0
 
 <div align="center">
 
@@ -35,7 +35,22 @@
 
 ## 版本历史
 
-### v0.6.0 — 交付基础层 🆕
+### v0.7.0 — Readiness Gate 🆕
+
+> **基于现有 workflow artifact 的有边界预提交 verdict**
+
+| v0.7.0 新增 | 增加了什么 | 实际价值 |
+|:---|:---|:---|
+| `16-check-readiness` | 预提交 readiness gate | 把现有 check/fix/compile/export/review artifacts 汇总成一个明确的 go/no-go verdict |
+| Gate modes | `advisor-handoff` + `submission-prep` | 只在目标工作流确实需要时提高严格度 |
+| Runner bridge | `run-summary.json` 中的 `derived_artifacts.readiness_gate` | 在不把 runner 变成第二套 orchestration engine 的前提下暴露 readiness |
+
+**核心新增：**
+- 机器可读的 `PASS / WARN / BLOCK` readiness artifact
+- 显式 blockers、warnings、next actions 与 source references
+- 以 derived artifact 形式接入 `run_check_once.py`
+
+### v0.6.0 — 交付基础层
 
 > **审阅优先导出 + 编译诊断 + 有边界审阅闭环**
 
@@ -158,6 +173,7 @@ v0.5.0 覆盖范围：
 | **内容检查** | ✅ 稳定 | 必需章节、摘要关键词 |
 | **编译日志解析** | ✅ v0.6 | 基于现有 `.log` 文件提供更友好的编译诊断 |
 | **审阅闭环** | ✅ v0.6 | 审阅 diff、反馈归一化、TODO 拆分与修订摘要 |
+| **预提交 Gate** | ✅ v0.7 | 基于现有 workflow artifacts 的有边界 readiness verdict |
 
 ---
 
@@ -267,6 +283,23 @@ python 04-word-review-ingest/feedback_ingest.py \
 - diff/triage 与 feedback ingest 都保留显式 JSON artifact
 - 含糊或高判断成本的修改保持 review-gated，不会静默自动应用
 
+### 预提交 Gate
+
+```bash
+# 生成有边界的 readiness artifact
+python 16-check-readiness/check_readiness.py \
+  --project-root thesis \
+  --ruleset tsinghua-thesis \
+  --mode advisor-handoff
+```
+
+定位说明：
+
+- gate 是构建在现有报告与 workflow artifact 之上的汇总层
+- 它返回 `PASS`、`WARN`、`BLOCK`，并显式给出 blockers、warnings 与 next actions
+- 它不会重跑整条工具链、不会自动修复问题，也不会声称通用的 submission 合规认证
+- `run_check_once.py` 也可以在 `run-summary.json` 中把 readiness gate 暴露成 derived artifact reference
+
 ---
 
 ## 规则包系统
@@ -307,6 +340,7 @@ thesis-skills/
 ├── 04-word-review-ingest/  # 有边界的反馈归一化工作流
 ├── 10-check-*/             # 确定性检查器
 ├── 15-check-compile/       # 编译日志诊断翻译层
+├── 16-check-readiness/     # 有边界的预提交 readiness gate
 ├── 20-fix-*/               # 安全修复器
 ├── 90-rules/               # 规则包系统
 └── 99-runner/              # 入口点

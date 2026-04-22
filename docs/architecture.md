@@ -11,6 +11,7 @@ It is a deterministic workflow layer for academic writing projects that need:
 - bounded LaTeX-to-Word export support for review-oriented workflows
 - bounded review-loop workflows for revision rounds and feedback handling
 - bounded compile-log parsing for friendlier build diagnostics
+- bounded pre-submission gating from existing workflow artifacts
 - repeatable, inspectable checks
 - bounded, report-driven fixes
 - reusable rule packs for schools and journals
@@ -28,9 +29,10 @@ The current repository is easiest to understand as layered workflows:
 3. LaTeX-to-Word export
 4. Review-loop workflows
 5. Compile-log diagnostics
-6. Deterministic checking
-7. Report-driven fixing
-8. Rule-pack onboarding and reuse
+6. Pre-submission gating
+7. Deterministic checking
+8. Report-driven fixing
+9. Rule-pack onboarding and reuse
 
 These layers map to concrete folders and scripts rather than abstract concepts.
 
@@ -42,7 +44,11 @@ thesis-skills/
 ├── 00-bib-zotero/            Zotero bibliography and Word-sync workflows
 ├── 01-word-to-latex/         Structured migration from Word exports to LaTeX
 ├── 02-latex-to-word/         Bounded LaTeX-to-Word export workflow
-├── 10-check-references/      Deterministic reference checks
+├── 03-latex-review-diff/      Review package and triage workflow
+├── 04-word-review-ingest/     Bounded feedback normalization workflow
+├── 15-check-compile/          Compile-log diagnostics
+├── 16-check-readiness/        Pre-submission readiness gate
+├── 10-check-references/       Deterministic reference checks
 ├── 11-check-language/        Baseline language checks
 ├── 12-check-format/          Format checks
 ├── 13-check-content/         Content checks
@@ -173,7 +179,29 @@ Important boundary:
 - this layer parses existing compile artifacts; it is not a replacement for `latexmk`, `xelatex`, or `bibtex`
 - missing logs should be reported explicitly rather than masked
 
-### 6. Deterministic Checking
+### 6. Pre-Submission Gating
+
+Purpose:
+
+- aggregate existing workflow artifacts into a bounded readiness verdict
+- distinguish blockers, warnings, and missing evidence explicitly
+- stay downstream of checking, fixing, compile parsing, export, and review workflows
+
+Main entrypoint:
+
+- `16-check-readiness/check_readiness.py`
+
+Core support:
+
+- `core/readiness_gate.py`
+
+Important boundary:
+
+- the gate is a summarizing decision layer, not a second hidden orchestrator
+- it must reuse existing structured artifacts instead of re-implementing lower-level analysis
+- missing evidence should remain visible rather than being treated as `PASS`
+
+### 7. Deterministic Checking
 
 Purpose:
 
@@ -207,7 +235,7 @@ Important boundary:
   language issues
 - deep findings are intentionally not equivalent to final editorial judgment
 
-### 7. Report-Driven Fixing
+### 8. Report-Driven Fixing
 
 Purpose:
 
@@ -233,7 +261,7 @@ Important boundary:
 - deep patches validate spans and skip `review_required` items by default
 - the system prefers conservative edits over broad rewrites
 
-### 8. Rule-Pack Onboarding And Reuse
+### 9. Rule-Pack Onboarding And Reuse
 
 Purpose:
 

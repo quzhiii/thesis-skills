@@ -37,6 +37,7 @@ That means the project is not trying to be a general writing assistant. It is an
 | Word -> LaTeX migration | Stable | explicit migration spec with structured metadata |
 | LaTeX -> Word export | Stable (v0.6) | review-friendly export first, submission-friendly later |
 | Compile log parsing | Stable (v0.6) | parse existing `.log` files into structured findings |
+| Pre-submission gate | Stable (v0.7) | bounded `PASS/WARN/BLOCK` verdict from existing artifacts |
 | Deterministic check -> fix loop | Stable | covered by regression tests |
 | Rule pack generation | Stable | starter and draft-pack paths both exist |
 
@@ -133,6 +134,14 @@ EndNote XML/RIS/BibTeX
 - introduce stricter submission-oriented export only after the review path is proven
 - add `15-check-compile` as a bounded compile-log diagnostic translation layer
 - add review-loop workflows for review diff, feedback ingest, and revision summaries
+
+### v0.7.0
+
+- ✅ add `16-check-readiness` as a bounded pre-submission gate
+- ✅ reuse existing run, fix, check, compile, export, and review artifacts instead of re-running the whole toolchain
+- ✅ emit explicit `PASS / WARN / BLOCK` verdicts with blockers, warnings, next actions, and source references
+- ✅ keep advisor-handoff and submission-prep policy explicit and inspectable
+- ✅ avoid overclaiming institutional compliance or replacing human judgement
 
 ## Repository Design Rules
 

@@ -1,6 +1,6 @@
 [project]
 name = "thesis-skills"
-version = "0.6.0"
+version = "0.7.0"
 description = "Deterministic thesis and journal writing workflows with Python checkers, safe fixers, YAML rule packs, and one-click runners"
 readme = "README.md"
 requires-python = ">=3.10"

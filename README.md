@@ -1,4 +1,4 @@
-# Thesis Skills v0.6.0
+# Thesis Skills v0.7.0
 
 <div align="center">
 
@@ -35,7 +35,22 @@
 
 ## Version History
 
-### v0.6.0 — Delivery Foundation 🆕
+### v0.7.0 — Readiness Gate 🆕
+
+> **Bounded pre-submission verdicts from existing workflow artifacts**
+
+| New in v0.7.0 | What it adds | Why it matters |
+|:---|:---|:---|
+| `16-check-readiness` | Pre-submission readiness gate | Summarizes existing check/fix/compile/export/review artifacts into one explicit go/no-go verdict |
+| Gate modes | `advisor-handoff` + `submission-prep` | Makes readiness stricter only where the target workflow actually requires it |
+| Runner bridge | `derived_artifacts.readiness_gate` in `run-summary.json` | Exposes readiness without turning the runner into a second orchestration engine |
+
+**Key additions:**
+- machine-readable readiness artifacts with `PASS / WARN / BLOCK`
+- explicit blockers, warnings, next actions, and source references
+- bounded integration with `run_check_once.py` as a derived artifact
+
+### v0.6.0 — Delivery Foundation
 
 > **Review-friendly export + compile diagnostics + bounded review loop**
 
@@ -158,6 +173,7 @@ v0.5.0 Coverage:
 | **Content Check** | ✅ Stable | Required sections, abstract keywords |
 | **Compile Log Parser** | ✅ v0.6 | Friendlier compile diagnostics from existing `.log` files |
 | **Review Loop** | ✅ v0.6 | Review diff, feedback ingest, TODO split, and revision summaries |
+| **Pre-Submission Gate** | ✅ v0.7 | Bounded readiness verdict from existing workflow artifacts |
 
 ---
 
@@ -267,6 +283,23 @@ Positioning:
 - diff/triage and feedback ingest stay inspectable through explicit JSON artifacts
 - ambiguous or high-judgement changes remain review-gated rather than auto-applied
 
+### Pre-Submission Gate
+
+```bash
+# Emit a bounded readiness artifact
+python 16-check-readiness/check_readiness.py \
+  --project-root thesis \
+  --ruleset tsinghua-thesis \
+  --mode advisor-handoff
+```
+
+Positioning:
+
+- the gate is a summarizing layer built on existing reports and workflow artifacts
+- it returns `PASS`, `WARN`, or `BLOCK` with explicit blockers, warnings, and next actions
+- it does not re-run the whole toolchain, auto-fix issues, or claim universal submission compliance
+- `run_check_once.py` can also surface the readiness gate as a derived artifact reference in `run-summary.json`
+
 ---
 
 ## Rule Pack System
@@ -307,6 +340,7 @@ thesis-skills/
 ├── 04-word-review-ingest/  # Bounded feedback normalization workflow
 ├── 10-check-*/             # Deterministic checkers
 ├── 15-check-compile/       # Compile-log diagnostic translation
+├── 16-check-readiness/     # Bounded pre-submission readiness gate
 ├── 20-fix-*/               # Safe fixers
 ├── 90-rules/               # Rule pack system
 └── 99-runner/              # Entry points
