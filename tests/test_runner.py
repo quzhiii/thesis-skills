@@ -14,6 +14,20 @@ SAMPLE = ROOT / "examples" / "minimal-latex-project"
 
 
 class RunnerTest(unittest.TestCase):
+    def test_manifest_registers_readiness_gate_module(self) -> None:
+        manifest = json.loads((ROOT / "skills-manifest.json").read_text(encoding="utf-8"))
+        modules = {item["id"]: item for item in manifest["modules"]}
+        self.assertIn("16-check-readiness", modules)
+        self.assertEqual(
+            modules["16-check-readiness"]["entry"],
+            "16-check-readiness/THESIS_CHECK_READINESS.md",
+        )
+        self.assertEqual(modules["16-check-readiness"]["type"], "checker")
+        self.assertEqual(
+            modules["16-check-readiness"]["runner"],
+            "16-check-readiness/check_readiness.py",
+        )
+
     def test_manifest_registers_review_loop_workflows(self) -> None:
         manifest = json.loads((ROOT / "skills-manifest.json").read_text(encoding="utf-8"))
         modules = {item["id"]: item for item in manifest["modules"]}
@@ -179,6 +193,41 @@ class RunnerTest(unittest.TestCase):
             "manual_first",
         )
         self.assertEqual(data["steps"]["compile"]["status"], "missing-log")
+
+    def test_run_check_once_surfaces_readiness_gate_as_derived_artifact(self) -> None:
+        with workspace_project_copy(SAMPLE, "runner-") as project_root:
+            (project_root / "main.log").write_text(
+                "! Undefined control sequence.\nl.42 \\fooBar\n", encoding="utf-8"
+            )
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "run_check_once.py"),
+                    "--project-root",
+                    str(project_root),
+                    "--ruleset",
+                    "university-generic",
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            summary = json.loads(
+                (project_root / "reports" / "run-summary.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            readiness_report = project_root / "reports" / "readiness-report.json"
+            readiness_exists = readiness_report.exists()
+
+        self.assertIn("derived_artifacts", summary)
+        self.assertIn("readiness_gate", summary["derived_artifacts"])
+        readiness = summary["derived_artifacts"]["readiness_gate"]
+        self.assertEqual(readiness["mode"], "advisor-handoff")
+        self.assertEqual(readiness["report"], "reports/readiness-report.json")
+        self.assertIn("overall_verdict", readiness)
+        self.assertTrue(readiness_exists)
 
 
 if __name__ == "__main__":

@@ -4,27 +4,116 @@
   "steps": {
     "bib-quality": {
       "exit_code": 0,
-      "report": "reports/check_bib_quality-report.json"
+      "report": "reports/check_bib_quality-report.json",
+      "report_summary": {
+        "checker": "check_bib_quality",
+        "ruleset": "university-generic",
+        "errors": 0,
+        "warnings": 0,
+        "infos": 0,
+        "status": "PASS",
+        "files_scanned": 2,
+        "entries_scanned": 3
+      }
     },
     "references": {
       "exit_code": 1,
-      "report": "reports/check_references-report.json"
+      "report": "reports/check_references-report.json",
+      "report_summary": {
+        "checker": "check_references",
+        "ruleset": "university-generic",
+        "errors": 1,
+        "warnings": 2,
+        "infos": 0,
+        "status": "FAIL",
+        "files_scanned": 3
+      }
     },
     "language": {
       "exit_code": 1,
-      "report": "reports/check_language-report.json"
+      "report": "reports/check_language-report.json",
+      "report_summary": {
+        "checker": "check_language",
+        "ruleset": "university-generic",
+        "errors": 1,
+        "warnings": 2,
+        "infos": 0,
+        "status": "FAIL",
+        "files_scanned": 2
+      }
+    },
+    "language-deep": {
+      "exit_code": 1,
+      "report": "reports/check_language_deep-report.json",
+      "report_summary": {
+        "checker": "check_language_deep",
+        "ruleset": "university-generic",
+        "errors": 0,
+        "warnings": 1,
+        "infos": 0,
+        "status": "FAIL",
+        "files_scanned": 2,
+        "coverage_mode": "partial_latex_aware_screening",
+        "review_mode": "manual_first",
+        "review_required": 1,
+        "stratified_counts": {
+          "deep_language": 0,
+          "consistency": 1,
+          "high_confidence": 1,
+          "conservative_suggestions": 1
+        },
+        "category_counts": {
+          "acronym_first_use": 1
+        },
+        "review_digest": {
+          "priority_counts": {
+            "high": 1,
+            "medium": 0,
+            "low": 0
+          },
+          "cluster_count": 1,
+          "deduplicated_action_items": 1
+        }
+      }
     },
     "format": {
       "exit_code": 1,
-      "report": "reports/check_format-report.json"
+      "report": "reports/check_format-report.json",
+      "report_summary": {
+        "checker": "check_format",
+        "ruleset": "university-generic",
+        "errors": 3,
+        "warnings": 2,
+        "infos": 0,
+        "status": "FAIL",
+        "files_scanned": 3
+      }
     },
     "content": {
       "exit_code": 1,
-      "report": "reports/check_content-report.json"
+      "report": "reports/check_content-report.json",
+      "report_summary": {
+        "checker": "check_content",
+        "ruleset": "university-generic",
+        "errors": 1,
+        "warnings": 0,
+        "infos": 0,
+        "status": "FAIL",
+        "files_scanned": 3,
+        "acronym_candidates": []
+      }
     },
     "compile": {
-      "status": "unavailable",
-      "reason": "No compile adapter configured in stdlib starter"
+      "status": "missing-log",
+      "reason": "No compile log discovered for the main TeX file",
+      "expected_log": "main.log"
+    }
+  },
+  "derived_artifacts": {
+    "readiness_gate": {
+      "mode": "advisor-handoff",
+      "report": "reports/readiness-report.json",
+      "overall_verdict": "BLOCK"
     }
   }
 }

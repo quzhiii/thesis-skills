@@ -1,13 +1,19 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import subprocess
 import sys
 from pathlib import Path
+from typing import cast
 
 from core.project import ThesisProject
+from core.rules import RulePack
 from core.rules import find_rule_pack
+
+readiness_gate = importlib.import_module("core.readiness_gate")
+build_readiness_artifact = readiness_gate.build_readiness_artifact
 
 
 def _run(cmd: list[str], cwd: Path) -> int:
@@ -37,11 +43,15 @@ def main() -> int:
 
     repo_root = Path(__file__).resolve().parent
     pack = find_rule_pack(repo_root, args.ruleset)
+    project_rules = cast(dict[str, object], pack.rules.get("project", {}))
+    main_tex_candidates = cast(list[str], project_rules["main_tex_candidates"])
+    chapter_globs = cast(list[str], project_rules["chapter_globs"])
+    bibliography_files = cast(list[str], project_rules["bibliography_files"])
     project = ThesisProject.discover(
         args.project_root,
-        pack.rules["project"]["main_tex_candidates"],
-        pack.rules["project"]["chapter_globs"],
-        pack.rules["project"]["bibliography_files"],
+        main_tex_candidates,
+        chapter_globs,
+        bibliography_files,
     )
     steps = [
         (
@@ -84,21 +94,22 @@ def main() -> int:
         selected = [step for step in steps if step[0] == args.only]
         compile_steps = [step for step in steps if step[0] == "compile"]
         steps = selected + [step for step in compile_steps if step not in selected]
+    steps_summary: dict[str, object] = {}
     summary: dict[str, object] = {
         "ruleset": args.ruleset,
         "project_root": str(project.root),
-        "steps": {},
+        "steps": steps_summary,
     }
     overall = 0
     for name, script, report in steps:
         if name == "compile" and args.skip_compile:
-            summary["steps"]["compile"] = {
+            steps_summary["compile"] = {
                 "status": "skipped",
                 "reason": "Skipped by --skip-compile",
             }
             continue
         if name == "compile" and not project.main_tex.with_suffix(".log").exists():
-            summary["steps"]["compile"] = {
+            steps_summary["compile"] = {
                 "status": "missing-log",
                 "reason": "No compile log discovered for the main TeX file",
                 "expected_log": project.main_tex.with_suffix(".log")
@@ -132,15 +143,31 @@ def main() -> int:
                 payload = None
             if isinstance(payload, dict) and isinstance(payload.get("summary"), dict):
                 step_summary["report_summary"] = payload["summary"]
-        summary["steps"][name] = step_summary
+        steps_summary[name] = step_summary
         if code in {2, 3}:
             overall = code
             break
         if code == 1 and overall == 0:
             overall = 1
-    compile_step = summary["steps"].get("compile")
+    compile_step = steps_summary.get("compile")
     if isinstance(compile_step, dict) and "report_summary" in compile_step:
         compile_step["status"] = "parsed"
+
+    readiness_report = project.reports_dir / "readiness-report.json"
+    readiness_artifact = build_readiness_artifact(
+        mode="advisor-handoff", project_root=project.root
+    )
+    readiness_report.write_text(
+        json.dumps(readiness_artifact, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    summary["derived_artifacts"] = {
+        "readiness_gate": {
+            "mode": readiness_artifact["mode"],
+            "report": readiness_report.relative_to(project.root).as_posix(),
+            "overall_verdict": readiness_artifact["overall_verdict"],
+        }
+    }
+
     (project.reports_dir / "run-summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
     )
