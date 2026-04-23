@@ -10,8 +10,9 @@
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/github/license/quzhiii/thesis-skills)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)](https://github.com/quzhiii/thesis-skills)
+[![Landing Page](https://img.shields.io/badge/🚀%20Landing%20Page-Live-success)](https://quzhiii.github.io/thesis-skills)
 
-[中文文档](README.zh-CN.md) • **English**
+[中文文档](README.zh-CN.md) • **English** • [🚀 展示页面](https://quzhiii.github.io/thesis-skills)
 
 [Quick Start](#quick-start) • [Beginner Guide (ZH)](docs/getting-started-zh.md) • [Features](#core-features) • [Changelog](#version-history) • [Architecture](docs/architecture.md) • [Contributing](CONTRIBUTING.md)
 
