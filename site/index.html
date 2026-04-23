@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thesis Skills v0.7 — 确定性论文工作流</title>
+    <meta name="description" content="Thesis Skills 是一套确定性论文写作工作流工具，帮助研究者将论文从杂乱草稿推进到可提交状态。">
+    <style>
+        :root {
+            --color-bg: #fafbfc;
+            --color-surface: #ffffff;
+            --color-text: #1a1a2e;
+            --color-text-secondary: #5a5a6e;
+            --color-text-muted: #8a8a9a;
+            --color-accent: #2563eb;
+            --color-accent-light: #dbeafe;
+            --color-accent-dark: #1d4ed8;
+            --color-success: #059669;
+            --color-warning: #d97706;
+            --color-danger: #dc2626;
+            --color-border: #e5e7eb;
+            --color-border-light: #f3f4f6;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --max-width: 1100px;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+            --font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(250, 251, 252, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--color-border-light);
+        }
+
+        .nav-inner {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-logo-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--color-accent);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--color-accent);
+        }
+
+        .nav-cta {
+            background: var(--color-accent);
+            color: white !important;
+            padding: 8px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem !important;
+            transition: background 0.2s;
+        }
+
+        .nav-cta:hover {
+            background: var(--color-accent-dark);
+        }
+
+        /* Sections */
+        section {
+            padding: 100px 24px;
+        }
+
+        .section-inner {
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-accent);
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 20px;
+            color: var(--color-text);
+        }
+
+        .section-desc {
+            font-size: 1.15rem;
+            color: var(--color-text-secondary);
+            max-width: 640px;
+            line-height: 1.7;
+        }
+
+        /* Hero */
+        .hero {
+            padding-top: 140px;
+            padding-bottom: 80px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--color-accent-light);
+            color: var(--color-accent-dark);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 28px;
+        }
+
+        .hero-badge-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--color-accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .hero h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 24px;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--color-text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--color-accent);
+            color: white;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--color-accent-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-secondary {
+            background: var(--color-surface);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--color-text-muted);
+            background: var(--color-bg);
+        }
+
+        .hero-meta {
+            margin-top: 48px;
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+
+        .hero-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Pain Points */
+        .pain-points {
+            background: var(--color-surface);
+        }
+
+        .pain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .pain-card {
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            background: var(--color-bg);
+            border: 1px solid var(--color-border-light);
+            transition: all 0.2s;
+        }
+
+        .pain-card:hover {
+            border-color: var(--color-border);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .pain-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background: #fee2e2;
+            color: var(--color-danger);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .pain-card:nth-child(2) .pain-icon {
+            background: #fef3c7;
+            color: var(--color-warning);
+        }
+
+        .pain-card:nth-child(3) .pain-icon {
+            background: #dbeafe;
+            color: var(--color-accent);
+        }
+
+        .pain-card:nth-child(4) .pain-icon {
+            background: #d1fae5;
+            color: var(--color-success);
+        }
+
+        .pain-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--color-text);
+        }
+
+        .pain-card p {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Scenarios */
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .scenario-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            border: 1px solid var(--color-border);
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scenario-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--color-accent);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .scenario-card:hover::before {
+            opacity: 1;
+        }
+
+        .scenario-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+        }
+
+        .scenario-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-accent);
+            background: var(--color-accent-light);
+            padding: 4px 10px;
+            border-radius: 100px;
+            margin-bottom: 16px;
+        }
+
+        .scenario-card h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--color-text);
+        }
+
+        .scenario-card p {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .scenario-artifact {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            font-family: var(--font-mono);
+            background: var(--color-bg);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border-light);
+        }
+
+        /* Artifact Showcase */
+        .artifacts {
+            background: var(--color-surface);
+        }
+
+        .artifact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 28px;
+            margin-top: 48px;
+        }
+
+        .artifact-panel {
+            background: var(--color-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            overflow: hidden;
+        }
+
+        .artifact-header {
+            padding: 16px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .artifact-header-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--color-success);
+        }
+
+        .artifact-header-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-text);
+            font-family: var(--font-mono);
+        }
+
+        .artifact-body {
+            padding: 20px;
+        }
+
+        .artifact-preview {
+            background: var(--color-surface);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border-light);
+            padding: 16px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            font-family: var(--font-mono);
+        }
+
+        .artifact-preview .ok {
+            color: var(--color-success);
+        }
+
+        .artifact-preview .warn {
+            color: var(--color-warning);
+        }
+
+        .artifact-preview .err {
+            color: var(--color-danger);
+        }
+
+        .artifact-preview .muted {
+            color: var(--color-text-muted);
+        }
+
+        .artifact-desc {
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Trustworthy */
+        .trust-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        .trust-item {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .trust-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            border-radius: var(--radius-md);
+            background: var(--color-accent-light);
+            color: var(--color-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .trust-item h4 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--color-text);
+        }
+
+        .trust-item p {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Scope */
+        .scope {
+            background: var(--color-surface);
+        }
+
+        .scope-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        @media (max-width: 768px) {
+            .scope-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .scope-column h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scope-in h4 {
+            color: var(--color-success);
+        }
+
+        .scope-out h4 {
+            color: var(--color-danger);
+        }
+
+        .scope-list {
+            list-style: none;
+        }
+
+        .scope-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--color-border-light);
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .scope-list li:last-child {
+            border-bottom: none;
+        }
+
+        .scope-list .check {
+            color: var(--color-success);
+            font-weight: 700;
+            min-width: 20px;
+        }
+
+        .scope-list .cross {
+            color: var(--color-danger);
+            font-weight: 700;
+            min-width: 20px;
+        }
+
+        /* CTA */
+        .cta {
+            text-align: center;
+            padding: 100px 24px;
+        }
+
+        .cta-inner {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        .cta h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--color-text);
+        }
+
+        .cta p {
+            font-size: 1.1rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 36px;
+        }
+
+        .cta-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 48px;
+        }
+
+        .cta-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+        }
+
+        .cta-links a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+
+        .cta-links a:hover {
+            color: var(--color-accent-dark);
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 40px 24px;
+            text-align: center;
+            border-top: 1px solid var(--color-border-light);
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+
+        .footer a {
+            color: var(--color-text-muted);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: var(--color-accent);
+        }
+
+        /* Highlights */
+        .highlights {
+            background: var(--color-surface);
+        }
+
+        .highlight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        .highlight-card {
+            padding: 36px 32px;
+            border-radius: var(--radius-lg);
+            background: var(--color-bg);
+            border: 1px solid var(--color-border-light);
+            transition: all 0.2s;
+        }
+
+        .highlight-card:hover {
+            border-color: var(--color-border);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .highlight-card.featured {
+            background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+            border-color: var(--color-accent-light);
+        }
+
+        .highlight-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            background: var(--color-accent-light);
+            color: var(--color-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .highlight-card h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--color-text);
+        }
+
+        .highlight-card p {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .highlight-stat {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .highlight-stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--color-accent);
+            line-height: 1;
+        }
+
+        .highlight-stat-label {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+        }
+
+        .highlight-list {
+            list-style: none;
+            margin-top: 12px;
+        }
+
+        .highlight-list li {
+            padding: 6px 0;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .highlight-list .bullet {
+            color: var(--color-accent);
+            font-weight: 700;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.05rem;
+            }
+
+            section {
+                padding: 60px 20px;
+            }
+
+            .section-title {
+                font-size: 1.7rem;
+            }
+
+            .pain-grid,
+            .scenario-grid,
+            .artifact-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-actions,
+            .cta-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 280px;
+                justify-content: center;
+            }
+        }
+
+        /* Print */
+        @media print {
+            .nav, .hero-actions, .cta-actions, .footer {
+                display: none;
+            }
+
+            section {
+                padding: 40px 0;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo">
+                <div class="nav-logo-icon">T</div>
+                Thesis Skills
+            </a>
+            <div class="nav-links">
+                <a href="#pain-points">痛点</a>
+                <a href="#highlights">亮点</a>
+                <a href="#scenarios">场景</a>
+                <a href="#artifacts">产物</a>
+                <a href="#trustworthy">可信</a>
+                <a href="#scope">范围</a>
+                <a href="https://github.com/quzhiii/thesis-skills" class="nav-cta" target="_blank" rel="noopener">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="section-inner">
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                v0.7 预提交判断层已就绪
+            </div>
+            <h1>把论文草稿<br>推进到可提交状态</h1>
+            <p class="hero-subtitle">
+                Thesis Skills 是一套确定性工作流工具，帮助研究者管理引用迁移、格式检查、编译诊断和审阅闭环——让论文从杂乱草稿逐步走向导师审阅和最终提交。
+            </p>
+            <div class="hero-actions">
+                <a href="#scenarios" class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    了解使用场景
+                </a>
+                <a href="https://github.com/quzhiii/thesis-skills" class="btn btn-secondary" target="_blank" rel="noopener">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    查看源码
+                </a>
+            </div>
+            <div class="hero-meta">
+                <div class="hero-meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    12 个工作流模块
+                </div>
+                <div class="hero-meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    开源 MIT 协议
+                </div>
+                <div class="hero-meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    Python 3.10+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pain Points -->
+    <section id="pain-points" class="pain-points">
+        <div class="section-inner">
+            <div class="section-label">常见痛点</div>
+            <h2 class="section-title">写论文时，这些场景是否熟悉？</h2>
+            <p class="section-desc">Thesis Skills 不是 AI 写作工具，而是一套确定性工作流——解决论文写作中最实际、最耗时的环节。</p>
+
+            <div class="pain-grid">
+                <div class="pain-card">
+                    <div class="pain-icon">📄</div>
+                    <h3>导师只审 Word，但论文是 LaTeX</h3>
+                    <p>LaTeX 排版的论文无法直接给导师批注，手动转换耗时且容易丢失格式。需要一个审阅友好的导出副本。</p>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">🔥</div>
+                    <h3>LaTeX 编译报错看不懂</h3>
+                    <p>原始编译日志冗长且晦涩，关键错误 buried 在数百行输出中。难以快速定位真正需要修复的问题。</p>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">💬</div>
+                    <h3>修改意见分散，难以追踪</h3>
+                    <p>导师的批注、邮件反馈、聊天记录散落在各处。新一轮修改时，不知道哪些已处理、哪些仍待办。</p>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">🎯</div>
+                    <h3>提交前心里没底</h3>
+                    <p>盲审或正式提交前，不确定引用是否完整、格式是否合规、语言是否通顺。缺少一个清晰的 go / no-go 判断。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Highlights -->
+    <section id="highlights" class="highlights">
+        <div class="section-inner">
+            <div class="section-label">核心亮点</div>
+            <h2 class="section-title">不只是解决问题，还能显著提升效率</h2>
+            <p class="section-desc">Thesis Skills 将论文写作中最耗时、最容易出错的环节自动化，同时保持确定性和可检查性。</p>
+
+            <div class="highlight-grid">
+                <div class="highlight-card featured">
+                    <div class="highlight-icon">⚡</div>
+                    <h3>显著的工作流提速</h3>
+                    <p>基于实际用户数据的效率对比，最耗时的环节实现了数量级的提升。</p>
+                    <div class="highlight-stat">
+                        <span class="highlight-stat-number">42×</span>
+                        <span class="highlight-stat-label">日常引用更新提速</span>
+                    </div>
+                    <div class="highlight-stat">
+                        <span class="highlight-stat-number">5.25×</span>
+                        <span class="highlight-stat-label">Word→LaTeX 迁移提速</span>
+                    </div>
+                </div>
+
+                <div class="highlight-card">
+                    <div class="highlight-icon">🎓</div>
+                    <h3>多学校模板一键适配</h3>
+                    <p>内置清华大学研究生毕业论文模板，支持通过 YAML 规则包自定义其他高校格式要求。</p>
+                    <ul class="highlight-list">
+                        <li><span class="bullet">✓</span> 清华大学研究生模板（已内置）</li>
+                        <li><span class="bullet">✓</span> 通用高校论文模板</li>
+                        <li><span class="bullet">✓</span> 期刊投稿模板</li>
+                        <li><span class="bullet">✓</span> 自定义规则包支持</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-card">
+                    <div class="highlight-icon">🔍</div>
+                    <h3>LaTeX 格式自动检查与修复</h3>
+                    <p>根据学校模板和写作指南，自动检查格式问题并生成安全修复建议，避免手动逐个调整。</p>
+                    <ul class="highlight-list">
+                        <li><span class="bullet">✓</span> 图表、标题、居中格式检查</li>
+                        <li><span class="bullet">✓</span> 必需章节完整性验证</li>
+                        <li><span class="bullet">✓</span> 安全修复 + dry-run 预览</li>
+                        <li><span class="bullet">✓</span> 规则驱动，可自定义</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-card">
+                    <div class="highlight-icon">📋</div>
+                    <h3>引用管理自动化</h3>
+                    <p>从 EndNote / Zotero 自动导入文献，保持引用编号稳定，避免手动映射错误。</p>
+                    <ul class="highlight-list">
+                        <li><span class="bullet">✓</span> EndNote XML/RIS/BibTeX 导入</li>
+                        <li><span class="bullet">✓</span> Zotero 与 Word 同步</li>
+                        <li><span class="bullet">✓</span> Citation Lock 编号锁定</li>
+                        <li><span class="bullet">✓</span> 去重与规范化</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scenarios -->
+    <section id="scenarios">
+        <div class="section-inner">
+            <div class="section-label">使用场景</div>
+            <h2 class="section-title">四个核心工作流</h2>
+            <p class="section-desc">每个场景都对应论文写作中的真实环节，产出明确、可检查的 artifact。</p>
+
+            <div class="scenario-grid">
+                <div class="scenario-card">
+                    <div class="scenario-tag">场景一</div>
+                    <h3>Word 草稿 → 结构化 LaTeX 工作流</h3>
+                    <p>从 Word 文档中提取引用结构，迁移到 LaTeX 项目中。保留引用编号稳定性，生成可审计的映射报告。</p>
+                    <div class="scenario-artifact">📦 citation-map.json + refNNN 锁定</div>
+                </div>
+                <div class="scenario-card">
+                    <div class="scenario-tag">场景二</div>
+                    <h3>LaTeX 论文 → 导师审阅版 Word</h3>
+                    <p>将 LaTeX 论文导出为审阅友好的 .docx 格式。显式报告不支持的结构，不隐藏降级风险。</p>
+                    <div class="scenario-artifact">📄 thesis-review.docx + export-limitations.json</div>
+                </div>
+                <div class="scenario-card">
+                    <div class="scenario-tag">场景三</div>
+                    <h3>原始编译日志 → 可读诊断报告</h3>
+                    <p>解析现有 .log 文件，将原始 TeX 报错转换为结构化 findings，区分阻塞性错误和警告。</p>
+                    <div class="scenario-artifact">📊 compile-findings.json + run-summary.json</div>
+                </div>
+                <div class="scenario-card">
+                    <div class="scenario-tag">场景四</div>
+                    <h3>最终论文包 → 预提交裁决</h3>
+                    <p>汇总已有检查、修复、编译、导出、审阅产物，输出明确的 PASS / WARN / BLOCK 判断及下一步行动。</p>
+                    <div class="scenario-artifact">✅ readiness-gate.json (PASS | WARN | BLOCK)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Artifact Showcase -->
+    <section id="artifacts" class="artifacts">
+        <div class="section-inner">
+            <div class="section-label">产物展示</div>
+            <h2 class="section-title">每一步都有明确的产物</h2>
+            <p class="section-desc">Thesis Skills 的核心设计原则是"产物可检查"——每个工作流步骤都生成结构化报告，而非静默修改。</p>
+
+            <div class="artifact-grid">
+                <div class="artifact-panel">
+                    <div class="artifact-header">
+                        <div class="artifact-header-dot"></div>
+                        <div class="artifact-header-title">review-friendly.docx</div>
+                    </div>
+                    <div class="artifact-body">
+                        <div class="artifact-preview">
+<div><span class="muted"># 导出摘要</span></div>
+<div><span class="ok">✓</span> 正文段落: 142 段</div>
+<div><span class="ok">✓</span> 数学公式: 89 个 (保留为 OMML)</div>
+<div><span class="warn">△</span> 复杂表格: 3 个 (简化排版)</div>
+<div><span class="err">✗</span> TikZ 图形: 2 个 (需手动重绘)</div>
+<div><span class="muted">---</span></div>
+<div><span class="muted">显式报告限制，不隐藏降级</span></div>
+                        </div>
+                        <p class="artifact-desc">审阅友好的 Word 导出，附带显式限制报告。 unsupported constructs 被明确列出，而非静默降级。</p>
+                    </div>
+                </div>
+
+                <div class="artifact-panel">
+                    <div class="artifact-header">
+                        <div class="artifact-header-dot" style="background: var(--color-warning);"></div>
+                        <div class="artifact-header-title">compile-findings.json</div>
+                    </div>
+                    <div class="artifact-body">
+                        <div class="artifact-preview">
+<div><span class="muted">{</span></div>
+<div>  <span class="muted">"severity":</span> <span class="err">"error"</span><span class="muted">,</span></div>
+<div>  <span class="muted">"source":</span> <span class="muted">"thesis.tex:214"</span><span class="muted">,</span></div>
+<div>  <span class="muted">"message":</span> <span class="muted">"Undefined control sequence"</span><span class="muted">,</span></div>
+<div>  <span class="muted">"hint":</span> <span class="muted">"检查 \newcommand 定义"</span><span class="muted">,</span></div>
+<div>  <span class="muted">"raw_log_excerpt":</span> <span class="muted">"..."</span></div>
+<div><span class="muted">}</span></div>
+                        </div>
+                        <p class="artifact-desc">将原始 LaTeX 编译日志转换为结构化 findings，保留原始日志片段以便溯源，同时提供可读的错误解释。</p>
+                    </div>
+                </div>
+
+                <div class="artifact-panel">
+                    <div class="artifact-header">
+                        <div class="artifact-header-dot" style="background: var(--color-accent);"></div>
+                        <div class="artifact-header-title">review-todo.json</div>
+                    </div>
+                    <div class="artifact-body">
+                        <div class="artifact-preview">
+<div><span class="muted">[</span></div>
+<div>  <span class="muted">{</span></div>
+<div>    <span class="muted">"id": "REV-003",</span></div>
+<div>    <span class="muted">"status":</span> <span class="warn">"pending"</span><span class="muted">,</span></div>
+<div>    <span class="muted">"source": "导师批注 P.12",</span></div>
+<div>    <span class="muted">"category": "论述深度",</span></div>
+<div>    <span class="muted">"action": "补充实验对比"</span></div>
+<div>  <span class="muted">}</span></div>
+<div><span class="muted">]</span></div>
+                        </div>
+                        <p class="artifact-desc">审阅闭环产物：将分散的反馈归一化为结构化 TODO，支持追踪 revision round 的处理状态。</p>
+                    </div>
+                </div>
+
+                <div class="artifact-panel">
+                    <div class="artifact-header">
+                        <div class="artifact-header-dot" style="background: var(--color-success);"></div>
+                        <div class="artifact-header-title">readiness-gate.json</div>
+                    </div>
+                    <div class="artifact-body">
+                        <div class="artifact-preview">
+<div><span class="muted">{</span></div>
+<div>  <span class="muted">"verdict":</span> <span class="warn">"WARN"</span><span class="muted">,</span></div>
+<div>  <span class="muted">"mode": "advisor-handoff",</span></div>
+<div>  <span class="muted">"blockers": [],</span></div>
+<div>  <span class="muted">"warnings": [</span></div>
+<div>    <span class="muted">"3 个深度语言问题需审阅"</span></div>
+<div>  <span class="muted">],</span></div>
+<div>  <span class="muted">"next_action": "优先处理 warnings"</span></div>
+<div><span class="muted">}</span></div>
+                        </div>
+                        <p class="artifact-desc">预提交 Gate：汇总所有已有产物，给出明确的 PASS / WARN / BLOCK 裁决，以及具体的下一步行动。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trustworthy -->
+    <section id="trustworthy">
+        <div class="section-inner">
+            <div class="section-label">为什么可信</div>
+            <h2 class="section-title">有边界、可检查、不夸大</h2>
+            <p class="section-desc">Thesis Skills 不是 AI 论文写作助手，也不是一键完成工具。它的价值在于确定性、可重复性和诚实性。</p>
+
+            <div class="trust-grid">
+                <div class="trust-item">
+                    <div class="trust-icon">1</div>
+                    <div>
+                        <h4>有边界的工作流</h4>
+                        <p>每个功能都有明确的输入、输出和限制。不支持的构造会被显式报告，不会静默降级或假装处理。</p>
+                    </div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">2</div>
+                    <div>
+                        <h4>显式报告</h4>
+                        <p>检查器不直接修改源文件，而是生成结构化 JSON 报告。修复器读取报告后生成补丁，支持 dry-run 预览。</p>
+                    </div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">3</div>
+                    <div>
+                        <h4>可检查的产物</h4>
+                        <p>每个工作流步骤的产物都是人类可读的 artifact。你可以打开 JSON 文件查看具体发现，而不是依赖隐藏的内部状态。</p>
+                    </div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">4</div>
+                    <div>
+                        <h4>没有"魔法"</h4>
+                        <p>不声称能"自动理解导师意见"或"智能修复所有问题"。含糊或高判断成本的修改保持 review-gated，由人做最终决定。</p>
+                    </div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">5</div>
+                    <div>
+                        <h4>局限性被暴露而非隐藏</h4>
+                        <p>导出限制、编译解析边界、语言检查的覆盖范围——所有这些都被明确文档化，并在产物中显式报告。</p>
+                    </div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">6</div>
+                    <div>
+                        <h4>开源可审计</h4>
+                        <p>MIT 协议开源，所有规则、检查逻辑和修复策略都可在代码和 YAML 规则包中查看和自定义。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scope -->
+    <section id="scope" class="scope">
+        <div class="section-inner">
+            <div class="section-label">当前范围</div>
+            <h2 class="section-title">v0.7 已有什么，还没有什么</h2>
+            <p class="section-desc">诚实展示当前能力边界，帮助你判断 Thesis Skills 是否适合你的阶段。</p>
+
+            <div class="scope-grid">
+                <div class="scope-column scope-in">
+                    <h4>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        v0.7 已包含
+                    </h4>
+                    <ul class="scope-list">
+                        <li><span class="check">✓</span> EndNote / Zotero 文献导入与同步</li>
+                        <li><span class="check">✓</span> Word → LaTeX 引用迁移</li>
+                        <li><span class="check">✓</span> LaTeX → Word 审阅友好导出</li>
+                        <li><span class="check">✓</span> 引用完整性检查（缺失、孤立、重复）</li>
+                        <li><span class="check">✓</span> 语言检查（间距、标点、术语一致性）</li>
+                        <li><span class="check">✓</span> 深度语言筛查（句子级、跨文件）</li>
+                        <li><span class="check">✓</span> 格式与内容结构检查</li>
+                        <li><span class="check">✓</span> 编译日志结构化解析</li>
+                        <li><span class="check">✓</span> 审阅闭环（diff / feedback ingest / TODO）</li>
+                        <li><span class="check">✓</span> 预提交 readiness gate (PASS/WARN/BLOCK)</li>
+                        <li><span class="check">✓</span> 安全修复与选择性深度补丁</li>
+                        <li><span class="check">✓</span> 可自定义 YAML 规则包</li>
+                    </ul>
+                </div>
+                <div class="scope-column scope-out">
+                    <h4>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        尚未支持（v0.8 及以后）
+                    </h4>
+                    <ul class="scope-list">
+                        <li><span class="cross">✗</span> 图形界面 (GUI) 或 Web 编辑器</li>
+                        <li><span class="cross">✗</span> 提交级 Word 导出（当前为审阅级）</li>
+                        <li><span class="cross">✗</span> 自动理解导师自然语言批注</li>
+                        <li><span class="cross">✗</span> AI 生成或重写论文内容</li>
+                        <li><span class="cross">✗</span> 多用户实时协作</li>
+                        <li><span class="cross">✗</span> 覆盖所有高校的特殊格式</li>
+                        <li><span class="cross">✗</span> 一键完成论文提交</li>
+                        <li><span class="cross">✗</span> 替代 LaTeX 工具链的完整编译编排</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="cta-inner">
+            <h2>开始试用 Thesis Skills</h2>
+            <p>适合已有 LaTeX 基础、希望建立确定性检查工作流的研究者。如果你还没有 LaTeX 基础，建议先阅读零基础入门教程。</p>
+            <div class="cta-actions">
+                <a href="https://github.com/quzhiii/thesis-skills" class="btn btn-primary" target="_blank" rel="noopener">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    查看 GitHub 仓库
+                </a>
+                <a href="https://github.com/quzhiii/thesis-skills/blob/main/docs/getting-started-zh.md" class="btn btn-secondary" target="_blank" rel="noopener">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    零基础入门教程
+                </a>
+            </div>
+            <div class="cta-links">
+                <a href="https://github.com/quzhiii/thesis-skills#quick-start" target="_blank" rel="noopener">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    快速开始
+                </a>
+                <a href="https://github.com/quzhiii/thesis-skills/blob/main/docs/architecture.md" target="_blank" rel="noopener">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    架构文档
+                </a>
+                <a href="https://github.com/quzhiii/thesis-skills/blob/main/README.zh-CN.md" target="_blank" rel="noopener">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    中文 README
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div>
+            Thesis Skills v0.7 — MIT License — 
+            <a href="https://github.com/quzhiii/thesis-skills" target="_blank" rel="noopener">quzhiii/thesis-skills</a>
+        </div>
+    </footer>
+</body>
+</html>
