@@ -8,6 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from core.chapter_summary import build_chapter_summaries
 from core.reports import write_review_artifact
 from core.review_clusters import build_review_clusters
 from core.review_queue import build_review_queue
@@ -63,6 +64,7 @@ def main() -> int:
         "high_priority_items": sum(1 for item in review_queue if item.get("priority") == "high"),
         "cluster_count": len(review_clusters),
     }
+    chapter_summaries = build_chapter_summaries(review_queue)
     payload = {
         "project_root": str(project_root),
         "revision_id": revision_id,
@@ -71,6 +73,7 @@ def main() -> int:
         "review_queue": review_queue,
         "review_clusters": review_clusters,
         "review_digest": review_digest,
+        "chapter_summaries": chapter_summaries,
     }
     write_review_artifact(
         artifact_path,
