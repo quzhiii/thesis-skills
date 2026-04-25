@@ -59,10 +59,34 @@ def main() -> int:
     changed_scope = [path.relative_to(project_root).as_posix() for path in source_files if path.exists()]
     review_queue = build_review_queue(findings)
     review_clusters = build_review_clusters(review_queue)
+    priority_counts = {"high": 0, "medium": 0, "low": 0}
+    category_counts: dict[str, int] = {}
+    review_required_items = 0
+    candidate_patch_items = 0
+    for item in review_queue:
+        priority = str(item.get("priority", "medium"))
+        if priority in priority_counts:
+            priority_counts[priority] += 1
+        else:
+            priority_counts["medium"] += 1
+        category = str(item.get("category", "uncategorized"))
+        category_counts[category] = category_counts.get(category, 0) + 1
+        if bool(item.get("review_required", False)):
+            review_required_items += 1
+        else:
+            candidate_patch_items += 1
     review_digest = {
         "total_items": len(review_queue),
         "high_priority_items": sum(1 for item in review_queue if item.get("priority") == "high"),
         "cluster_count": len(review_clusters),
+        "priority_counts": priority_counts,
+        "category_counts": category_counts,
+        "affected_chapters_count": len({str(item.get("file", "")) for item in review_queue if item.get("file")}),
+        "todo_summary": {
+            "review_required_items": review_required_items,
+            "candidate_patch_items": candidate_patch_items,
+            "suggested_todo_items": review_required_items,
+        },
     }
     chapter_summaries = build_chapter_summaries(review_queue)
     payload = {
