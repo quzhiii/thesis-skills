@@ -139,6 +139,22 @@ v0.5.0 覆盖范围：
 
 ---
 
+## v0.7.0 之后的下一阶段
+
+仓库现在已经不再处于“一个个补齐缺失工作流模块”的阶段。
+当前更重要的是把已经公开可见的 delivery / review / readiness 工作流继续收紧、讲清楚、做稳定。
+
+- **v0.7.1 — 审阅摘要硬化**
+  - chapter-level review summaries 已经进入 review artifact 方向
+  - 下一步继续聚焦 richer review digest、TODO 导向 artifact 和更清晰的 revision summary
+- **v0.7.2 — 反馈归一化与 readiness 校准**
+  - readiness gate 现在已经能读取更丰富、但仍有边界的 review-debt evidence
+  - 下一步继续聚焦 `PASS / WARN / BLOCK` 解释质量，以及 ingest 到 gate 的更紧密衔接
+
+完整路线请看 [`docs/roadmap.md`](docs/roadmap.md)。
+
+---
+
 ## 核心功能
 
 ### 五层架构
@@ -282,6 +298,7 @@ python 04-word-review-ingest/feedback_ingest.py \
 
 - 审阅闭环是面向 revision round 的有边界 workflow，不是协作文档平台
 - diff/triage 与 feedback ingest 都保留显式 JSON artifact
+- chapter-level review summaries 已经让 review package 更容易按章节快速浏览
 - 含糊或高判断成本的修改保持 review-gated，不会静默自动应用
 
 ### 预提交 Gate
@@ -298,6 +315,7 @@ python 16-check-readiness/check_readiness.py \
 
 - 它更像“最后一层判断”，不是新的底层工具链
 - 它会复用已有报告和 workflow artifact，把结果汇总成一个更容易理解的 readiness verdict
+- 它现在也会读取更丰富但仍有边界的 review-debt evidence，而不只依赖单一路径的 review summary
 - 输出不是模糊评分，而是明确的 `PASS`、`WARN`、`BLOCK`，并告诉你哪里卡住了、哪里只是有风险、下一步该先做什么
 - 它不会替你重跑整条流程、不会自动修复问题，也不会声称自己能覆盖所有学校或机构的提交规则
 - 如果你走的是 `run_check_once.py`，也可以直接在 `run-summary.json` 里看到 readiness gate 的 derived artifact 引用

@@ -139,6 +139,22 @@ v0.5.0 Coverage:
 
 ---
 
+## After v0.7.0
+
+The repository has moved past the stage of adding missing workflow families one by one.
+The current hardening track is now:
+
+- **v0.7.1 — Review Summary Hardening**
+  - chapter-level review summaries are now part of the review artifact direction
+  - the next narrow improvements focus on richer review digests, TODO-oriented artifacts, and clearer revision summaries
+- **v0.7.2 — Feedback Ingest + Readiness Calibration**
+  - the readiness gate now reads richer bounded review-debt evidence from ingest artifacts
+  - the next narrow improvements focus on clearer `PASS / WARN / BLOCK` explanation quality and tighter ingest-to-gate linkage
+
+See [`docs/roadmap.md`](docs/roadmap.md) for the current post-`v0.7.0` release train and acceptance gates.
+
+---
+
 ## Core Features
 
 ### Five-Layer Architecture
@@ -282,6 +298,7 @@ Positioning:
 
 - review loop is a bounded workflow for revision rounds, not a collaboration platform
 - diff/triage and feedback ingest stay inspectable through explicit JSON artifacts
+- chapter-level review summaries now make review-package output easier to scan before widening further
 - ambiguous or high-judgement changes remain review-gated rather than auto-applied
 
 ### Pre-Submission Gate
@@ -298,6 +315,7 @@ Positioning:
 
 - the gate is a summarizing layer built on existing reports and workflow artifacts
 - it returns `PASS`, `WARN`, or `BLOCK` with explicit blockers, warnings, and next actions
+- it now consumes richer bounded review-debt evidence instead of relying only on a review-diff summary path
 - it does not re-run the whole toolchain, auto-fix issues, or claim universal submission compliance
 - `run_check_once.py` can also surface the readiness gate as a derived artifact reference in `run-summary.json`
 
