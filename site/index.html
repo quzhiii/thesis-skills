@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thesis Skills v0.7 — 确定性论文工作流</title>
-    <meta name="description" content="Thesis Skills 是一套确定性论文写作工作流工具，帮助研究者将论文从杂乱草稿推进到可提交状态。">
+    <title>Thesis Skills post-v0.7 — 确定性论文工作流</title>
+    <meta name="description" content="Thesis Skills 是一套确定性论文写作工作流工具，帮助研究者将论文从杂乱草稿推进到导师审阅、返修追踪和最终提交。">
     <style>
         :root {
             --color-bg: #fafbfc;
@@ -845,11 +845,11 @@
         <div class="section-inner">
             <div class="hero-badge">
                 <span class="hero-badge-dot"></span>
-                v0.7 预提交判断层已就绪
+                post-v0.7：审阅摘要与 readiness 正在持续硬化
             </div>
             <h1>把论文草稿<br>推进到可提交状态</h1>
             <p class="hero-subtitle">
-                Thesis Skills 是一套确定性工作流工具，帮助研究者管理引用迁移、格式检查、编译诊断和审阅闭环——让论文从杂乱草稿逐步走向导师审阅和最终提交。
+                Thesis Skills 是一套确定性工作流工具，帮助研究者管理引用迁移、格式检查、编译诊断和审阅闭环——让论文从杂乱草稿逐步走向导师审阅、返修追踪和最终提交。
             </p>
             <div class="hero-actions">
                 <a href="#scenarios" class="btn btn-primary">
@@ -1000,7 +1000,7 @@
                 <div class="scenario-card">
                     <div class="scenario-tag">场景四</div>
                     <h3>最终论文包 → 预提交裁决</h3>
-                    <p>汇总已有检查、修复、编译、导出、审阅产物，输出明确的 PASS / WARN / BLOCK 判断及下一步行动。</p>
+                    <p>汇总已有检查、修复、编译、导出、审阅产物，输出明确的 PASS / WARN / BLOCK 判断，并把未清审阅债务讲清楚。</p>
                     <div class="scenario-artifact">✅ readiness-gate.json (PASS | WARN | BLOCK)</div>
                 </div>
             </div>
@@ -1070,7 +1070,7 @@
 <div>  <span class="muted">}</span></div>
 <div><span class="muted">]</span></div>
                         </div>
-                        <p class="artifact-desc">审阅闭环产物：将分散的反馈归一化为结构化 TODO，支持追踪 revision round 的处理状态。</p>
+                        <p class="artifact-desc">审阅闭环产物：将分散的反馈归一化为结构化 TODO，支持追踪 revision round 的处理状态，并为 chapter-level 摘要和后续 gate 解释提供边界清晰的输入。</p>
                     </div>
                 </div>
 
@@ -1091,7 +1091,7 @@
 <div>  <span class="muted">"next_action": "优先处理 warnings"</span></div>
 <div><span class="muted">}</span></div>
                         </div>
-                        <p class="artifact-desc">预提交 Gate：汇总所有已有产物，给出明确的 PASS / WARN / BLOCK 裁决，以及具体的下一步行动。</p>
+                        <p class="artifact-desc">预提交 Gate：汇总所有已有产物，给出明确的 PASS / WARN / BLOCK 裁决，以及具体的下一步行动，并把 review debt 的来源解释得更清楚。</p>
                     </div>
                 </div>
             </div>
@@ -1175,7 +1175,9 @@
                         <li><span class="check">✓</span> 格式与内容结构检查</li>
                         <li><span class="check">✓</span> 编译日志结构化解析</li>
                         <li><span class="check">✓</span> 审阅闭环（diff / feedback ingest / TODO）</li>
+                        <li><span class="check">✓</span> chapter-level review summaries</li>
                         <li><span class="check">✓</span> 预提交 readiness gate (PASS/WARN/BLOCK)</li>
+                        <li><span class="check">✓</span> 基于 ingest evidence 的更清晰 review-debt gate 解释</li>
                         <li><span class="check">✓</span> 安全修复与选择性深度补丁</li>
                         <li><span class="check">✓</span> 可自定义 YAML 规则包</li>
                     </ul>
