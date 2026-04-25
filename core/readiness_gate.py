@@ -2,10 +2,23 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 
 VALID_MODES = {"advisor-handoff", "submission-prep"}
+
+
+class ReviewDigestMetrics(TypedDict):
+    total_items: int
+    high_priority_items: int
+
+
+class IngestDebtMetrics(TypedDict):
+    todo_count: int
+    blocked_count: int
+    candidate_patch_count: int
+    ambiguous_count: int
+    source_refs: list[str]
 
 
 def resolve_gate_mode(mode: str) -> str:
@@ -57,7 +70,9 @@ def collect_readiness_sources(project_root: str | Path) -> dict[str, dict[str, o
     run_summary = _load_json(run_summary_path)
     fix_summary = _load_json(fix_summary_path)
     export_report = _load_json(export_report_path)
-    review_artifact = _load_json(review_artifact_path) or _load_json(review_ingest_path)
+    review_diff = _load_json(review_artifact_path)
+    review_ingest = _load_json(review_ingest_path)
+    review_artifact = review_diff or review_ingest
 
     report_paths: set[Path] = set()
     if isinstance(run_summary, dict):
@@ -127,6 +142,22 @@ def collect_readiness_sources(project_root: str | Path) -> dict[str, dict[str, o
             export_report_path.relative_to(root).as_posix(),
             reason="latex-to-word export report not found",
         ),
+        "review_diff": _present_source(
+            review_artifact_path.relative_to(root).as_posix(), review_diff
+        )
+        if review_diff
+        else _missing_source(
+            review_artifact_path.relative_to(root).as_posix(),
+            reason="review-diff artifact not found",
+        ),
+        "review_ingest": _present_source(
+            review_ingest_path.relative_to(root).as_posix(), review_ingest
+        )
+        if review_ingest
+        else _missing_source(
+            review_ingest_path.relative_to(root).as_posix(),
+            reason="review-ingest artifact not found",
+        ),
         "review_loop": _present_source(
             (review_artifact_path if review_artifact_path.exists() else review_ingest_path)
             .relative_to(root)
@@ -181,6 +212,83 @@ def _build_dimension(verdict: str, evidence_status: str, reason: str, **extra: o
     }
     payload.update(extra)
     return payload
+
+
+def _payload_dict(source: dict[str, object]) -> dict[str, object] | None:
+    payload = source.get("payload")
+    return payload if isinstance(payload, dict) else None
+
+
+def _review_digest_metrics(review_payload: dict[str, object] | None) -> ReviewDigestMetrics | None:
+    if not isinstance(review_payload, dict):
+        return None
+    payload_section = review_payload.get("payload")
+    if not isinstance(payload_section, dict):
+        return None
+    review_digest = payload_section.get("review_digest")
+    if not isinstance(review_digest, dict):
+        return None
+
+    total_items = review_digest.get("total_items", 0)
+    high_priority_items = review_digest.get("high_priority_items", 0)
+    return {
+        "total_items": total_items if isinstance(total_items, int) else 0,
+        "high_priority_items": high_priority_items if isinstance(high_priority_items, int) else 0,
+    }
+
+
+def _ingest_debt_metrics(review_payload: dict[str, object] | None) -> IngestDebtMetrics | None:
+    if not isinstance(review_payload, dict):
+        return None
+    payload_section = review_payload.get("payload")
+    if not isinstance(payload_section, dict):
+        return None
+    selective_action = payload_section.get("selective_action")
+    if not isinstance(selective_action, dict):
+        return None
+
+    todos_raw = selective_action.get("todos")
+    blocked_raw = selective_action.get("blocked")
+    candidate_patches_raw = selective_action.get("candidate_patches")
+    todos = [item for item in todos_raw if isinstance(item, dict)] if isinstance(todos_raw, list) else []
+    blocked = [item for item in blocked_raw if isinstance(item, dict)] if isinstance(blocked_raw, list) else []
+    candidate_patches = (
+        [item for item in candidate_patches_raw if isinstance(item, dict)]
+        if isinstance(candidate_patches_raw, list)
+        else []
+    )
+
+    action_summary = selective_action.get("summary")
+    todo_count = action_summary.get("todo_count") if isinstance(action_summary, dict) else None
+    blocked_count = action_summary.get("blocked_count") if isinstance(action_summary, dict) else None
+    candidate_patch_count = (
+        action_summary.get("candidate_patch_count") if isinstance(action_summary, dict) else None
+    )
+
+    normalized_summary = review_payload.get("summary")
+    ambiguous_count = normalized_summary.get("ambiguous_count") if isinstance(normalized_summary, dict) else None
+
+    source_refs: list[str] = []
+    for item in [*blocked, *todos]:
+        source_ref = item.get("source_ref")
+        if isinstance(source_ref, str) and source_ref and source_ref not in source_refs:
+            source_refs.append(source_ref)
+        if len(source_refs) >= 3:
+            break
+
+    resolved_todo_count = todo_count if isinstance(todo_count, int) else len(todos)
+    resolved_blocked_count = blocked_count if isinstance(blocked_count, int) else len(blocked)
+    resolved_candidate_patch_count = (
+        candidate_patch_count if isinstance(candidate_patch_count, int) else len(candidate_patches)
+    )
+
+    return {
+        "todo_count": resolved_todo_count,
+        "blocked_count": resolved_blocked_count,
+        "candidate_patch_count": resolved_candidate_patch_count,
+        "ambiguous_count": ambiguous_count if isinstance(ambiguous_count, int) else 0,
+        "source_refs": source_refs,
+    }
 
 
 def _evaluate_dimensions(
@@ -268,43 +376,99 @@ def _evaluate_dimensions(
         dimensions["export"] = _build_dimension("WARN", "missing", "export evidence missing")
 
     review_source = sources.get("review_loop", {})
-    if review_source.get("status") == "present":
-        review_payload = review_source.get("payload")
-        if isinstance(review_payload, dict):
-            payload_section = review_payload.get("payload")
-            review_digest = payload_section.get("review_digest") if isinstance(payload_section, dict) else None
-            total_items = review_digest.get("total_items", 0) if isinstance(review_digest, dict) else 0
-            high_priority_items = review_digest.get("high_priority_items", 0) if isinstance(review_digest, dict) else 0
-            if isinstance(total_items, int) and total_items > 0:
-                dimensions["review_debt"] = _build_dimension(
-                    "WARN",
-                    "present",
-                    "review-loop artifact contains unresolved review debt",
-                    total_items=total_items,
-                    high_priority_items=high_priority_items if isinstance(high_priority_items, int) else 0,
-                )
-            else:
-                dimensions["review_debt"] = _build_dimension(
-                    "PASS",
-                    "present",
-                    "review-loop artifact contains no unresolved review debt",
-                    total_items=0,
-                    high_priority_items=0,
-                )
+    review_source_payload = _payload_dict(review_source) if isinstance(review_source, dict) else None
+    review_diff_source = sources.get("review_diff", {})
+    review_diff_payload = _payload_dict(review_diff_source) if isinstance(review_diff_source, dict) else None
+    review_ingest_source = sources.get("review_ingest", {})
+    review_ingest_payload = _payload_dict(review_ingest_source) if isinstance(review_ingest_source, dict) else None
+
+    review_digest_metrics = _review_digest_metrics(review_diff_payload)
+    if review_digest_metrics is None:
+        review_digest_metrics = _review_digest_metrics(review_source_payload)
+
+    ingest_debt_metrics = _ingest_debt_metrics(review_ingest_payload)
+    if ingest_debt_metrics is None:
+        ingest_debt_metrics = _ingest_debt_metrics(review_source_payload)
+
+    if review_digest_metrics is not None or ingest_debt_metrics is not None:
+        diff_total_items = review_digest_metrics["total_items"] if review_digest_metrics else 0
+        blocked_count = ingest_debt_metrics["blocked_count"] if ingest_debt_metrics else 0
+        todo_count = ingest_debt_metrics["todo_count"] if ingest_debt_metrics else 0
+        candidate_patch_count = (
+            ingest_debt_metrics["candidate_patch_count"] if ingest_debt_metrics else 0
+        )
+        ambiguous_count = ingest_debt_metrics["ambiguous_count"] if ingest_debt_metrics else 0
+        source_refs = ingest_debt_metrics["source_refs"] if ingest_debt_metrics else []
+        unresolved_ingest_items = blocked_count + todo_count
+        total_items = diff_total_items if diff_total_items > 0 else unresolved_ingest_items
+        high_priority_items = (
+            review_digest_metrics["high_priority_items"] if review_digest_metrics else 0
+        )
+
+        reason_parts: list[str] = []
+        if diff_total_items > 0:
+            reason_parts.append("review-diff digest reports unresolved review debt")
+        if blocked_count > 0 or todo_count > 0:
+            debt_parts: list[str] = []
+            if blocked_count > 0:
+                debt_parts.append(f"{blocked_count} blocked")
+            if todo_count > 0:
+                debt_parts.append(f"{todo_count} todo")
+            reason_parts.append(f"ingest detail: {', '.join(debt_parts)}")
+
+        if total_items > 0:
+            verdict = "WARN"
+            reason = "; ".join(reason_parts) or "review-loop artifact contains unresolved review debt"
         else:
-            dimensions["review_debt"] = _build_dimension("WARN", "missing", "review-loop payload unreadable")
+            verdict = "PASS"
+            reason = "review-loop artifacts contain no unresolved review debt"
+            if candidate_patch_count > 0:
+                reason += f"; {candidate_patch_count} candidate patches remain explanation-only"
+
+        dimensions["review_debt"] = _build_dimension(
+            verdict,
+            "present",
+            reason,
+            total_items=total_items,
+            high_priority_items=high_priority_items,
+            blocked_count=blocked_count,
+            todo_count=todo_count,
+            candidate_patch_count=candidate_patch_count,
+            ambiguous_count=ambiguous_count,
+            source_refs=source_refs,
+        )
+    elif review_source.get("status") == "present":
+        dimensions["review_debt"] = _build_dimension(
+            "WARN", "missing", "review-loop payload unreadable"
+        )
     else:
-        dimensions["review_debt"] = _build_dimension("WARN", "missing", "review-loop evidence missing")
+        dimensions["review_debt"] = _build_dimension(
+            "WARN", "missing", "review-loop evidence missing"
+        )
 
     if mode == "submission-prep" and dimensions["review_debt"]["evidence_status"] == "present":
         total_items = dimensions["review_debt"].get("total_items", 0)
-        if isinstance(total_items, int) and total_items > 0:
+        blocked_count = dimensions["review_debt"].get("blocked_count", 0)
+        todo_count = dimensions["review_debt"].get("todo_count", 0)
+        if (
+            isinstance(total_items, int)
+            and total_items > 0
+            or isinstance(blocked_count, int)
+            and blocked_count > 0
+            or isinstance(todo_count, int)
+            and todo_count > 0
+        ):
             dimensions["review_debt"] = _build_dimension(
                 "BLOCK",
                 "present",
                 "submission-prep requires unresolved review debt to be cleared",
-                total_items=total_items,
+                total_items=total_items if isinstance(total_items, int) else 0,
                 high_priority_items=dimensions["review_debt"].get("high_priority_items", 0),
+                blocked_count=blocked_count if isinstance(blocked_count, int) else 0,
+                todo_count=todo_count if isinstance(todo_count, int) else 0,
+                candidate_patch_count=dimensions["review_debt"].get("candidate_patch_count", 0),
+                ambiguous_count=dimensions["review_debt"].get("ambiguous_count", 0),
+                source_refs=dimensions["review_debt"].get("source_refs", []),
             )
 
     return dimensions

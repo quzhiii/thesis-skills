@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -36,3 +37,80 @@ def materialize_project(root: Path, files: dict[str, str]) -> Path:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
     return root
+
+
+def readiness_pass_fixture_files() -> dict[str, str]:
+    return {
+        "reports/run-summary.json": json.dumps(
+            {
+                "ruleset": "university-generic",
+                "steps": {
+                    "references": {
+                        "exit_code": 0,
+                        "report": "reports/check_references-report.json",
+                    },
+                    "language": {
+                        "exit_code": 0,
+                        "report": "reports/check_language-report.json",
+                    },
+                    "format": {
+                        "exit_code": 0,
+                        "report": "reports/check_format-report.json",
+                    },
+                    "content": {
+                        "exit_code": 0,
+                        "report": "reports/check_content-report.json",
+                    },
+                    "compile": {
+                        "status": "parsed",
+                        "report": "reports/check_compile-report.json",
+                    },
+                },
+            },
+            ensure_ascii=False,
+        ),
+        "reports/check_references-report.json": json.dumps(
+            {
+                "summary": {"checker": "check_references", "errors": 0, "warnings": 0, "status": "PASS"},
+                "findings": [],
+            },
+            ensure_ascii=False,
+        ),
+        "reports/check_language-report.json": json.dumps(
+            {
+                "summary": {"checker": "check_language", "errors": 0, "warnings": 0, "status": "PASS"},
+                "findings": [],
+            },
+            ensure_ascii=False,
+        ),
+        "reports/check_format-report.json": json.dumps(
+            {
+                "summary": {"checker": "check_format", "errors": 0, "warnings": 0, "status": "PASS"},
+                "findings": [],
+            },
+            ensure_ascii=False,
+        ),
+        "reports/check_content-report.json": json.dumps(
+            {
+                "summary": {"checker": "check_content", "errors": 0, "warnings": 0, "status": "PASS"},
+                "findings": [],
+            },
+            ensure_ascii=False,
+        ),
+        "reports/check_compile-report.json": json.dumps(
+            {
+                "summary": {"checker": "check_compile", "errors": 0, "warnings": 0, "status": "PASS"},
+                "findings": [],
+            },
+            ensure_ascii=False,
+        ),
+        "reports/latex_to_word-report.json": json.dumps(
+            {
+                "profile": "review-friendly",
+                "warnings": [],
+                "unsupported_constructs": [],
+                "applied": False,
+            },
+            ensure_ascii=False,
+        ),
+    }

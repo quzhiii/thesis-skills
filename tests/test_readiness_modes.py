@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from tests.helpers import materialize_project, workspace_tempdir
+from tests.helpers import materialize_project, readiness_pass_fixture_files, workspace_tempdir
 
 
 readiness_gate = importlib.import_module("core.readiness_gate")
@@ -195,6 +195,60 @@ class ReadinessModesTest(unittest.TestCase):
 
         self.assertEqual(advisor["dimensions"]["review_debt"]["verdict"], "WARN")
         self.assertEqual(submission["dimensions"]["review_debt"]["verdict"], "BLOCK")
+
+    def test_mode_policy_differs_for_ingest_only_review_debt(self) -> None:
+        with workspace_tempdir("readiness-mode-") as base:
+            files = readiness_pass_fixture_files()
+            files["reports/review-ingest-artifact.json"] = json.dumps(
+                {
+                    "artifact_type": "feedback_ingest",
+                    "summary": {"normalized_count": 3, "ambiguous_count": 1},
+                    "payload": {
+                        "normalized_items": [
+                            {"source_ref": "blocked-1"},
+                            {"source_ref": "todo-1"},
+                            {"source_ref": "candidate-1"},
+                        ],
+                        "selective_action": {
+                            "todos": [
+                                {"source_ref": "todo-1", "category": "argument", "review_required": True}
+                            ],
+                            "blocked": [
+                                {
+                                    "source_ref": "blocked-1",
+                                    "category": "review",
+                                    "review_required": True,
+                                    "reason": "ambiguous",
+                                }
+                            ],
+                            "candidate_patches": [
+                                {"source_ref": "candidate-1", "category": "language"}
+                            ],
+                            "summary": {
+                                "todo_count": 1,
+                                "blocked_count": 1,
+                                "candidate_patch_count": 1,
+                            },
+                        },
+                    },
+                },
+                ensure_ascii=False,
+            )
+            project = materialize_project(base / "project", files)
+
+            advisor = build_readiness_artifact(
+                mode="advisor-handoff", project_root=Path(project)
+            )
+            submission = build_readiness_artifact(
+                mode="submission-prep", project_root=Path(project)
+            )
+
+        self.assertEqual(advisor["dimensions"]["review_debt"]["verdict"], "WARN")
+        self.assertEqual(submission["dimensions"]["review_debt"]["verdict"], "BLOCK")
+        self.assertEqual(advisor["dimensions"]["review_debt"]["todo_count"], 1)
+        self.assertEqual(advisor["dimensions"]["review_debt"]["blocked_count"], 1)
+        self.assertEqual(advisor["overall_verdict"], "WARN")
+        self.assertEqual(submission["overall_verdict"], "BLOCK")
 
 
 if __name__ == "__main__":

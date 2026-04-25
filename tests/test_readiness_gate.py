@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from tests.helpers import materialize_project, workspace_tempdir
+from tests.helpers import materialize_project, readiness_pass_fixture_files, workspace_tempdir
 
 
 readiness_gate = importlib.import_module("core.readiness_gate")
@@ -325,6 +325,169 @@ class ReadinessGateTest(unittest.TestCase):
         self.assertIn("evidence_status", artifact["warnings"][0])
         self.assertIn("headline", artifact["summary"])
         self.assertEqual(artifact["summary"]["evidence_status"], "complete")
+
+    def test_ingest_only_review_debt_surfaces_bounded_explanation_detail(self) -> None:
+        with workspace_tempdir("readiness-") as base:
+            files = readiness_pass_fixture_files()
+            files["reports/review-ingest-artifact.json"] = json.dumps(
+                {
+                    "artifact_type": "feedback_ingest",
+                    "summary": {"normalized_count": 4, "ambiguous_count": 2},
+                    "payload": {
+                        "normalized_items": [
+                            {"source_ref": "blocked-1"},
+                            {"source_ref": "blocked-2"},
+                            {"source_ref": "todo-1"},
+                            {"source_ref": "candidate-1"},
+                        ],
+                        "selective_action": {
+                            "todos": [
+                                {"source_ref": "todo-1", "category": "argument", "review_required": True}
+                            ],
+                            "blocked": [
+                                {
+                                    "source_ref": "blocked-1",
+                                    "category": "review",
+                                    "review_required": True,
+                                    "reason": "ambiguous",
+                                },
+                                {
+                                    "source_ref": "blocked-2",
+                                    "category": "review",
+                                    "review_required": True,
+                                    "reason": "blocked",
+                                },
+                            ],
+                            "candidate_patches": [
+                                {"source_ref": "candidate-1", "category": "language"}
+                            ],
+                            "summary": {
+                                "todo_count": 1,
+                                "blocked_count": 2,
+                                "candidate_patch_count": 1,
+                            },
+                        },
+                    },
+                },
+                ensure_ascii=False,
+            )
+            project = materialize_project(base / "project", files)
+
+            artifact = build_readiness_artifact(mode="advisor-handoff", project_root=Path(project))
+
+        review_debt = artifact["dimensions"]["review_debt"]
+        self.assertEqual(review_debt["verdict"], "WARN")
+        self.assertEqual(review_debt["total_items"], 3)
+        self.assertEqual(review_debt["blocked_count"], 2)
+        self.assertEqual(review_debt["todo_count"], 1)
+        self.assertEqual(review_debt["candidate_patch_count"], 1)
+        self.assertIn("blocked", review_debt["reason"])
+        self.assertIn("todo", review_debt["reason"])
+        self.assertLessEqual(len(review_debt["source_refs"]), 3)
+        self.assertCountEqual(review_debt["source_refs"], ["blocked-1", "blocked-2", "todo-1"])
+
+    def test_candidate_patches_do_not_block_readiness_by_themselves(self) -> None:
+        with workspace_tempdir("readiness-") as base:
+            files = readiness_pass_fixture_files()
+            files["reports/review-ingest-artifact.json"] = json.dumps(
+                {
+                    "artifact_type": "feedback_ingest",
+                    "summary": {"normalized_count": 2, "ambiguous_count": 0},
+                    "payload": {
+                        "normalized_items": [
+                            {"source_ref": "candidate-1"},
+                            {"source_ref": "candidate-2"},
+                        ],
+                        "selective_action": {
+                            "todos": [],
+                            "blocked": [],
+                            "candidate_patches": [
+                                {"source_ref": "candidate-1", "category": "language"},
+                                {"source_ref": "candidate-2", "category": "language"},
+                            ],
+                            "summary": {
+                                "todo_count": 0,
+                                "blocked_count": 0,
+                                "candidate_patch_count": 2,
+                            },
+                        },
+                    },
+                },
+                ensure_ascii=False,
+            )
+            project = materialize_project(base / "project", files)
+
+            artifact = build_readiness_artifact(mode="submission-prep", project_root=Path(project))
+
+        review_debt = artifact["dimensions"]["review_debt"]
+        self.assertEqual(review_debt["verdict"], "PASS")
+        self.assertEqual(review_debt["candidate_patch_count"], 2)
+        self.assertEqual(review_debt["todo_count"], 0)
+        self.assertEqual(review_debt["blocked_count"], 0)
+        self.assertEqual(artifact["overall_verdict"], "PASS")
+
+    def test_review_diff_digest_remains_primary_when_ingest_also_exists(self) -> None:
+        with workspace_tempdir("readiness-") as base:
+            files = readiness_pass_fixture_files()
+            files["reports/review-diff-artifact.json"] = json.dumps(
+                {
+                    "artifact_type": "review_package",
+                    "summary": {"revision_id": "review-primary-1"},
+                    "payload": {
+                        "review_digest": {"total_items": 1, "high_priority_items": 1},
+                        "review_queue": [
+                            {"priority": "high", "review_required": True, "category": "argument"}
+                        ],
+                    },
+                },
+                ensure_ascii=False,
+            )
+            files["reports/review-ingest-artifact.json"] = json.dumps(
+                {
+                    "artifact_type": "feedback_ingest",
+                    "summary": {"normalized_count": 3, "ambiguous_count": 1},
+                    "payload": {
+                        "normalized_items": [
+                            {"source_ref": "blocked-1"},
+                            {"source_ref": "todo-1"},
+                            {"source_ref": "candidate-1"},
+                        ],
+                        "selective_action": {
+                            "todos": [
+                                {"source_ref": "todo-1", "category": "argument", "review_required": True}
+                            ],
+                            "blocked": [
+                                {
+                                    "source_ref": "blocked-1",
+                                    "category": "review",
+                                    "review_required": True,
+                                    "reason": "ambiguous",
+                                }
+                            ],
+                            "candidate_patches": [
+                                {"source_ref": "candidate-1", "category": "language"}
+                            ],
+                            "summary": {
+                                "todo_count": 1,
+                                "blocked_count": 1,
+                                "candidate_patch_count": 1,
+                            },
+                        },
+                    },
+                },
+                ensure_ascii=False,
+            )
+            project = materialize_project(base / "project", files)
+
+            artifact = build_readiness_artifact(mode="advisor-handoff", project_root=Path(project))
+
+        review_debt = artifact["dimensions"]["review_debt"]
+        self.assertEqual(review_debt["verdict"], "WARN")
+        self.assertEqual(review_debt["total_items"], 1)
+        self.assertEqual(review_debt["high_priority_items"], 1)
+        self.assertEqual(review_debt["todo_count"], 1)
+        self.assertEqual(review_debt["blocked_count"], 1)
+        self.assertEqual(review_debt["candidate_patch_count"], 1)
 
     def test_readiness_cli_writes_report_for_selected_mode(self) -> None:
         with workspace_tempdir("readiness-cli-") as base:
