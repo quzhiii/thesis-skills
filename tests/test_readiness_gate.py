@@ -424,6 +424,7 @@ class ReadinessGateTest(unittest.TestCase):
         self.assertEqual(review_debt["candidate_patch_count"], 2)
         self.assertEqual(review_debt["todo_count"], 0)
         self.assertEqual(review_debt["blocked_count"], 0)
+        self.assertIn("candidate patches remain explanation-only", review_debt["reason"])
         self.assertEqual(artifact["overall_verdict"], "PASS")
 
     def test_review_diff_digest_remains_primary_when_ingest_also_exists(self) -> None:
@@ -488,6 +489,66 @@ class ReadinessGateTest(unittest.TestCase):
         self.assertEqual(review_debt["todo_count"], 1)
         self.assertEqual(review_debt["blocked_count"], 1)
         self.assertEqual(review_debt["candidate_patch_count"], 1)
+        self.assertIn("review-diff digest reports unresolved review debt", review_debt["reason"])
+        self.assertIn("ingest detail", review_debt["reason"])
+
+    def test_ingest_debt_becomes_fallback_when_review_diff_exists_but_has_zero_items(self) -> None:
+        with workspace_tempdir("readiness-") as base:
+            files = readiness_pass_fixture_files()
+            files["reports/review-diff-artifact.json"] = json.dumps(
+                {
+                    "artifact_type": "review_package",
+                    "summary": {"revision_id": "review-primary-2"},
+                    "payload": {
+                        "review_digest": {"total_items": 0, "high_priority_items": 0},
+                        "review_queue": [],
+                    },
+                },
+                ensure_ascii=False,
+            )
+            files["reports/review-ingest-artifact.json"] = json.dumps(
+                {
+                    "artifact_type": "feedback_ingest",
+                    "summary": {"normalized_count": 4, "ambiguous_count": 2},
+                    "payload": {
+                        "normalized_items": [
+                            {"source_ref": "blocked-1"},
+                            {"source_ref": "todo-1"},
+                            {"source_ref": "todo-1"},
+                            {"source_ref": "blocked-2"},
+                        ],
+                        "selective_action": {
+                            "todos": [
+                                {"source_ref": "todo-1", "category": "argument", "review_required": True}
+                            ],
+                            "blocked": [
+                                {"source_ref": "blocked-1", "category": "review", "review_required": True},
+                                {"source_ref": "blocked-2", "category": "review", "review_required": True},
+                            ],
+                            "candidate_patches": [],
+                            "summary": {
+                                "todo_count": 1,
+                                "blocked_count": 2,
+                                "candidate_patch_count": 0,
+                            },
+                        },
+                    },
+                },
+                ensure_ascii=False,
+            )
+            project = materialize_project(base / "project", files)
+
+            artifact = build_readiness_artifact(mode="advisor-handoff", project_root=Path(project))
+
+        review_debt = artifact["dimensions"]["review_debt"]
+        self.assertEqual(review_debt["verdict"], "WARN")
+        self.assertEqual(review_debt["total_items"], 3)
+        self.assertEqual(review_debt["high_priority_items"], 0)
+        self.assertEqual(review_debt["blocked_count"], 2)
+        self.assertEqual(review_debt["todo_count"], 1)
+        self.assertCountEqual(review_debt["source_refs"], ["blocked-1", "todo-1", "blocked-2"])
+        self.assertNotIn("review-diff digest reports unresolved review debt", review_debt["reason"])
+        self.assertIn("ingest detail", review_debt["reason"])
 
     def test_readiness_cli_writes_report_for_selected_mode(self) -> None:
         with workspace_tempdir("readiness-cli-") as base:
