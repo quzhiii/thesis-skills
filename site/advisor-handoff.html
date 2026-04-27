@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thesis Skills Advisor Handoff | 如何把当前论文状态清楚交给导师/合作者继续看</title>
+    <meta name="description" content="把当前论文目标、已完成部分、卡住的问题、希望导师重点看的地方和版本说明整理成一个 bounded handoff packet，帮助导师/合作者快速进入上下文。">
+    <link rel="stylesheet" href="editorial-theme.css">
+</head>
+<body>
+    <div class="page">
+        <div class="page-frame">
+            <a class="skip-link" href="#main-content">跳到主要内容</a>
+            <span class="frame-corner tl"></span>
+            <span class="frame-corner tr"></span>
+            <span class="frame-corner bl"></span>
+            <span class="frame-corner br"></span>
+
+            <header class="issue-bar">
+                <div class="issue-block">
+                    <span class="issue-chip">Issue 008</span>
+                    <span>advisor handoff</span>
+                </div>
+                <div class="issue-title">
+                    <span class="issue-kicker">Thesis Skills</span>
+                    <span class="issue-note">context transfer / reader guidance</span>
+                </div>
+                <div class="issue-meta">
+                    <span>scenario / cn</span>
+                    <span>2026.04</span>
+                </div>
+            </header>
+
+            <nav class="site-nav" aria-label="主导航">
+                <a class="brand-link" href="index.html">
+                    <span class="brand-mark">TS</span>
+                    <span class="brand-copy">
+                        <strong>Thesis Skills</strong>
+                        <span>advisor handoff</span>
+                    </span>
+                </a>
+                <div class="nav-links">
+                    <a href="index.html">首页</a>
+                    <a href="#workflow">交接步骤</a>
+                    <a href="#packet">handoff packet</a>
+                    <a href="artifact-gallery.html">输出样例</a>
+                    <a href="docs-home.html">文档入口</a>
+                    <a href="scenario-entry.html">场景入口</a>
+                    <a href="advisor-handoff.html" aria-current="page">交导师场景</a>
+                    <a href="https://github.com/quzhiii/thesis-skills" class="nav-cta" target="_blank" rel="noopener">GitHub</a>
+                </div>
+            </nav>
+
+            <main id="main-content" class="editorial-main">
+                <section class="hero">
+                    <div class="hero-grid">
+                        <div class="hero-main">
+                            <div class="hero-tag">advisor handoff</div>
+                            <h1 class="hero-title">
+                                <span class="title-line">如何把当前论文状态</span>
+                                <span class="title-line title-strong">清楚交给导师/合作者继续看</span>
+                            </h1>
+                            <p class="hero-subtitle">这不是协作平台，也不是评论系统。它只回答一个问题：在导师反馈前、换人协作、阶段性暂停、论文版本交接时，怎样把上下文交代清楚，让对方知道该看什么、先看哪里、哪里仍然卡着。</p>
+                            <div class="hero-actions">
+                                <a class="btn btn-primary" href="#workflow">查看交接步骤</a>
+                                <a class="btn btn-secondary" href="#packet">查看 handoff packet</a>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-card">
+                                    <span class="metric-value">4 个</span>
+                                    <span class="metric-label">典型 handoff 时刻</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-value">6 项</span>
+                                    <span class="metric-label">bounded handoff packet 内容</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-value">静态说明</span>
+                                    <span class="metric-label">不是任务板或评论系统</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <aside class="hero-side">
+                            <div class="aside-panel">
+                                <div class="aside-label">适合什么时候用</div>
+                                <ul class="editorial-list">
+                                    <li>导师反馈前，想先告诉对方你已经做到哪一步。</li>
+                                    <li>换人协作时，需要把当前版本的重点、风险和问题移交出去。</li>
+                                    <li>阶段性暂停后重新接回项目，需要快速恢复上下文。</li>
+                                </ul>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+
+                <section class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">01 / pain</div>
+                            <h2 class="section-title">只发一份完整草稿，通常不算交接</h2>
+                        </div>
+                        <p class="section-intro">导师或合作者最常缺的不是文件本身，而是阅读上下文：你已经改到哪里、还有哪些卡点、希望对方重点看什么。</p>
+                    </div>
+                    <div class="card-grid grid-3">
+                        <article class="editorial-card">
+                            <div class="card-index">问题 01</div>
+                            <h3 class="card-title">读者不知道先看哪里</h3>
+                            <p class="card-text">整篇论文都能看，但真正需要优先反馈的段落、章节或争议点没有被标出来。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">问题 02</div>
+                            <h3 class="card-title">版本和范围不清楚</h3>
+                            <p class="card-text">对方不知道当前是第几轮、哪些已改、哪些故意没动，反馈很容易重复或偏题。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">问题 03</div>
+                            <h3 class="card-title">开放问题被埋在正文里</h3>
+                            <p class="card-text">真正卡住的决策点没有单独提出来，最后收到的是泛泛意见，不是你此刻最需要的判断。</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="workflow" class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">02 / workflow</div>
+                            <h2 class="section-title">一个有边界的交接流程</h2>
+                        </div>
+                        <p class="section-intro">advisor handoff 的核心不是“把所有东西都发过去”，而是把读者进入上下文所需的最小信息打包清楚。</p>
+                    </div>
+                    <div class="module-list">
+                        <article class="module-card">
+                            <div class="module-layout">
+                                <div class="module-meta">
+                                    <div class="module-key">step 01</div>
+                                    <h3 class="module-title">先定义这次 handoff 的目的</h3>
+                                    <p class="module-short">说明这是求总体意见、求定点反馈，还是阶段性交接。</p>
+                                </div>
+                                <div class="module-copy">
+                                    <p class="module-desc">如果这次交接的目标不明确，读者通常会默认“整篇都看”，结果很耗时，也未必能击中你当前最缺的反馈。</p>
+                                    <div class="note-grid">
+                                        <div class="note-box"><strong>适合表达</strong>“这轮最想确认研究问题和 related work 的衔接是否成立。”</div>
+                                        <div class="note-box"><strong>避免表达</strong>“麻烦老师帮我看看还有什么问题。”</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="module-card">
+                            <div class="module-layout">
+                                <div class="module-meta">
+                                    <div class="module-key">step 02</div>
+                                    <h3 class="module-title">把版本和已完成范围说清楚</h3>
+                                    <p class="module-short">告诉对方你改过什么、没改什么，以及这份草稿对应哪一轮。</p>
+                                </div>
+                                <div class="module-copy">
+                                    <p class="module-desc">这一步的目的是减少重复劳动。导师或合作者能快速分辨哪些意见已经被吸收，哪些仍然处于开放状态。</p>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="module-card">
+                            <div class="module-layout">
+                                <div class="module-meta">
+                                    <div class="module-key">step 03</div>
+                                    <h3 class="module-title">把卡住的问题单独列出来</h3>
+                                    <p class="module-short">不要让真正的疑问埋在正文里等对方自己发现。</p>
+                                </div>
+                                <div class="module-copy">
+                                    <p class="module-desc">最好把“卡住的问题”压缩成 2–4 个明确判断点，方便对方集中回应，而不是在整篇里漫无目的地扫读。</p>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="module-card">
+                            <div class="module-layout">
+                                <div class="module-meta">
+                                    <div class="module-key">step 04</div>
+                                    <h3 class="module-title">附上最小阅读指引</h3>
+                                    <p class="module-short">告诉对方先看哪几章、哪几页、哪几个图表，为什么。</p>
+                                </div>
+                                <div class="module-copy">
+                                    <p class="module-desc">这一步就是避免“只发一份完整草稿而不给阅读说明”。没有阅读说明，对方很难优先把时间花在你最需要反馈的地方。</p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="packet" class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">03 / packet</div>
+                            <h2 class="section-title">handoff packet 里放什么</h2>
+                        </div>
+                        <p class="section-intro">一个 bounded handoff packet 不需要很长，但应该把阅读前必须知道的信息交代完整。</p>
+                    </div>
+                    <div class="card-grid grid-3">
+                        <article class="editorial-card">
+                            <div class="card-index">01</div>
+                            <h3 class="card-title">当前论文目标</h3>
+                            <p class="card-text">这一版想解决什么问题、推进到哪个阶段、需要对方从哪个角度看。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">02</div>
+                            <h3 class="card-title">已完成部分</h3>
+                            <p class="card-text">哪些章节、图表、论证链已经整理完，避免对方把精力花在已收敛部分。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">03</div>
+                            <h3 class="card-title">卡住的问题</h3>
+                            <p class="card-text">把最需要判断的点独立列出来，而不是让导师自己在正文里挖。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">04</div>
+                            <h3 class="card-title">希望导师重点看的地方</h3>
+                            <p class="card-text">例如 related work、问题定义、实验解释、结论边界等定点区块。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">05</div>
+                            <h3 class="card-title">相关文件 / 版本说明</h3>
+                            <p class="card-text">说明草稿文件、补充附件、版本日期、导出格式，以及是否有 diff / review artifact 可参考。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">06</div>
+                            <h3 class="card-title">下一步建议</h3>
+                            <p class="card-text">告诉对方你希望收到反馈后怎么推进，而不是让这次交接停在“看完了”这一层。</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">04 / example</div>
+                            <h2 class="section-title">一个好的交接说明长什么样</h2>
+                        </div>
+                        <p class="section-intro">下面这个例子重点不是措辞漂亮，而是把读者进入上下文所需的信息一次交代清楚。</p>
+                    </div>
+                    <div class="spotlight-grid">
+                        <article class="spotlight-panel">
+                            <div class="panel-label">good handoff text</div>
+                            <h3 class="spotlight-title">示例</h3>
+                            <pre><code>这是一版给导师看的阶段性交接稿。
+
+当前论文目标：确认研究问题、related work 和实验设计三段是否已经衔接清楚。
+已完成部分：摘要、绪论、方法章节已经重写；图 2 和表 3 的编号已统一。
+卡住的问题：
+1. related work 里是否需要单独分出一节比较基线方法；
+2. 实验结果部分是否已经足够支持结论强度。
+希望导师重点看的地方：第二章第 2.3 节、第三章结果解释段、结论里的贡献表述。
+相关文件 / 版本说明：主文件为 thesis-v3.pdf，补充 diff 为 review-diff-artifact.json。
+下一步建议：如果以上两点判断能明确，我会先补 related work，再收紧结论措辞。</code></pre>
+                        </article>
+                        <article class="spotlight-panel">
+                            <div class="panel-label">common mistake</div>
+                            <h3 class="spotlight-title">常见误区</h3>
+                            <p class="spotlight-text">不要只发一份完整草稿而不给阅读说明。对方当然可以“从头看到尾”，但这通常会把注意力分散到与你当前最需要的反馈无关的地方。</p>
+                            <ul class="editorial-list">
+                                <li>不要把所有问题混成一句“请老师看看还有什么问题”。</li>
+                                <li>不要省略版本说明，否则会引发重复反馈。</li>
+                                <li>不要把 handoff 写成评论系统需求单；这只是阅读上下文转移，不是协作产品。</li>
+                            </ul>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">05 / related</div>
+                            <h2 class="section-title">它和 thesis-skills 的关系</h2>
+                        </div>
+                        <p class="section-intro">这是一页 scenario guide，不是 standalone tool。它教你怎样把已有 artifact 和 workflow 组织成一个清楚的 handoff。</p>
+                    </div>
+                    <div class="card-grid grid-3">
+                        <article class="editorial-card link-card">
+                            <div class="card-index">related</div>
+                            <h3 class="card-title">review loop</h3>
+                            <p class="link-text">如果你正在整理返修意见，先看 review loop 和 feedback ingest 相关流程。</p>
+                            <a class="card-link" href="https://github.com/quzhiii/thesis-skills/blob/main/README.zh-CN.md#%E5%AE%A1%E9%98%85%E9%97%AD%E7%8E%AF%E5%B7%A5%E4%BD%9C%E6%B5%81" target="_blank" rel="noopener">查看 review loop 相关说明</a>
+                        </article>
+                        <article class="editorial-card link-card">
+                            <div class="card-index">related</div>
+                            <h3 class="card-title">readiness gate</h3>
+                            <p class="link-text">如果你已经从“交导师看”走到“准备系统判断风险”，下一页就该看 submission-prep。</p>
+                            <a class="card-link" href="submission-prep.html">继续看下一场景</a>
+                        </article>
+                        <article class="editorial-card link-card">
+                            <div class="card-index">related</div>
+                            <h3 class="card-title">场景总入口</h3>
+                            <p class="link-text">如果你还不确定自己处于哪种交接时刻，先回到场景索引页。</p>
+                            <a class="card-link" href="scenario-entry.html">回到场景列表</a>
+                        </article>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="page-footer">
+                <span>Thesis Skills / advisor handoff</span>
+                <span>context transfer / reader guidance / bounded workflow</span>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>
