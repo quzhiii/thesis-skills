@@ -125,6 +125,14 @@ All listed workflow families are publicly available in `v0.7.0`:
 
 **Acceptance:** This release is complete when review summaries are more informative at chapter/section granularity, TODO-oriented artifacts are inspectable and reproducible, docs and landing page explain the review loop in scenario language, and no wording suggests the repo automatically "understands all advisor intent."
 
+Current progress within this slice:
+
+- chapter-level review summaries are now implemented and tested through the review-diff artifact path
+- review digest artifacts now surface richer priority / category / TODO-oriented counts
+- revision summary outputs now expose accepted / pending / blocked counts through the fix-cycle path
+- scenario docs V1 and landing page V1 surfaces are now in place under `site/`
+- section-level review summaries still remain optional follow-up work if a stable bounded contract emerges
+
 ---
 
 ### v0.7.2 — Feedback Ingest And Gate Calibration
@@ -152,6 +160,13 @@ All listed workflow families are publicly available in `v0.7.0`:
 - position the system as a collaborative platform replacement
 
 **Acceptance:** This release is complete when feedback-ingest artifacts are bounded and auditable, readiness output clearly reflects review debt and unresolved blockers, ambiguous items remain explicitly review-gated, and tests cover both ingest and gate summary boundaries.
+
+Current progress within this slice:
+
+- readiness gate now consumes both review-diff digest evidence and bounded feedback-ingest debt detail
+- ingest-only unresolved blocked / todo debt now produces mode-sensitive `advisor-handoff => WARN` and `submission-prep => BLOCK` behavior
+- readiness explanations now surface bounded source references and ingest-driven debt detail without promoting candidate patches into blockers by default
+- broader importer / schema hardening remains subsequent polish work if the ingest surface expands beyond bounded JSON input
 
 ---
 
@@ -183,6 +198,17 @@ All listed workflow families are publicly available in `v0.7.0`:
 - hide workflow limitations on export/review fidelity
 
 **Acceptance:** This release is complete when defense prep produces useful bounded artifacts, the landing page makes the repo understandable to non-technical thesis users, and showcase materials are grounded in real repo outputs.
+
+Current progress within this slice:
+
+- defense outline artifact is now implemented as a bounded defense-prep artifact
+- chapter highlights and figure inventory are now implemented as bounded defense-prep artifacts
+- candidate tables and diagrams inventory is now implemented as a bounded candidate-selection artifact
+- talk-prep notes are now implemented as bounded speaker-support notes
+- artifact demo gallery, docs homepage, and scenario entry page are now implemented as showcase-facing surfaces
+- dedicated `advisor-handoff` and `submission-prep` scenario pages are now implemented as editorial static guides
+- a bounded before/after comparison section is now implemented inside `site/artifact-gallery.html#before-after`
+- the current showcase landing page entry is live in `site/index.html`, and the main site surfaces now describe the v0.8 showcase in a more consistent editorial vocabulary
 
 ---
 
@@ -237,8 +263,8 @@ The repository already has a scenario-first copy base at `site/copy-source.md`. 
 | Artifact showcase examples | Existing in `site/copy-source.md` |
 | v0.7 scope boundaries section | Existing in `site/copy-source.md` |
 | Static HTML landing page | Existing in `site/index.html` |
-| Artifact demo gallery | Planned (v0.8.0) |
-| Docs homepage / scenario hub | Planned (v0.8.0) |
+| Artifact demo gallery | Existing in `site/artifact-gallery.html` |
+| Docs homepage / scenario hub | Existing in `site/docs-home.html` and `site/scenario-entry.html` |
 
 Showcase work must follow the same bounded philosophy as code: no marketing copy that claims support the repo cannot prove.
 
@@ -255,22 +281,20 @@ Showcase work must follow the same bounded philosophy as code: no marketing copy
 
 ## Suggested Execution Order
 
-If only one track is chosen:
+Given the current repository state, the next work should proceed in this order:
 
-1. `v0.7.1` review summary hardening
+1. finish the remaining `v0.8.0` public-surface polish
+   - clearer before/after artifact examples
+   - landing-page / site wording sync so `v0.8` surfaces describe themselves consistently
+2. start `v0.8.1` rule-pack ecosystem hardening
+   - pack lint baseline
+   - completeness and schema-consistency checks
+   - mixed workflow integration docs
+3. use `v1.0.0` as a coherence and stabilization pass
+   - align README, roadmap, landing page, docs, and manifest
+   - remove stale version wording and historical drift
 
-If two tracks:
-
-1. `v0.7.1` review summary hardening
-2. landing page / scenario docs V1
-
-If three tracks:
-
-1. `v0.7.1` review summary hardening
-2. landing page / scenario docs V1
-3. `v0.7.2` feedback ingest and gate calibration
-
-This order preserves the narrative: first make the current review story clearer, then make the repo easier to understand, then connect ingest and readiness more tightly.
+Remaining `v0.7.x` work is now polish-oriented rather than a missing-capability gap: section-level summaries remain optional follow-up work, and ingest contract hardening can continue incrementally without reopening product scope.
 
 ## Cross-Release Acceptance Gates
 

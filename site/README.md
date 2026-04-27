@@ -1,14 +1,18 @@
 # Thesis Skills 落地页
 
-这是 Thesis Skills v0.7 的展示落地页，用于帮助潜在用户快速了解项目的定位、场景和能力边界。
+这是 Thesis Skills 当前 v0.8 showcase / docs 入口的静态页面目录，用于帮助潜在用户快速了解项目的定位、场景、artifact 示例和能力边界。
 
 ## 文件结构
 
 ```
 site/
-├── index.html          # 落地页主文件
-├── copy-source.md      # 页面文案源文件
-└── README.md           # 本文件
+├── editorial-theme.css   # 统一的 v0.8 展示主题样式
+├── artifact-gallery.html # v0.8 artifact demo gallery
+├── docs-home.html        # docs 首页入口
+├── index.html            # 首页与 v0.8 showcase 入口
+├── scenario-entry.html   # 场景入口页
+├── copy-source.md        # 旧版页面文案源文件
+└── README.md             # 本文件
 ```
 
 ## 本地预览
@@ -101,14 +105,18 @@ jobs:
 
 ## 更新页面
 
-1. 编辑 `site/index.html` 修改页面内容
-2. 或编辑 `site/copy-source.md` 查看文案源文件
-3. 本地预览确认无误
-4. 提交并推送
+1. 编辑 `site/editorial-theme.css` 调整统一视觉样式
+2. 编辑 `site/index.html`、`site/artifact-gallery.html`、`site/docs-home.html` 或 `site/scenario-entry.html` 修改页面内容
+3. 或编辑 `site/copy-source.md` 查看旧版文案源文件
+4. 本地预览确认无误
+5. 提交并推送
 
 ## 设计说明
 
 - **单页静态**：无框架依赖，纯 HTML + CSS
+- **统一主题样式**：`editorial-theme.css` 让首页、gallery、docs、scenario 共用一套视觉系统
+- **附加 demo 页面**：`artifact-gallery.html` 用于承接 v0.8 defense-prep artifact 展示
+- **docs 导航页**：`docs-home.html` 与 `scenario-entry.html` 用于组织文档入口和按场景进入
 - **响应式**：适配桌面和移动端
 - **学术风格**：简洁、可信、不 flashy
 - **无构建步骤**：直接部署，零维护成本

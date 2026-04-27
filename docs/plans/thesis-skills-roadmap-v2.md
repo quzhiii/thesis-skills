@@ -440,40 +440,50 @@ Ship a stable public story covering:
 
 ## 9. Execution Backlog v2
 
+This backlog is synchronized to the repository state as of `2026-04-27`.
+Checked items reflect behavior that is already present in the codebase and covered by direct artifact paths and tests.
+Unchecked items are the remaining backlog, not historical work that has already landed.
+
 ## Batch A — `v0.7.1` Review Summary Hardening
 
-- [ ] audit current review-loop artifacts and JSON shapes
-- [ ] define chapter-level summary contract
+- [x] audit current review-loop artifacts and JSON shapes
+- [x] define chapter-level summary contract
 - [ ] define section-level summary contract where stable
-- [ ] add richer review digest fields
-- [ ] add review TODO generation improvements
-- [ ] add tests for chapter/section summary artifacts
-- [ ] refresh review-related README / docs wording
-- [ ] create landing page V1 and scenario docs V1
+- [x] add richer review digest fields
+- [x] add review TODO generation improvements
+- [x] add tests for chapter-level summary artifacts and TODO-oriented digest fields
+- [x] refresh review-related README / docs wording
+- [x] create landing page V1 and scenario docs V1
+- [ ] deepen changed-scope linkage, repeated-issue grouping, and reviewer-friendly digest polish without widening automation
 
 ## Batch B — `v0.7.2` Feedback Ingest And Gate Calibration
 
-- [ ] audit current `04-word-review-ingest` contract
-- [ ] define feedback-ingest artifact schema updates
-- [ ] harden ambiguity / blocked-item handling
-- [ ] calibrate readiness gate against review debt
-- [ ] improve `PASS / WARN / BLOCK` explanation quality
-- [ ] add tests for ingest + gate linkage
+- [x] audit current `04-word-review-ingest` contract
+- [ ] define feedback-ingest artifact schema updates for any broader ingest surface
+- [ ] deepen ambiguity / blocked-item hardening beyond current bounded heuristics
+- [x] calibrate readiness gate against review debt
+- [x] improve `PASS / WARN / BLOCK` explanation quality
+- [x] add tests for ingest + gate linkage
 - [ ] update docs and examples for ingestion / readiness scenarios
 
 ## Batch C — `v0.8.0` Defense Pack And Showcase
 
-- [ ] create defense-pack workflow scaffold
-- [ ] generate defense outline artifact
-- [ ] generate chapter highlight artifact
-- [ ] generate figure inventory for slides
-- [ ] generate candidate table / diagram inventory
-- [ ] create landing page V2
-- [ ] build artifact demo gallery
-- [ ] create docs homepage / scenario hub
+- [x] create defense-pack workflow scaffold
+- [x] generate defense outline artifact
+- [x] generate chapter highlight artifact
+- [x] generate figure inventory for slides
+- [x] generate candidate table / diagram inventory
+- [x] generate talk-prep notes artifact
+- [x] create landing page V2 showcase entry
+- [x] build artifact demo gallery
+- [x] create docs homepage / scenario hub
+- [x] add dedicated advisor-handoff / submission-prep scenario pages as static editorial guides
+- [x] add clearer before/after artifact examples in the existing artifact gallery flow
+- [x] polish landing-page and site-directory wording so `v0.8` showcase surfaces describe themselves consistently
 
 ## Batch D — `v0.8.1` Rule-Pack Ecosystem Hardening
 
+- [ ] document the current starter-pack baseline and its extension assumptions
 - [ ] add pack linting tool
 - [ ] add completeness checks
 - [ ] add schema consistency checks
@@ -493,27 +503,18 @@ Ship a stable public story covering:
 
 ## 10. Suggested Execution Order
 
-If only one next track is chosen, do this first:
+From the synchronized project state, the next order should be:
 
-1. `v0.7.1` review summary hardening
+1. close the remaining `v0.8.0` showcase / public-surface polish
+2. start the `v0.8.1` rule-pack hardening foundation
+3. use `v1.0.0` as a coherence and stabilization pass across docs, site, manifest, and public positioning
 
-If two tracks are chosen, do this:
-
-1. `v0.7.1` review summary hardening
-2. landing page / scenario docs V1
-
-If three tracks are chosen, do this:
-
-1. `v0.7.1` review summary hardening
-2. landing page / scenario docs V1
-3. `v0.7.2` feedback ingest and gate calibration
-
-This order preserves a cleaner narrative:
+`v0.7.1` and `v0.7.2` still have optional polish items, but they are no longer the highest-leverage missing-capability tracks.
 
 ```text
-first make the current review story clearer
-then make the repo easier to understand
-then connect ingest and readiness more tightly
+first make the existing showcase and defense-prep story internally consistent
+then harden the extension ecosystem
+then lock the public narrative for v1.0.0
 ```
 
 ---
