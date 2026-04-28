@@ -327,9 +327,10 @@ Starter packs included:
 
 ```
 90-rules/packs/
-├── university-generic/     # Generic university thesis
-├── journal-generic/        # Generic journal article
-└── tsinghua-thesis/        # Tsinghua University example
+ ├── university-generic/     # Generic university thesis
+ ├── journal-generic/        # Generic journal article
+ ├── tsinghua-thesis/        # Tsinghua University example
+ └── demo-university-thesis/ # Concrete non-Tsinghua example pack
 ```
 
 Create your own:
@@ -341,6 +342,38 @@ python 90-rules/create_pack.py \
   --starter university-generic \
   --kind university-thesis
 ```
+
+Current starter-pack baseline and extension assumptions:
+
+- `90-rules/STARTER_PACK_BASELINE.md`
+- `90-rules/MIXED_PACK_WORKFLOWS.md`
+
+First baseline lint command:
+
+```bash
+python 90-rules/lint_pack.py --pack-path 90-rules/packs/university-generic
+```
+
+The current completeness layer in that command also checks:
+
+- required top-level sections in `rules.yaml`: `project`, `reference`, `language`
+- required top-level section in `mappings.yaml`: `mappings`
+
+The current schema-consistency layer also enforces:
+
+- required top-level rule sections must be mappings
+- `mappings.yaml` must match one of the two currently accepted shapes:
+  - starter-pack shape: `mappings`
+  - draft-pack shape: `source_template_mappings` + `chapter_role_mappings`
+
+The current scorecard output summarizes:
+
+- required files
+- metadata completeness
+- baseline completeness
+- schema consistency
+- overall status
+- finding counts (`errors`, `warnings`, `infos`)
 
 ---
 

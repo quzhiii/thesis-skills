@@ -238,6 +238,16 @@ Current progress within this slice:
 
 **Acceptance:** This release is complete when starter packs can be evaluated with explicit quality signals, docs make extension safer and easier, and ecosystem hardening does not distort generic workflow policy.
 
+Current progress within this slice:
+
+- starter-pack baseline and extension assumptions are now documented in `90-rules/STARTER_PACK_BASELINE.md`
+- a first baseline pack lint command now exists at `90-rules/lint_pack.py`
+- the first completeness checks now enforce top-level presence for baseline `rules.yaml` and `mappings.yaml` sections
+- the first schema-consistency checks now accept the two currently observed mapping shapes and reject obvious top-level type mismatches
+- the first scorecard output now summarizes required files, metadata completeness, baseline completeness, schema consistency, and finding counts in the lint report payload
+- mixed local / Git / export pack maintenance workflows are now documented in `90-rules/MIXED_PACK_WORKFLOWS.md`
+- a concrete non-Tsinghua example pack now exists at `90-rules/packs/demo-university-thesis`
+
 ---
 
 ### v1.0.0 — Stable Public Story

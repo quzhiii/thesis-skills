@@ -483,13 +483,13 @@ Unchecked items are the remaining backlog, not historical work that has already 
 
 ## Batch D — `v0.8.1` Rule-Pack Ecosystem Hardening
 
-- [ ] document the current starter-pack baseline and its extension assumptions
-- [ ] add pack linting tool
-- [ ] add completeness checks
-- [ ] add schema consistency checks
-- [ ] add pack scorecard output
-- [ ] add docs for mixed local / Git / export workflows
-- [ ] expand example packs and example projects
+- [x] document the current starter-pack baseline and its extension assumptions
+- [x] add pack linting tool
+- [x] add completeness checks
+- [x] add schema consistency checks
+- [x] add pack scorecard output
+- [x] add docs for mixed local / Git / export workflows
+- [x] expand example packs and example projects
 
 ## Batch E — `v1.0.0` Stabilization
 
