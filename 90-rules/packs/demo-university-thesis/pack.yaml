@@ -1,0 +1,6 @@
+id: demo-university-thesis
+kind: university-thesis
+display_name: Demo University Thesis Pack
+version: 1
+precedence: guide_over_template
+starter: false

@@ -1,0 +1,178 @@
+project:
+  main_tex_candidates:
+    - thesis.tex
+    - main.tex
+  chapter_globs:
+    - chapters/*.tex
+    - sections/*.tex
+  bibliography_files:
+    - ref/refs.bib
+reference:
+  missing_key:
+    severity: error
+  orphan_entry:
+    severity: warning
+  duplicate_title:
+    severity: warning
+  bib_quality:
+    require_langid: false
+    allowed_entry_types:
+      - article
+      - book
+      - inproceedings
+      - misc
+    missing_langid:
+      severity: warning
+    malformed_doi:
+      severity: warning
+    unsupported_entry_type:
+      severity: warning
+language:
+  cjk_latin_spacing:
+    enabled: true
+    severity: warning
+    autofix_safe: true
+  repeated_punctuation:
+    enabled: true
+    severity: error
+    autofix_safe: true
+  mixed_quote_style:
+    enabled: true
+    severity: warning
+    autofix_safe: false
+  weak_phrases:
+    enabled: true
+    severity: info
+    autofix_safe: false
+    patterns:
+      - 众所周知
+      - 不难看出
+  bracket_mismatch:
+    enabled: true
+    severity: error
+    autofix_safe: false
+  quote_mismatch:
+    enabled: true
+    severity: error
+    autofix_safe: false
+  booktitle_mixed_style:
+    enabled: true
+    severity: warning
+    autofix_safe: false
+  unit_spacing:
+    enabled: true
+    severity: warning
+    autofix_safe: true
+  ellipsis_style:
+    enabled: true
+    severity: warning
+    autofix_safe: true
+  dash_style:
+    enabled: true
+    severity: info
+    autofix_safe: false
+  zh_en_symbol_spacing:
+    enabled: true
+    severity: warning
+    autofix_safe: false
+  number_range_style:
+    enabled: true
+    severity: info
+    autofix_safe: false
+  enum_punctuation_style:
+    enabled: true
+    severity: info
+    autofix_safe: false
+  connector_blacklist_simple:
+    enabled: true
+    severity: info
+    autofix_safe: false
+    patterns:
+      - 因此所以
+      - 但是同时
+  fullwidth_halfwidth_mix:
+    enabled: true
+    severity: warning
+    autofix_safe: true
+language_deep:
+  connector_misuse:
+    enabled: true
+    severity: warning
+    min_confidence: 0.74
+    review_required: true
+    patterns:
+      因此所以:
+        message: Connector chain may be redundant
+        suggestions:
+          - 因此
+          - 所以
+  collocation_misuse:
+    enabled: true
+    severity: warning
+    min_confidence: 0.78
+    review_required: true
+    patterns:
+      提升效率水平:
+        message: Collocation may be awkward or redundant
+        suggestions:
+          - 提升效率
+          - 提高水平
+  acronym_first_use:
+    enabled: true
+    severity: warning
+    min_confidence: 0.86
+    review_required: true
+    require_expansion_before_short_form: true
+    acronyms:
+      DID:
+        expansions:
+          - 双重差分
+          - Difference-in-Differences
+      PSM:
+        expansions:
+          - 倾向得分匹配
+          - Propensity Score Matching
+consistency:
+  terminology_consistency:
+    enabled: true
+    severity: warning
+    min_confidence: 0.82
+    review_required: true
+    min_occurrences: 2
+    groups:
+      学位论文:
+        variants:
+          - 毕业论文
+          - thesis
+format:
+  require_list_of_figures: false
+  require_list_of_tables: false
+  figure_requires_centering: true
+content:
+  required_sections:
+    - Abstract
+    - Introduction
+  abstract_keywords:
+    min: 3
+    max: 8
+compile:
+  enabled: true
+  severity: warning
+  engine_hint: xelatex
+  categories:
+    undefined_control_sequence:
+      severity: error
+    missing_file_or_package:
+      severity: error
+    missing_citation:
+      severity: warning
+    missing_reference:
+      severity: warning
+    bibliography_backend_issue:
+      severity: warning
+    overfull_box:
+      severity: info
+    compile_warning_unknown:
+      severity: info
+    compile_error_unknown:
+      severity: error

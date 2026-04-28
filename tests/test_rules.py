@@ -68,7 +68,12 @@ language:
         self.assertIn("consistency", pack.rules)
 
     def test_phase1_language_rules_exist_in_all_packs(self) -> None:
-        for pack_id in ("tsinghua-thesis", "university-generic", "journal-generic"):
+        for pack_id in (
+            "tsinghua-thesis",
+            "university-generic",
+            "journal-generic",
+            "demo-university-thesis",
+        ):
             with self.subTest(pack=pack_id):
                 pack = load_rule_pack(PACK_ROOT / pack_id)
                 language = pack.rules["language"]
