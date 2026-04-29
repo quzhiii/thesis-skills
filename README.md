@@ -40,14 +40,14 @@ The goal is simple: turn scattered, manual, error-prone thesis finishing work in
 
 For repetitive finishing work, the expected time savings are concrete:
 
-| Workflow | Manual baseline | With Thesis Skills |
-|---|---:|---:|
-| Bibliography intake | 30-60 min | 2-5 min |
-| Word ↔ LaTeX review handoff | 1-3 hrs | 5-10 min |
-| Deterministic format checks | 1-3 hrs | 2-5 min |
-| Safe report-driven fixes | 1-2 hrs | 5-10 min |
-| Pre-submission readiness review | 30-60 min | 1-2 min |
-| Defense prep inventory | 2-4 hrs | 10-15 min |
+| Workflow | Manual baseline | With Thesis Skills | Speedup |
+|---|---:|---:|---:|
+| Bibliography intake | 30-60 min | 2-5 min | **~10× faster** |
+| Word ↔ LaTeX review handoff | 1-3 hrs | 5-10 min | **~15× faster** |
+| Deterministic format checks | 1-3 hrs | 2-5 min | **~20× faster** |
+| Safe report-driven fixes | 1-2 hrs | 5-10 min | **~10× faster** |
+| Pre-submission readiness review | 30-60 min | 1-2 min | **~30× faster** |
+| Defense prep inventory | 2-4 hrs | 10-15 min | **~15× faster** |
 
 > Time savings are conservative estimates for repetitive formatting and handoff work. Thesis Skills does not replace writing, thinking, advisor judgment, or institutional confirmation.
 

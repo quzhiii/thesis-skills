@@ -40,14 +40,14 @@ LaTeX 项目 ───────┤                                           
 
 对重复性后期工作来说，节省时间是具体可感知的：
 
-| 工作流 | 手工基线 | 使用 Thesis Skills |
-|---|---:|---:|
-| 文献接入 | 30-60 分钟 | 2-5 分钟 |
-| Word ↔ LaTeX 审阅交接 | 1-3 小时 | 5-10 分钟 |
-| 确定性格式检查 | 1-3 小时 | 2-5 分钟 |
-| 基于报告的安全修复 | 1-2 小时 | 5-10 分钟 |
-| 提交前 readiness 复核 | 30-60 分钟 | 1-2 分钟 |
-| 答辩前清单整理 | 2-4 小时 | 10-15 分钟 |
+| 工作流 | 手工基线 | 使用 Thesis Skills | 提速 |
+|---|---:|---:|---:|
+| 文献接入 | 30-60 分钟 | 2-5 分钟 | **约 10 倍** |
+| Word ↔ LaTeX 审阅交接 | 1-3 小时 | 5-10 分钟 | **约 15 倍** |
+| 确定性格式检查 | 1-3 小时 | 2-5 分钟 | **约 20 倍** |
+| 基于报告的安全修复 | 1-2 小时 | 5-10 分钟 | **约 10 倍** |
+| 提交前 readiness 复核 | 30-60 分钟 | 1-2 分钟 | **约 30 倍** |
+| 答辩前清单整理 | 2-4 小时 | 10-15 分钟 | **约 15 倍** |
 
 > 时间节省是对重复性格式和交接工作的保守估算。Thesis Skills 不替代写作、思考、导师判断或学校/期刊规则的最终人工确认。
 
@@ -86,36 +86,36 @@ python run_check_once.py \
 
 ## 输出
 
-### Hero workflow
+### 核心工作流
 
 ```text
-1. 接入          2. 检查            3. 安全修复          4. Gate         5. 交接
+1. 接入          2. 检查            3. 安全修复          4. 放行判断      5. 交接
 ──────────       ───────────        ─────────────        ─────────       ─────────────
-Zotero           references         dry-run 补丁         PASS            导师审阅 Word
-EndNote     →    language      →    先预览再应用    →    WARN      →     review TODOs
-Word/LaTeX       format             显式确认修改         BLOCK           答辩准备材料
+Zotero           引用完整性         预览补丁             通过            导师审阅 Word
+EndNote     →    语言规则      →    dry-run 优先   →     警告      →     审阅 TODO
+Word/LaTeX       格式结构           显式确认修改         阻断            答辩准备材料
 ```
 
-### Readiness gate preview
+### Readiness gate 预览
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│ Readiness verdict: WARN                                      │
+│ Readiness verdict: WARN（存在警告）                           │
 ├───────────────────────┬────────┬─────────────────────────────┤
-│ Dimension             │ Status │ Why it matters              │
+│ 检查维度              │ 状态   │ 含义                        │
 ├───────────────────────┼────────┼─────────────────────────────┤
-│ References            │ PASS   │ all cite keys resolve       │
-│ Language              │ WARN   │ 2 style warnings remain     │
-│ Format                │ PASS   │ labels and refs are stable  │
-│ Compile evidence      │ WARN   │ skipped in demo mode        │
-│ Export evidence       │ WARN   │ not produced by smoke test  │
-│ Review-loop evidence  │ WARN   │ not produced by smoke test  │
+│ 引用                  │ PASS   │ 引用 key 全部可解析         │
+│ 语言                  │ WARN   │ 仍有 2 条风格警告           │
+│ 格式                  │ PASS   │ 标签和交叉引用稳定          │
+│ 编译证据              │ WARN   │ demo 模式跳过编译           │
+│ Word 导出证据         │ WARN   │ smoke test 不生成该产物     │
+│ 审阅闭环证据          │ WARN   │ smoke test 不生成该产物     │
 └───────────────────────┴────────┴─────────────────────────────┘
 
-Next actions:
-1. Review reports/check_language-report.json
-2. Generate Word export / review-loop artifacts when those handoffs are needed
-3. Re-run without --skip-compile before final submission
+下一步：
+1. 查看 reports/check_language-report.json
+2. 需要导师审阅交接时，再生成 Word 导出和 review-loop 产物
+3. 最终提交前，去掉 --skip-compile 重新运行
 ```
 
 一次真实运行会生成这些机器可读 artifacts：
