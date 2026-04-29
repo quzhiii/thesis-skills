@@ -1,24 +1,21 @@
 # Thesis Skills 静态站点
 
-这是 Thesis Skills v1.1 showcase 入口的静态页面目录，用于帮助潜在用户快速了解项目定位、使用场景、输出样例和能力边界。
+这是 Thesis Skills 当前 v1.0.0 public-story / docs / showcase 入口的静态页面目录，用于帮助潜在用户快速了解项目定位、使用场景、artifact 示例和能力边界。
 
 ## 文件结构
 
 ```text
 site/
-├── editorial-theme.css       # 统一展示主题样式（含 v1.1 新增组件）
-├── index.html                # 首页：产品定位 + 快速试跑 + 输出预览
-├── quickstart.html           # 3 分钟跑通最小示例
-├── scenario-entry.html       # 按论文阶段进入（含输入-命令-输出）
-├── artifact-gallery.html     # 全流程输出样例（6 类 artifact）
-├── docs-home.html            # 文档首页入口
+├── editorial-theme.css       # 统一的 v1.0 展示主题样式
+├── index.html                # 首页与 v1.0 public-story 入口
+├── scenario-entry.html       # 按论文阶段进入的场景入口页
+├── artifact-gallery.html     # v1.0 输出样例与答辩前整理展示页
+├── docs-home.html            # docs 首页入口
 ├── advisor-handoff.html      # 交导师/合作者场景页
 ├── submission-prep.html      # 送审/投稿前场景页
-├── v1.0-backup/              # v1.0 原始文件备份
-├── v1.1-showcase/            # v1.1 开发目录（含优化计划）
 ├── copy-source.md            # 可继续维护的页面文案源文件
-├── index-product-redraft.html # 历史首页草稿
-├── v0.8-roadmap.md           # 历史 v0.8 范围记录
+├── index-product-redraft.html # 历史首页草稿，保留作参考
+├── v0.8-roadmap.md           # 历史 v0.8 范围记录，保留作参考
 └── README.md                 # 本文件
 ```
 
@@ -105,7 +102,7 @@ jobs:
 ## 更新页面
 
 1. 编辑 `site/editorial-theme.css` 调整统一视觉样式
-2. 编辑 `site/index.html`、`site/artifact-gallery.html`、`site/quickstart.html`、`site/scenario-entry.html` 或场景页修改页面内容
+2. 编辑 `site/index.html`、`site/artifact-gallery.html`、`site/docs-home.html`、`site/scenario-entry.html` 或场景页修改页面内容
 3. 如需先整理文案，可编辑 `site/copy-source.md`
 4. 本地预览确认无误
 5. 提交并推送
@@ -114,8 +111,7 @@ jobs:
 
 - **单页静态**：无框架依赖，纯 HTML + CSS
 - **统一主题样式**：`editorial-theme.css` 让首页、gallery、docs、scenario 共用一套视觉系统
-- **快速上手页**：`quickstart.html` 引导 3 分钟跑通最小示例
-- **输出样例页**：`artifact-gallery.html` 展示全流程 6 类输出样例
+- **输出样例页**：`artifact-gallery.html` 承接 v1.0 输出样例和 defense-prep artifact 展示
 - **docs 导航页**：`docs-home.html` 与 `scenario-entry.html` 用于组织文档入口和按场景进入
 - **场景页**：`advisor-handoff.html` 和 `submission-prep.html` 用于解释具体 bounded workflow 场景
 - **响应式**：适配桌面和移动端

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thesis Skills Quickstart | 3 分钟跑通第一个检查</title>
+    <meta name="description" content="不用读完整文档，先跑一条命令，看输出，再决定要不要继续。Python 3.10+，不需要 LaTeX。">
+    <link rel="stylesheet" href="editorial-theme.css">
+</head>
+<body>
+    <div class="page">
+        <div class="page-frame">
+            <a class="skip-link" href="#main-content">跳到主要内容</a>
+            <span class="frame-corner tl"></span>
+            <span class="frame-corner tr"></span>
+            <span class="frame-corner bl"></span>
+            <span class="frame-corner br"></span>
+
+            <header class="issue-bar">
+                <div class="issue-block">
+                    <span class="issue-chip">Issue 010</span>
+                    <span>quickstart</span>
+                </div>
+                <div class="issue-title">
+                    <span class="issue-kicker">Thesis Skills</span>
+                    <span class="issue-note">v1.0.0</span>
+                </div>
+                <div class="issue-meta">
+                    <span>guide / cn</span>
+                    <span>2026.04</span>
+                </div>
+            </header>
+
+            <nav class="site-nav" aria-label="主导航">
+                <a class="brand-link" href="index.html">
+                    <span class="brand-mark">TS</span>
+                    <span class="brand-copy">
+                        <strong>Thesis Skills</strong>
+                        <span>quickstart</span>
+                    </span>
+                </a>
+                <div class="nav-links">
+                    <a href="index.html">首页</a>
+                    <a href="scenario-entry.html">场景入口</a>
+                    <a href="artifact-gallery.html">输出样例</a>
+                    <a href="quickstart.html" aria-current="page">快速上手</a>
+                    <a href="docs-home.html">文档</a>
+                    <a href="https://github.com/quzhiii/thesis-skills" class="nav-cta" target="_blank" rel="noopener">GitHub</a>
+                </div>
+            </nav>
+
+            <main id="main-content" class="editorial-main">
+                <section class="hero">
+                    <div class="hero-grid">
+                        <div class="hero-main">
+                            <div class="hero-tag">quickstart</div>
+                            <h1 class="hero-title">
+                                <span class="title-line">3 分钟跑通</span>
+                                <span class="title-line title-strong">第一个检查</span>
+                            </h1>
+                            <p class="hero-subtitle">不用读完整文档，先跑一条命令，看输出，再决定要不要继续。</p>
+                            <div class="hero-actions">
+                                <a class="btn btn-primary" href="#steps">开始按步骤走</a>
+                                <a class="btn btn-secondary" href="scenario-entry.html">去场景入口</a>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-card">
+                                    <span class="metric-value">3.10+</span>
+                                    <span class="metric-label">Python 版本</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-value">零依赖</span>
+                                    <span class="metric-label">纯 Python stdlib</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-value">6 份</span>
+                                    <span class="metric-label">JSON 检查报告</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <aside class="hero-side">
+                            <div class="aside-panel">
+                                <div class="aside-label">这条路径适合谁</div>
+                                <ul class="editorial-list">
+                                    <li>你想先确认这东西能跑起来，再决定要不要深入。</li>
+                                    <li>你本地没有 LaTeX，只想看 demo 输出长什么样。</li>
+                                    <li>你习惯先动手再翻文档。</li>
+                                </ul>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+
+                <section id="steps" class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">01 / steps</div>
+                            <h2 class="section-title">按顺序走七步</h2>
+                        </div>
+                        <p class="section-intro">每步都有明确输入和可验证的输出。卡住时先看 Step 6 的常见失败。</p>
+                    </div>
+
+                    <div class="step-list">
+                        <article class="step-item">
+                            <div class="step-header">
+                                <span class="step-badge">1</span>
+                                <h3 class="step-title">确认环境</h3>
+                            </div>
+                            <div class="step-body">
+                                <p>Python 3.10 或更高版本。git 已安装。</p>
+                                <p>不需要 LaTeX。demo 模式用 <code>--skip-compile</code> 跳过编译。</p>
+                            </div>
+                        </article>
+
+                        <article class="step-item">
+                            <div class="step-header">
+                                <span class="step-badge">2</span>
+                                <h3 class="step-title">克隆仓库</h3>
+                            </div>
+                            <div class="step-body">
+                                <pre class="terminal-block"><span class="terminal-prompt">$</span> git clone https://github.com/quzhiii/thesis-skills.git
+<span class="terminal-prompt">$</span> cd thesis-skills</pre>
+                            </div>
+                        </article>
+
+                        <article class="step-item">
+                            <div class="step-header">
+                                <span class="step-badge">3</span>
+                                <h3 class="step-title">运行 demo 检查</h3>
+                            </div>
+                            <div class="step-body">
+                                <pre class="terminal-block"><span class="terminal-prompt">$</span> python run_check_once.py \
+  --project-root examples/minimal-latex-project \
+  --ruleset university-generic \
+  --skip-compile</pre>
+                                <p><strong>--project-root</strong>：指定项目目录，这里用仓库自带的最小示例。</p>
+                                <p><strong>--ruleset</strong>：选择规则包，<code>university-generic</code> 是通用大学论文规则。</p>
+                                <p><strong>--skip-compile</strong>：跳过 LaTeX 编译。如果你本地有 LaTeX，可以去掉这个参数。</p>
+                            </div>
+                        </article>
+
+                        <article class="step-item">
+                            <div class="step-header">
+                                <span class="step-badge">4</span>
+                                <h3 class="step-title">预期输出</h3>
+                            </div>
+                            <div class="step-body">
+                                <p>命令跑完后，会在 <code>examples/minimal-latex-project/reports/</code> 目录下生成 6 个 JSON 文件：</p>
+                                <pre class="terminal-block">examples/minimal-latex-project/reports/
+├── run-summary.json              <span class="terminal-comment"># 所有检查的汇总索引</span>
+├── check_references-report.json  <span class="terminal-comment"># 引用完整性检查</span>
+├── check_language-report.json    <span class="terminal-comment"># 中文语言风格检查</span>
+├── check_format-report.json      <span class="terminal-comment"># 格式规范检查</span>
+├── check_content-report.json     <span class="terminal-comment"># 内容结构检查</span>
+└── readiness-report.json         <span class="terminal-comment"># 总 verdict：PASS / WARN / BLOCK</span></pre>
+                            </div>
+                        </article>
+
+                        <article class="step-item">
+                            <div class="step-header">
+                                <span class="step-badge">5</span>
+                                <h3 class="step-title">先看这三个文件</h3>
+                            </div>
+                            <div class="step-body">
+                                <p><strong>先看 readiness-report.json</strong>：总 verdict 是什么。PASS 表示通过，WARN 有警告但不阻塞，BLOCK 需要处理后才能继续。</p>
+                                <p><strong>再看 check_language-report.json</strong>：中文语言风格检查结果，比如口语化表达、标点混用、重复用词。</p>
+                                <p><strong>最后看 run-summary.json</strong>：所有检查的汇总索引，方便你快速定位哪一项需要细看。</p>
+                            </div>
+                        </article>
+
+                        <article class="step-item">
+                            <div class="step-header">
+                                <span class="step-badge">6</span>
+                                <h3 class="step-title">常见失败和对策</h3>
+                            </div>
+                            <div class="step-body">
+                                <div class="note-grid">
+                                    <div class="note-box">
+                                        <strong>Python 版本过低</strong>
+                                        升级到 3.10 或更高版本。项目用了 Python 3.10 的语法特性，低版本会直接报错。
+                                    </div>
+                                    <div class="note-box">
+                                        <strong>找不到项目目录</strong>
+                                        确认你在 thesis-skills 根目录下运行命令，或者给 --project-root 传绝对路径。
+                                    </div>
+                                    <div class="note-box">
+                                        <strong>缺少依赖</strong>
+                                        项目用纯 Python stdlib，一般不需要额外安装。如果报错 ModuleNotFoundError，检查是否在正确的虚拟环境里。
+                                    </div>
+                                    <div class="note-box">
+                                        <strong>输出目录为空</strong>
+                                        检查命令参数拼写，特别是 --project-root 和 --ruleset 的值。规则包名称要和 90-rules/packs/ 下的目录名一致。
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="step-item">
+                            <div class="step-header">
+                                <span class="step-badge">7</span>
+                                <h3 class="step-title">下一步</h3>
+                            </div>
+                            <div class="step-body">
+                                <p>跑通了 demo，接下来按你的实际情况选路径：</p>
+                                <div class="cta-actions" style="margin-top: 14px;">
+                                    <a class="btn btn-primary" href="scenario-entry.html">去场景入口 →</a>
+                                    <a class="btn btn-secondary" href="artifact-gallery.html">看输出样例 →</a>
+                                    <a class="btn btn-ghost" href="docs-home.html">读完整文档 →</a>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="page-footer">
+                <span>Thesis Skills / v1.0.0</span>
+                <span>deterministic thesis workflows / bounded artifacts / rule packs</span>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

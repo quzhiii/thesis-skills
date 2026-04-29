@@ -22,7 +22,7 @@
                 </div>
                 <div class="issue-title">
                     <span class="issue-kicker">Thesis Skills</span>
-                    <span class="issue-note">v1.0.0</span>
+                    <span class="issue-note">enter by stage, not by script name</span>
                 </div>
                 <div class="issue-meta">
                     <span>workflow map / cn</span>
@@ -40,10 +40,12 @@
                 </a>
                 <div class="nav-links">
                     <a href="index.html">首页</a>
-                    <a href="scenario-entry.html" aria-current="page">场景入口</a>
+                    <a href="#stages">五个阶段</a>
                     <a href="artifact-gallery.html">输出样例</a>
-                    <a href="quickstart.html">快速上手</a>
                     <a href="docs-home.html">文档</a>
+                    <a href="advisor-handoff.html">交导师场景</a>
+                    <a href="submission-prep.html">送审前场景</a>
+                    <a href="scenario-entry.html" aria-current="page">场景入口</a>
                     <a href="https://github.com/quzhiii/thesis-skills" class="nav-cta" target="_blank" rel="noopener">GitHub</a>
                 </div>
             </nav>
@@ -114,20 +116,6 @@
                                         <div class="note-box"><strong>你会得到</strong>文献质量检查结果、重复项提示和可导入的结构化报告。</div>
                                         <div class="note-box"><strong>不要误用</strong>它不负责读文献，也不生成综述内容。</div>
                                     </div>
-                                    <div class="io-block">
-                                        <div class="io-row">
-                                            <span class="io-label">输入</span>
-                                            <span class="io-value">EndNote/Zotero导出文件 + Word文档</span>
-                                        </div>
-                                        <div class="io-row">
-                                            <span class="io-label">运行</span>
-                                            <code class="io-value">python 00-bib-zotero/sync_from_word.py --project-root thesis --word-file thesis.docx --apply</code>
-                                        </div>
-                                        <div class="io-row">
-                                            <span class="io-label">输出</span>
-                                            <span class="io-value"><code>refs-import.bib</code>, <code>citation-mapping.json</code></span>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </article>
@@ -145,20 +133,6 @@
                                         <div class="note-box"><strong>适合时机</strong>需要换排版系统，或合作者使用不同工具时。</div>
                                         <div class="note-box"><strong>你会得到</strong>chapter 拆分结果、引用格式转换结果和迁移检查报告。</div>
                                         <div class="note-box"><strong>不要误用</strong>复杂表格和特殊版式仍可能需要手动调整。</div>
-                                    </div>
-                                    <div class="io-block">
-                                        <div class="io-row">
-                                            <span class="io-label">输入</span>
-                                            <span class="io-value">Word文档 + 目标LaTeX项目</span>
-                                        </div>
-                                        <div class="io-row">
-                                            <span class="io-label">运行</span>
-                                            <code class="io-value">python 02-latex-to-word/migrate_project.py --project-root thesis --word-file thesis.docx --apply</code>
-                                        </div>
-                                        <div class="io-row">
-                                            <span class="io-label">输出</span>
-                                            <span class="io-value">迁移后的LaTeX项目 + 迁移检查报告</span>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -179,20 +153,6 @@
                                         <div class="note-box"><strong>不要误用</strong>它不自动理解导师自然语言意见的真正含义。</div>
                                         <div class="note-box"><strong>继续往下</strong><a class="card-link" href="advisor-handoff.html">查看交导师场景页</a></div>
                                     </div>
-                                    <div class="io-block">
-                                        <div class="io-row">
-                                            <span class="io-label">输入</span>
-                                            <span class="io-value">Word反馈文件 + LaTeX项目</span>
-                                        </div>
-                                        <div class="io-row">
-                                            <span class="io-label">运行</span>
-                                            <code class="io-value">python 04-word-review-ingest/feedback_ingest.py --project-root thesis --input review-feedback.json</code>
-                                        </div>
-                                        <div class="io-row">
-                                            <span class="io-label">输出</span>
-                                            <span class="io-value"><code>review-todo-artifact.json</code>, <code>review-diff.md</code></span>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </article>
@@ -212,20 +172,6 @@
                                         <div class="note-box"><strong>不要误用</strong>检查规则仍要按学校、学院或期刊要求配置。</div>
                                         <div class="note-box"><strong>继续往下</strong><a class="card-link" href="submission-prep.html">查看送审前场景页</a></div>
                                     </div>
-                                    <div class="io-block">
-                                        <div class="io-row">
-                                            <span class="io-label">输入</span>
-                                            <span class="io-value">LaTeX项目 + ruleset</span>
-                                        </div>
-                                        <div class="io-row">
-                                            <span class="io-label">运行</span>
-                                            <code class="io-value">python run_check_once.py --project-root thesis --ruleset university-generic --skip-compile</code>
-                                        </div>
-                                        <div class="io-row">
-                                            <span class="io-label">输出</span>
-                                            <span class="io-value"><code>reports/run-summary.json</code> + 4个检查报告 + <code>reports/readiness-report.json</code></span>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </article>
@@ -243,20 +189,6 @@
                                         <div class="note-box"><strong>适合时机</strong>想尽快搭起答辩材料的骨架，给试讲留出时间。</div>
                                         <div class="note-box"><strong>你会得到</strong>Markdown 大纲、图表清单和讲稿备注草稿。</div>
                                         <div class="note-box"><strong>不要误用</strong>生成的是底稿和清单，不是最终 PPT，也不是逐字稿。</div>
-                                    </div>
-                                    <div class="io-block">
-                                        <div class="io-row">
-                                            <span class="io-label">输入</span>
-                                            <span class="io-value">LaTeX项目</span>
-                                        </div>
-                                        <div class="io-row">
-                                            <span class="io-label">运行</span>
-                                            <code class="io-value">python 17-defense-pack/generate_outline.py --project-root thesis --ruleset university-generic</code>
-                                        </div>
-                                        <div class="io-row">
-                                            <span class="io-label">输出</span>
-                                            <span class="io-value"><code>defense-outline.md</code>, <code>chapter-highlights.md</code>, <code>figure-inventory.md</code></span>
-                                        </div>
                                     </div>
                                 </div>
                             </div>

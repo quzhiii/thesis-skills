@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thesis Skills v1.0 | 确定性论文工作流系统</title>
+    <meta name="description" content="Thesis Skills v1.0 是一套确定性、可检查的论文工作流系统，覆盖文献接入、Word/LaTeX 交接、检查修复、审阅闭环、readiness gate、答辩前整理和规则包扩展。">
+    <link rel="stylesheet" href="editorial-theme.css">
+</head>
+<body>
+    <div class="page">
+        <div class="page-frame">
+            <span class="frame-corner tl"></span>
+            <span class="frame-corner tr"></span>
+            <span class="frame-corner bl"></span>
+            <span class="frame-corner br"></span>
+
+            <header class="issue-bar">
+                <div class="issue-block">
+                    <span class="issue-chip">Issue 010</span>
+                    <span>stable public story</span>
+                </div>
+                <div class="issue-title">
+                    <span class="issue-kicker">Thesis Skills</span>
+                    <span class="issue-note">v1.0.0</span>
+                </div>
+                <div class="issue-meta">
+                    <span>product / cn</span>
+                    <span>2026.04</span>
+                </div>
+            </header>
+
+            <nav class="site-nav" aria-label="主导航">
+                <a class="brand-link" href="index.html">
+                    <span class="brand-mark">TS</span>
+                    <span class="brand-copy">
+                        <strong>Thesis Skills</strong>
+                        <span>product home</span>
+                    </span>
+                </a>
+                <div class="nav-links">
+                    <a href="index.html" aria-current="page">首页</a>
+                    <a href="#problem">问题</a>
+                    <a href="#workflows">工作流</a>
+                    <a href="#boundaries">边界</a>
+                    <a href="#quick-start">快速上手</a>
+                    <a href="scenario-entry.html">场景入口</a>
+                    <a href="docs-home.html">文档</a>
+                    <a href="artifact-gallery.html">输出样例</a>
+                    <a href="https://github.com/quzhiii/thesis-skills" class="nav-cta" target="_blank" rel="noopener">GitHub</a>
+                </div>
+            </nav>
+
+            <main class="editorial-main">
+                <section id="problem" class="hero">
+                    <div class="hero-grid">
+                        <div class="hero-main">
+                            <div class="hero-tag">确定性论文工作流</div>
+                            <h1 class="hero-title">
+                                <span class="title-line">论文不是只靠最后通读</span>
+                                <span class="title-line title-strong">而是靠一串可检查的交付物推进</span>
+                            </h1>
+                            <p class="hero-subtitle">Thesis Skills v1.0 把文献接入、Word/LaTeX 交接、检查修复、审阅闭环、readiness 判断、答辩前整理和规则包扩展收束成一套有边界、可复现、可检查的 CLI 工作流。</p>
+                            <div class="hero-actions">
+                                <a class="btn btn-primary" href="#workflows">看当前能力</a>
+                                <a class="btn btn-secondary" href="docs-home.html">去文档入口</a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="workflows" class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">01 / workflows</div>
+                            <h2 class="section-title">v1.0 稳定公开工作流</h2>
+                        </div>
+                        <p class="section-intro">每条能力都对应真实入口和可检查 artifact，不靠隐藏状态或模糊承诺。</p>
+                    </div>
+                    <div class="card-grid grid-4">
+                        <article class="editorial-card">
+                            <div class="card-index">01</div>
+                            <h3 class="card-title">文献接入</h3>
+                            <p class="card-text">EndNote / Zotero 导入、预检、去重和稳定 refNNN 映射。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">02</div>
+                            <h3 class="card-title">Word / LaTeX 交接</h3>
+                            <p class="card-text">Word→LaTeX 迁移和审阅友好 LaTeX→Word 导出，并显式报告限制。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">03</div>
+                            <h3 class="card-title">检查与修复</h3>
+                            <p class="card-text">引用、语言、格式、内容、编译日志和 report-driven safe fixers。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">04</div>
+                            <h3 class="card-title">审阅与 readiness</h3>
+                            <p class="card-text">review diff、feedback ingest、TODO artifact 和 PASS/WARN/BLOCK gate。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">05</div>
+                            <h3 class="card-title">答辩前整理</h3>
+                            <p class="card-text">大纲、章节要点、图表清单、候选视觉材料和讲稿备注。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">06</div>
+                            <h3 class="card-title">规则包扩展</h3>
+                            <p class="card-text">学校/期刊规则包创建、草稿脚手架、lint、schema 和 scorecard。</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="boundaries" class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">02 / boundaries</div>
+                            <h2 class="section-title">它有边界，所以才可信</h2>
+                        </div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-card">
+                            <span class="metric-value">CLI-first</span>
+                            <span class="metric-label">不是 GUI / Web 编辑器</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">report-first</span>
+                            <span class="metric-label">检查器先写报告，修复器读报告</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">bounded</span>
+                            <span class="metric-label">不生成论文，不替代人工判断</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="quick-start" class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">03 / quick start</div>
+                            <h2 class="section-title">跑一次试试</h2>
+                        </div>
+                    </div>
+                    <div class="spotlight-grid">
+                        <article class="spotlight-panel">
+                            <pre><code>python run_check_once.py --project-root examples/minimal-latex-project --ruleset university-generic --skip-compile</code></pre>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="next" class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">04 / next</div>
+                            <h2 class="section-title">继续看</h2>
+                        </div>
+                    </div>
+                    <div class="cta-actions">
+                        <a class="btn btn-primary" href="scenario-entry.html">去场景入口 →</a>
+                        <a class="btn btn-secondary" href="docs-home.html">去文档 →</a>
+                        <a class="btn btn-ghost" href="artifact-gallery.html">看输出样例 →</a>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="page-footer">
+                <span>Thesis Skills / v1.0.0</span>
+                <span>deterministic thesis workflows / bounded artifacts / rule packs</span>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>
