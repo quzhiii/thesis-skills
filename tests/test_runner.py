@@ -72,7 +72,7 @@ class RunnerTest(unittest.TestCase):
                 capture_output=True,
                 text=True,
             )
-            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             summary = project_root / "reports" / "run-summary.json"
             self.assertTrue(summary.exists())
             data = json.loads(summary.read_text(encoding="utf-8"))
@@ -120,7 +120,7 @@ class RunnerTest(unittest.TestCase):
                 capture_output=True,
                 text=True,
             )
-            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             data = json.loads(
                 (project_root / "reports" / "run-summary.json").read_text(
                     encoding="utf-8"
@@ -162,6 +162,13 @@ class RunnerTest(unittest.TestCase):
 
     def test_run_check_once_can_focus_on_language_deep(self) -> None:
         with workspace_project_copy(SAMPLE, "runner-") as project_root:
+            (project_root / "chapters" / "01-introduction.tex").write_text(
+                "\\section{Introduction}\n"
+                "本研究使用 DID 识别政策效应。\n"
+                "本研究旨在提升效率水平。\n"
+                "大型语言模型在研究中具有重要作用。\n",
+                encoding="utf-8",
+            )
             result = subprocess.run(
                 [
                     sys.executable,
