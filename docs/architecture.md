@@ -12,6 +12,7 @@ It is a deterministic workflow layer for academic writing projects that need:
 - bounded review-loop workflows for revision rounds and feedback handling
 - bounded compile-log parsing for friendlier build diagnostics
 - bounded pre-submission gating from existing workflow artifacts
+- bounded defense-prep artifact generation
 - repeatable, inspectable checks
 - bounded, report-driven fixes
 - reusable rule packs for schools and journals
@@ -30,9 +31,10 @@ The current repository is easiest to understand as layered workflows:
 4. Review-loop workflows
 5. Compile-log diagnostics
 6. Pre-submission gating
-7. Deterministic checking
-8. Report-driven fixing
-9. Rule-pack onboarding and reuse
+7. Defense-prep artifacts
+8. Deterministic checking
+9. Report-driven fixing
+10. Rule-pack onboarding and reuse
 
 These layers map to concrete folders and scripts rather than abstract concepts.
 
@@ -48,6 +50,7 @@ thesis-skills/
 ├── 04-word-review-ingest/     Bounded feedback normalization workflow
 ├── 15-check-compile/          Compile-log diagnostics
 ├── 16-check-readiness/        Pre-submission readiness gate
+├── 17-defense-pack/           Bounded defense-prep artifact generators
 ├── 10-check-references/       Deterministic reference checks
 ├── 11-check-language/        Baseline language checks
 ├── 12-check-format/          Format checks
@@ -128,7 +131,7 @@ Core support:
 
 Important boundary:
 
-- `review-friendly` is the only first-class implemented export mode in `v0.6.x`
+- `review-friendly` is the only first-class implemented export mode in the v1.0 public contract
 - `submission-friendly` exists as a profile contract but is not yet fully implemented
 - export reports are mandatory; dry-run without `--apply` is the default
 
@@ -201,7 +204,36 @@ Important boundary:
 - it must reuse existing structured artifacts instead of re-implementing lower-level analysis
 - missing evidence should remain visible rather than being treated as `PASS`
 
-### 7. Deterministic Checking
+### 7. Defense-Prep Artifacts
+
+Purpose:
+
+- generate bounded preparation artifacts for defense or presentation planning
+- separate content inventory from final slide design
+- keep outputs editable and inspectable instead of pretending to generate a finished defense deck
+
+Main entrypoints:
+
+- `17-defense-pack/generate_outline.py`
+- `17-defense-pack/generate_chapter_highlights.py`
+- `17-defense-pack/generate_figure_inventory.py`
+- `17-defense-pack/generate_candidate_tables_diagrams.py`
+- `17-defense-pack/generate_talk_prep_notes.py`
+
+Core support:
+
+- `core/defense_outline.py`
+- `core/chapter_highlights.py`
+- `core/figure_inventory.py`
+- `core/candidate_visuals.py`
+- `core/talk_prep_notes.py`
+
+Important boundary:
+
+- this layer produces preparation artifacts, not final PPT files
+- presentation strategy, final slide design, and live Q&A preparation remain human-owned
+
+### 8. Deterministic Checking
 
 Purpose:
 
@@ -235,7 +267,7 @@ Important boundary:
   language issues
 - deep findings are intentionally not equivalent to final editorial judgment
 
-### 8. Report-Driven Fixing
+### 9. Report-Driven Fixing
 
 Purpose:
 
@@ -261,7 +293,7 @@ Important boundary:
 - deep patches validate spans and skip `review_required` items by default
 - the system prefers conservative edits over broad rewrites
 
-### 9. Rule-Pack Onboarding And Reuse
+### 10. Rule-Pack Onboarding And Reuse
 
 Purpose:
 
@@ -273,11 +305,13 @@ Main entrypoints:
 
 - `90-rules/create_pack.py`
 - `90-rules/create_draft_pack.py`
+- `90-rules/lint_pack.py`
 
 Core support:
 
 - `core/rules.py`
 - `core/pack_generator.py`
+- `core/pack_linter.py`
 - `core/yamlish.py`
 
 ## Shared Core Contracts
@@ -358,6 +392,9 @@ Non-responsibilities:
 - conservative automatic fixes
 - review-friendly patch preview
 - configurable rule-pack workflows
+- readiness summaries from existing artifacts
+- bounded defense-prep artifacts
+- rule-pack lint and scorecard checks
 
 ### What Thesis Skills Is Not
 
@@ -365,6 +402,7 @@ Non-responsibilities:
 - a GUI-first editing tool
 - a general-purpose AI writing assistant
 - a final thesis sign-off system
+- an automatic final defense-slide generator
 
 The `deep language` path in particular should be described as a
 high-confidence screening assistant plus human review aid. It is valuable for
@@ -399,8 +437,9 @@ basis for final thesis language polish.
 
 1. Start from `university-generic` or `journal-generic`
 2. Adjust `pack.yaml`, `rules.yaml`, and `mappings.yaml`
-3. Validate on `examples/minimal-latex-project`
-4. Add tests before expanding scope
+3. Run `python 90-rules/lint_pack.py --pack-path 90-rules/packs/<pack-id>`
+4. Validate on `examples/minimal-latex-project`
+5. Add tests before expanding scope
 
 ## Extension Rules
 

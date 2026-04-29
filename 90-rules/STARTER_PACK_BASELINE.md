@@ -1,8 +1,8 @@
 # Starter Pack Baseline
 
-This document records the **current repository baseline** for rule-pack starters before `v0.8.1` adds lint, completeness, or scorecard tooling.
+This document records the **current repository baseline** for rule-pack starters in the v1.0 public contract.
 
-It is intentionally descriptive, not aspirational: the goal is to state what a starter pack currently means in this repo, which assumptions are already explicit, and which assumptions are only implied by the code path.
+It is intentionally descriptive, not aspirational: the goal is to state what a starter pack currently means in this repo, which assumptions are explicit, and which assumptions are checked by the current lint / completeness / schema-consistency tooling.
 
 ---
 
@@ -16,19 +16,21 @@ Starter packs currently live under `90-rules/packs/<pack-id>/`.
 |---|---|---:|---|
 | `university-generic` | `university-thesis` | `true` | Generic thesis starter for new university packs |
 | `journal-generic` | `journal` | `true` | Generic journal starter for new submission packs |
-| `tsinghua-thesis` | `university-thesis` | `false` | Concrete example pack, not treated as a starter baseline in metadata |
+| `tsinghua-thesis` | `university-thesis` | `false` | Concrete Tsinghua example pack, not treated as a starter baseline in metadata |
+| `demo-university-thesis` | `university-thesis` | `false` | Concrete non-Tsinghua example pack for extension/story parity |
 
 Sources:
 
 - `90-rules/packs/university-generic/pack.yaml`
 - `90-rules/packs/journal-generic/pack.yaml`
 - `90-rules/packs/tsinghua-thesis/pack.yaml`
+- `90-rules/packs/demo-university-thesis/pack.yaml`
 
 ---
 
-## 2. Minimal pack shape that the runtime actually loads
+## 2. Minimal pack shape the runtime loads
 
-The runtime loader in `core/rules.py` currently expects exactly three files in a pack directory:
+The runtime loader in `core/rules.py` expects three files in a pack directory:
 
 - `pack.yaml`
 - `rules.yaml`
@@ -39,25 +41,63 @@ Code path:
 - `core/rules.py::load_rule_pack()` loads those three files directly
 - `core/rules.py::find_rule_pack()` resolves packs from `90-rules/packs/<ruleset>`
 
-That means the current runtime contract is file-presence-based, not schema-enforced.
-
-### What is explicit today
-
-- Pack directories are resolved by folder name.
-- A pack is considered loadable if those three YAML files exist and can be parsed.
-- There is no dedicated pack linter yet.
-- There is no separate completeness checker yet.
-- There is no schema-consistency gate beyond “can these YAML files be loaded?”
-
-### What is **not** explicit yet
-
-- No repo-level enforcement that `pack.yaml` contains a complete required field set.
-- No repo-level enforcement that `rules.yaml` exposes all expected checker sections.
-- No repo-level enforcement that `mappings.yaml` follows one normalized internal structure.
+The runtime contract remains file-presence and parseability based. The lint contract adds stronger review-time checks before a pack is trusted or shared.
 
 ---
 
-## 3. Starter-pack creation flow as it exists now
+## 3. Current lint / scorecard baseline
+
+Use:
+
+```bash
+python 90-rules/lint_pack.py --pack-path 90-rules/packs/<pack-id>
+```
+
+Current implementation:
+
+- `90-rules/lint_pack.py`
+- `core/pack_linter.py`
+- `tests/test_pack_linter.py`
+
+The current linter checks:
+
+1. Required files exist:
+   - `pack.yaml`
+   - `rules.yaml`
+   - `mappings.yaml`
+2. Required `pack.yaml` fields exist:
+   - `id`
+   - `kind`
+   - `display_name`
+   - `version`
+   - `precedence`
+   - `starter`
+3. Baseline `kind` values are valid:
+   - `university-thesis`
+   - `journal`
+4. `starter` is a boolean.
+5. `pack.yaml` `id` matches the directory name.
+6. `rules.yaml` exposes required top-level sections:
+   - `project`
+   - `reference`
+   - `language`
+7. Required rule sections are mappings.
+8. `mappings.yaml` matches one of the currently accepted shapes:
+   - starter-pack shape: `mappings`
+   - draft-pack shape: `source_template_mappings` + `chapter_role_mappings`
+
+The current scorecard summarizes:
+
+- `required_files`
+- `metadata_completeness`
+- `baseline_completeness`
+- `schema_consistency`
+- `overall_status`
+- `finding_counts`
+
+---
+
+## 4. Starter-pack creation flow
 
 ### `create_pack.py`
 
@@ -84,26 +124,22 @@ Current explicit constraints from `90-rules/create_pack.py`:
 Underlying behavior from `core/pack_generator.py::create_rule_pack()`:
 
 1. Copy the entire starter directory.
-2. Rewrite only these `pack.yaml` fields:
+2. Rewrite these `pack.yaml` fields:
    - `id`
    - `display_name`
    - `kind`
    - `starter` → forced to `false`
 3. Re-load the pack with `load_rule_pack()` to confirm the copied files are still parseable.
 
-### Current implication
-
-The starter-pack mechanism is a **copy-and-rewrite scaffold**, not a schema migration system.
-
-Any structure that is not explicitly rewritten is inherited from the starter as-is.
+The starter-pack mechanism is a **copy-and-rewrite scaffold**, not a schema migration system. Any structure that is not explicitly rewritten is inherited from the starter as-is.
 
 ---
 
-## 4. Draft-pack flow and the current extension assumption
+## 5. Draft-pack flow and extension assumption
 
 `90-rules/create_draft_pack.py` wraps `core/pack_generator.py::create_draft_pack()`.
 
-It accepts intake metadata and currently expects fields documented in `90-rules/THESIS_RULE_PACKS.md`, including:
+It accepts intake metadata and expects fields documented in `90-rules/THESIS_RULE_PACKS.md`, including:
 
 - `pack_id`
 - `display_name`
@@ -116,34 +152,21 @@ It accepts intake metadata and currently expects fields documented in `90-rules/
 - `word_style_mappings`
 - `chapter_role_mappings`
 
-### Important current assumption
-
-`create_draft_pack()` writes a new `mappings.yaml` using this structure:
+`create_draft_pack()` writes a `mappings.yaml` using this structure:
 
 - `source_template_mappings`
 - `chapter_role_mappings`
 
-But the existing starter packs currently use a different baseline shape in `mappings.yaml`, for example:
+Existing starter packs use a different baseline shape in `mappings.yaml`, for example:
 
 - `mappings.source_styles`
 - `mappings.latex_roles`
 
-Example source:
-
-- `90-rules/packs/university-generic/mappings.yaml`
-
-### Why this matters
-
-This is the clearest current extension assumption gap:
-
-- the runtime only checks that `mappings.yaml` parses,
-- but the repository does **not** yet enforce one normalized mapping schema across starter packs and draft-generated packs.
-
-`v0.8.1` should treat this as a documentation-first hardening target before adding stronger validation.
+The current linter intentionally accepts both shapes. This preserves the real repo state without pretending a single normalized mapping schema exists yet.
 
 ---
 
-## 5. Metadata fields already visible in starter packs
+## 6. Metadata fields visible in starter packs
 
 The current `pack.yaml` starter baseline visibly includes:
 
@@ -154,21 +177,13 @@ The current `pack.yaml` starter baseline visibly includes:
 - `precedence`
 - `starter`
 
-This is explicit in:
-
-- `90-rules/packs/university-generic/pack.yaml`
-- `90-rules/packs/journal-generic/pack.yaml`
-- `90-rules/packs/tsinghua-thesis/pack.yaml`
-
-### Extension assumption
-
-For now, a third-party pack should assume those fields are part of the practical baseline, even though the repo does not yet have a dedicated validator that rejects incomplete metadata.
+For v1.0, a third-party pack should treat these fields as part of the practical baseline. Missing fields are lint errors.
 
 ---
 
-## 6. Rules baseline visible in the current starters
+## 7. Rules baseline visible in starters
 
-The current starter packs are not empty templates; they already embed practical rule defaults.
+The current starter packs are not empty templates; they embed practical rule defaults.
 
 Examples visible in `rules.yaml` files:
 
@@ -184,46 +199,48 @@ Comparative examples:
 - `90-rules/packs/university-generic/rules.yaml`
 - `90-rules/packs/journal-generic/rules.yaml`
 - `90-rules/packs/tsinghua-thesis/rules.yaml`
-
-### Extension assumption
+- `90-rules/packs/demo-university-thesis/rules.yaml`
 
 Today, “starter pack” means more than metadata scaffolding:
 
-- it carries a default file-layout assumption,
-- a default reference-check posture,
-- and a default language/style checking posture.
+- it carries a default file-layout assumption
+- it carries a default reference-check posture
+- it carries a default language/style checking posture
 
-So extending from a starter is currently a policy inheritance decision, not just a folder bootstrap action.
+Extending from a starter is therefore a policy inheritance decision, not just a folder bootstrap action.
 
 ---
 
-## 7. What `v0.8.1` should assume as baseline from this point
+## 8. Current v1.0 baseline summary
 
-Before adding lint or scorecards, treat the following as the documented baseline:
+Treat the following as the documented baseline:
 
 1. A pack lives at `90-rules/packs/<pack-id>/`.
-2. A loadable pack currently means three parseable YAML files:
+2. A loadable pack has three parseable YAML files:
    - `pack.yaml`
    - `rules.yaml`
    - `mappings.yaml`
-3. The current starter inventory is:
+3. The starter inventory is:
    - `university-generic`
    - `journal-generic`
+4. Concrete example packs include:
    - `tsinghua-thesis`
-4. Only the first two are marked `starter: true` in metadata.
-5. Pack generation is currently copy-first, not schema-first.
-6. Mapping-schema consistency is **not** fully normalized yet.
-7. Any new lint/completeness tooling should check against this repo-state baseline instead of inventing a broader contract first.
+   - `demo-university-thesis`
+5. Pack generation is copy-first, not schema-first.
+6. The repository currently accepts two mapping shapes:
+   - starter-pack shape
+   - draft-pack shape
+7. `lint_pack.py` is the current review-time quality gate for required files, metadata completeness, baseline completeness, schema consistency, and scorecard status.
 
 ---
 
-## 8. Immediate hardening implications
+## 9. Remaining hardening implications
 
-This baseline suggests that the first `v0.8.1` hardening passes should answer four concrete questions:
+The current baseline intentionally does not claim a full packaging ecosystem. Future hardening may still address:
 
-1. Does every pack have the three required YAML files?
-2. Does every `pack.yaml` include the baseline metadata fields already used by current starters?
-3. Does every starter-generated or draft-generated pack produce a mapping file shape that the repo is willing to support long-term?
-4. Can we distinguish “starter baseline”, “concrete example pack”, and “draft-generated pack” without relying only on folder naming and loose convention?
+1. A formal pack export bundle format.
+2. A pack registry or publish command.
+3. A dedicated portability score beyond the current lint scorecard summary.
+4. A fully normalized internal mapping schema.
 
-Those are the questions the later lint / completeness / schema-consistency work should formalize.
+Until those exist, public docs should describe the current bounded model: local packs, Git-tracked evolution, handoff file sets, and lint reports.

@@ -18,13 +18,21 @@ Required files:
 
 Starter packs included:
 
-- `tsinghua-thesis`
 - `university-generic`
 - `journal-generic`
 
-Concrete non-Tsinghua example pack:
+Concrete example packs:
 
+- `tsinghua-thesis`
 - `demo-university-thesis`
+
+Quality gate before trusting or sharing a pack:
+
+```bash
+python 90-rules/lint_pack.py --pack-path 90-rules/packs/<pack-id>
+```
+
+The current lint report summarizes required files, metadata completeness, baseline completeness, schema consistency, overall status, and finding counts.
 
 When onboarding a new school or journal, copy the closest starter pack and then confirm ambiguous rules manually.
 

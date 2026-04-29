@@ -2,9 +2,9 @@
 
 ## Release Positioning
 
-`v0.7.0` is the current public baseline for `thesis-skills`.
+`v1.0.0` is the current public-story stabilization target for `thesis-skills`.
 
-The repository now presents a coherent end-to-end workflow story:
+The repository now presents one coherent, bounded workflow system:
 
 ```text
 bibliography intake
@@ -13,15 +13,13 @@ bibliography intake
 -> report-driven fixing
 -> review-first LaTeX-to-Word export
 -> bounded review loop
+-> compile-log diagnostics
 -> readiness gate
+-> defense-prep artifacts
+-> reusable rule-pack creation and linting
 ```
 
-The roadmap after `v0.7.0` is no longer organized around filling major capability gaps. It focuses on:
-
-- hardening existing workflow contracts
-- making the repo easier for real thesis users to understand
-- improving scenario-first adoption and presentation
-- preparing a stable `v1.0.0` public narrative
+`v1.0.0` does not mean a broad new feature expansion. It means the public contract is stable: README, roadmap, docs, site pages, manifests, examples, and actual code paths should all describe the same capabilities with the same names and limits.
 
 ## Product Direction
 
@@ -35,9 +33,11 @@ It is a deterministic, inspectable, report-driven workflow system for academic w
 - bounded review-loop workflows for revision rounds
 - bounded compile-log parsing
 - bounded pre-submission readiness gating
+- bounded defense-prep artifact generation
 - repeatable deterministic checks
 - bounded report-driven fixes
 - reusable rule packs for schools and journals
+- starter-pack linting, baseline completeness checks, schema-consistency checks, and scorecard output
 
 Design rules that stay in effect:
 
@@ -50,11 +50,12 @@ Design rules that stay in effect:
 
 ## Current Workflow Status
 
-All listed workflow families are publicly available in `v0.7.0`:
+All listed workflow families are part of the `v1.0.0` public contract:
 
 | Workflow | Status | Entrypoint |
 |---|---|---|
 | Zotero bibliography sync | Stable | `00-bib-zotero/sync_from_word.py` |
+| Zotero bibliography quality check | Stable | `00-bib-zotero/check_bib_quality.py` |
 | EndNote import-first intake | Stable | `00-bib-endnote/import_library.py` |
 | EndNote preflight check | Stable | `00-bib-endnote/check_endnote_export.py` |
 | Word-to-LaTeX migration | Stable | `01-word-to-latex/migrate_project.py` |
@@ -68,213 +69,87 @@ All listed workflow families are publicly available in `v0.7.0`:
 | Deep language review | Stable | `14-check-language-deep/check_language_deep.py` |
 | Compile-log diagnostics | Stable | `15-check-compile/check_compile.py` |
 | Pre-submission readiness gate | Stable | `16-check-readiness/check_readiness.py` |
+| Defense outline | Stable | `17-defense-pack/generate_outline.py` |
+| Defense chapter highlights | Stable | `17-defense-pack/generate_chapter_highlights.py` |
+| Defense figure inventory | Stable | `17-defense-pack/generate_figure_inventory.py` |
+| Defense candidate tables/diagrams | Stable | `17-defense-pack/generate_candidate_tables_diagrams.py` |
+| Defense talk-prep notes | Stable | `17-defense-pack/generate_talk_prep_notes.py` |
 | Reference fixing | Stable | `20-fix-references/fix_references.py` |
 | Safe language fixing | Stable | `21-fix-language-style/fix_language_style.py` |
 | Format fixing | Stable | `22-fix-format-structure/fix_format_structure.py` |
 | Deep patch preview | Stable | `24-fix-language-deep/fix_language_deep.py` |
 | Rule-pack creation | Stable | `90-rules/create_pack.py` |
+| Draft rule-pack creation | Stable | `90-rules/create_draft_pack.py` |
+| Rule-pack lint / scorecard | Stable | `90-rules/lint_pack.py` |
 
-### Not yet implemented
+### Current Boundaries
 
-| Capability | Notes |
+| Capability | Current boundary |
 |---|---|
-| EndNote Word field-code parser | Traveling Library extraction and direct Word sync not yet available |
-| Submission-friendly export profile | `review-friendly` is the only fully implemented export mode |
+| Submission-friendly Word export | `review-friendly` is the first-class implemented export profile; submission-friendly export remains a stricter future path |
 | GUI or web editor | Repository is CLI-first |
+| Natural-language advisor intent | Feedback ingest normalizes bounded inputs; it does not automatically understand all advisor intent |
+| Full compile orchestration | Compile support parses existing logs; it does not replace `latexmk`, `xelatex`, or `bibtex` |
+| Pack publishing ecosystem | Rule packs have local/Git/handoff workflows; there is no formal registry or versioned export bundle yet |
+| AI writing | The repository checks, organizes, and fixes bounded issues; it does not generate or rewrite thesis content |
 
 ## Release History (Compact)
 
 | Release | Theme |
 |---|---|
 | v0.3.0 | Public repository restructure, bilingual README, CI, Zotero as primary bib path |
-| v0.4.0 | EndNote XML/RIS/BibTeX import, DOI deduplication, `refNNN` stability, 45 tests |
-| v0.5.0 | Deterministic language lint layer (10+ rules) |
+| v0.4.0 | EndNote XML/RIS/BibTeX import, DOI deduplication, `refNNN` stability |
+| v0.5.0 | Deterministic language lint layer |
 | v0.5.1 | Deep language review: sentence-aware, cross-file screening |
 | v0.5.2 | Deep patch preview: span-based selective fixes |
 | v0.6.0 | Review-friendly LaTeX-to-Word export, compile-log parsing, review-loop workflows |
 | v0.7.0 | Pre-submission readiness gate (`PASS / WARN / BLOCK`), advisor-handoff and submission-prep modes |
+| v0.7.1 | Review-summary hardening and richer review digest artifacts |
+| v0.7.2 | Feedback-ingest and readiness-gate calibration |
+| v0.8.0 | Bounded defense-prep artifacts and static showcase surfaces |
+| v0.8.1 | Rule-pack ecosystem hardening: lint, completeness, schema consistency, scorecard, and concrete non-Tsinghua example pack |
+| v1.0.0 | Stable public story across README, roadmap, site, manifest, rule-pack docs, and actual code paths |
 
-## Roadmap After v0.7.0
+## V1.0 Stabilization Scope
 
-### v0.7.1 — Review Summary Hardening
+### Primary goal
 
-**Primary goal:** Make the current review-loop story clearer and more useful without drifting into unbounded auto-edit behavior.
+Ship a stable public narrative covering intake, migration, export, review, compile diagnostics, readiness, defense prep, and extension contracts.
 
-**Must-have:**
+### Acceptance
 
-- chapter-level review summaries
-- section-level review summaries where defensible
-- richer review digest artifacts
-- review TODO generation improvements
-- revision-summary artifact improvements
-- scenario docs V1 for review, export, and readiness workflows
-- landing page V1
+`v1.0.0` is complete when:
 
-**Should-have:**
+1. README, roadmap, docs, landing page, manifest, and actual code paths all match.
+2. The repository does not claim support that does not exist.
+3. Output artifacts are inspectable and reproducible across main workflows.
+4. English and Chinese public docs have parity on version, workflows, commands, limits, and links.
+5. The site tells the same bounded story as the GitHub README.
+6. Rule-pack docs describe the current lint/completeness/schema/scorecard behavior in present tense.
 
-- clearer linkage from review findings to changed scope
-- better repeated-issue grouping and clustering
-- more reviewer-friendly chapter digest output
+### Active cleanup checklist
 
-**Must not:**
-
-- widen to generic collaborative editing
-- auto-merge ambiguous comments
-- expand into broad patch automation by default
-- mix review coordination with export mechanics
-
-**Acceptance:** This release is complete when review summaries are more informative at chapter/section granularity, TODO-oriented artifacts are inspectable and reproducible, docs and landing page explain the review loop in scenario language, and no wording suggests the repo automatically "understands all advisor intent."
-
-Current progress within this slice:
-
-- chapter-level review summaries are now implemented and tested through the review-diff artifact path
-- review digest artifacts now surface richer priority / category / TODO-oriented counts
-- revision summary outputs now expose accepted / pending / blocked counts through the fix-cycle path
-- scenario docs V1 and landing page V1 surfaces are now in place under `site/`
-- section-level review summaries still remain optional follow-up work if a stable bounded contract emerges
-
----
-
-### v0.7.2 — Feedback Ingest And Gate Calibration
-
-**Primary goal:** Connect bounded feedback ingestion with clearer readiness signaling.
-
-**Must-have:**
-
-- Word review ingest contract hardening
-- feedback parser and importer hardening
-- review-debt to readiness linkage calibration
-- clearer `PASS / WARN / BLOCK` explanation output
-- richer final gate summary artifacts
-
-**Should-have:**
-
-- source reference tracking inside feedback-ingest artifacts
-- ambiguity markers and blocked-item surfaces
-- better explanation of "why this thesis is not yet ready"
-
-**Must not:**
-
-- accept all freeform review comments as machine-safe instructions
-- silently apply high-judgement feedback
-- position the system as a collaborative platform replacement
-
-**Acceptance:** This release is complete when feedback-ingest artifacts are bounded and auditable, readiness output clearly reflects review debt and unresolved blockers, ambiguous items remain explicitly review-gated, and tests cover both ingest and gate summary boundaries.
-
-Current progress within this slice:
-
-- readiness gate now consumes both review-diff digest evidence and bounded feedback-ingest debt detail
-- ingest-only unresolved blocked / todo debt now produces mode-sensitive `advisor-handoff => WARN` and `submission-prep => BLOCK` behavior
-- readiness explanations now surface bounded source references and ingest-driven debt detail without promoting candidate patches into blockers by default
-- broader importer / schema hardening remains subsequent polish work if the ingest surface expands beyond bounded JSON input
-
----
-
-### v0.8.0 — Defense Pack And Showcase
-
-**Primary goal:** Make `thesis-skills` easier to understand from the outside while adding a bounded defense-prep workflow.
-
-**Must-have:**
-
-- defense outline artifact
-- chapter highlights for defense prep
-- figure inventory for slides
-- candidate tables and diagrams inventory
-- talk-prep notes artifact
-- landing page V2
-- artifact demo gallery
-- docs homepage and scenario entry page
-
-**Should-have:**
-
-- advisor handoff scenario page
-- submission prep scenario page
-- clearer before/after artifact examples
-
-**Must not:**
-
-- promise automatic full PPT generation
-- let showcase pages market unsupported functionality
-- hide workflow limitations on export/review fidelity
-
-**Acceptance:** This release is complete when defense prep produces useful bounded artifacts, the landing page makes the repo understandable to non-technical thesis users, and showcase materials are grounded in real repo outputs.
-
-Current progress within this slice:
-
-- defense outline artifact is now implemented as a bounded defense-prep artifact
-- chapter highlights and figure inventory are now implemented as bounded defense-prep artifacts
-- candidate tables and diagrams inventory is now implemented as a bounded candidate-selection artifact
-- talk-prep notes are now implemented as bounded speaker-support notes
-- artifact demo gallery, docs homepage, and scenario entry page are now implemented as showcase-facing surfaces
-- dedicated `advisor-handoff` and `submission-prep` scenario pages are now implemented as editorial static guides
-- a bounded before/after comparison section is now implemented inside `site/artifact-gallery.html#before-after`
-- the current showcase landing page entry is live in `site/index.html`, and the main site surfaces now describe the v0.8 showcase in a more consistent editorial vocabulary
-
----
-
-### v0.8.1 — Rule-Pack Ecosystem Hardening
-
-**Primary goal:** Strengthen the extension and maintenance story.
-
-**Must-have:**
-
-- pack lint checks
-- completeness checks
-- schema consistency checks
-- pack maintainability and portability scorecard
-- mixed workflow integration docs
-- more explicit example packs
-
-**Should-have:**
-
-- stronger non-Tsinghua examples
-- guidance for third-party pack contributors
-- clearer pack acceptance criteria
-
-**Must not:**
-
-- overengineer the pack system before lint/scorecard value is visible
-- widen generic workflows to solve school-specific edge cases too early
-
-**Acceptance:** This release is complete when starter packs can be evaluated with explicit quality signals, docs make extension safer and easier, and ecosystem hardening does not distort generic workflow policy.
-
-Current progress within this slice:
-
-- starter-pack baseline and extension assumptions are now documented in `90-rules/STARTER_PACK_BASELINE.md`
-- a first baseline pack lint command now exists at `90-rules/lint_pack.py`
-- the first completeness checks now enforce top-level presence for baseline `rules.yaml` and `mappings.yaml` sections
-- the first schema-consistency checks now accept the two currently observed mapping shapes and reject obvious top-level type mismatches
-- the first scorecard output now summarizes required files, metadata completeness, baseline completeness, schema consistency, and finding counts in the lint report payload
-- mixed local / Git / export pack maintenance workflows are now documented in `90-rules/MIXED_PACK_WORKFLOWS.md`
-- a concrete non-Tsinghua example pack now exists at `90-rules/packs/demo-university-thesis`
-
----
-
-### v1.0.0 — Stable Public Story
-
-**Primary goal:** Ship a stable public narrative covering intake, migration, export, review, readiness, defense prep, and extension contracts.
-
-**Acceptance:** `v1.0.0` is complete when:
-
-1. README, roadmap, docs, landing page, and actual code paths all match
-2. the repository does not claim support that does not exist
-3. output artifacts are inspectable and reproducible across main workflows
-4. the landing page and GitHub positioning tell the same story
-5. the repo reads as one coherent system rather than a loose set of scripts
+- [ ] Align root `README.md` with the v1.0 public contract.
+- [ ] Align `README.zh-CN.md` with the same contract in native Chinese wording.
+- [ ] Align `skills-manifest.json` and package metadata with the v1.0 version.
+- [ ] Align `site/` pages and static copy sources with the v1.0 scope.
+- [ ] Align `90-rules/` docs with current lint and scorecard behavior.
+- [ ] Sweep public examples for stale CLI flags such as `--rules` instead of `--ruleset`.
+- [ ] Keep historical planning docs as history unless they are linked as current guidance.
 
 ## Showcase And Scenario Track
 
-The repository already has a scenario-first copy base at `site/copy-source.md`. This track runs parallel to core workflow hardening:
+The repository has a scenario-first static site under `site/`:
 
-| Milestone | Status |
+| Surface | Status |
 |---|---|
-| Landing page V1 copy source | Existing in `site/copy-source.md` |
-| Scenario cards (Word review, compile, feedback, readiness) | Existing in `site/copy-source.md` |
-| Artifact showcase examples | Existing in `site/copy-source.md` |
-| v0.7 scope boundaries section | Existing in `site/copy-source.md` |
-| Static HTML landing page | Existing in `site/index.html` |
+| Static landing page | Existing in `site/index.html` |
 | Artifact demo gallery | Existing in `site/artifact-gallery.html` |
-| Docs homepage / scenario hub | Existing in `site/docs-home.html` and `site/scenario-entry.html` |
+| Docs homepage | Existing in `site/docs-home.html` |
+| Scenario hub | Existing in `site/scenario-entry.html` |
+| Advisor handoff scenario | Existing in `site/advisor-handoff.html` |
+| Submission prep scenario | Existing in `site/submission-prep.html` |
+| Legacy copy source | Existing in `site/copy-source.md`; should be treated as editable source text, not as a separate release baseline |
 
 Showcase work must follow the same bounded philosophy as code: no marketing copy that claims support the repo cannot prove.
 
@@ -282,33 +157,27 @@ Showcase work must follow the same bounded philosophy as code: no marketing copy
 
 | Track | User Value | Strategic Value | Risk | Priority |
 |---|---|---|---|---|
-| Review summary hardening (v0.7.1) | High | High | Low-Medium | P0 |
-| Feedback ingest + gate calibration (v0.7.2) | High | High | Medium | P0 |
-| Landing page / scenario docs V1 | High | High | Low | P0 |
-| Defense pack (v0.8.0) | Medium | Medium | Medium | P1 |
-| Rule-pack lint / scorecard (v0.8.1) | Medium | Medium | Medium | P1 |
-| Mixed workflow integration docs | Medium | Medium | Low | P1 |
+| Public-story consistency | High | High | Low-Medium | P0 |
+| Bilingual README parity | High | High | Low | P0 |
+| Site/README/roadmap alignment | High | High | Low | P0 |
+| Rule-pack docs present-tense cleanup | Medium | High | Low | P1 |
+| Link and command integrity sweep | Medium | High | Low | P1 |
 
 ## Suggested Execution Order
 
 Given the current repository state, the next work should proceed in this order:
 
-1. finish the remaining `v0.8.0` public-surface polish
-   - clearer before/after artifact examples
-   - landing-page / site wording sync so `v0.8` surfaces describe themselves consistently
-2. start `v0.8.1` rule-pack ecosystem hardening
-   - pack lint baseline
-   - completeness and schema-consistency checks
-   - mixed workflow integration docs
-3. use `v1.0.0` as a coherence and stabilization pass
-   - align README, roadmap, landing page, docs, and manifest
-   - remove stale version wording and historical drift
-
-Remaining `v0.7.x` work is now polish-oriented rather than a missing-capability gap: section-level summaries remain optional follow-up work, and ingest contract hardening can continue incrementally without reopening product scope.
+1. align roadmap and release positioning around `v1.0.0`
+2. align package and manifest version metadata
+3. align English README as the primary public contract
+4. align Chinese README with parity on workflows, commands, limitations, and rule-pack hardening
+5. align `site/` pages with the same version and capability story
+6. align `90-rules/` docs with current lint/completeness/schema/scorecard behavior
+7. run grep/link/test verification before treating the cleanup as complete
 
 ## Cross-Release Acceptance Gates
 
-Every release in this roadmap is only complete when:
+Every release is only complete when:
 
 1. docs, manifest, landing page, and actual code paths match
 2. the repository does not claim support that does not exist
@@ -319,5 +188,5 @@ Every release in this roadmap is only complete when:
 
 ## Planning References
 
-- `docs/plans/thesis-skills-roadmap-v2.md` — full strategic roadmap after v0.7.0
-- `docs/plans/thesis-skills-agent-next-steps-prompt.md` — agent execution prompt for the next packaging and hardening cycle
+- `docs/plans/2026-04-27-post-sync-next-stage-plan.md` — internal handoff that identified `v1.0.0` as the coherence/stabilization gate
+- `docs/plans/thesis-skills-roadmap-v2.md` — historical strategic roadmap after the public `v0.7.0` baseline

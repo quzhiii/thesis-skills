@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historical Draft | Thesis Skills Product Home Redraft</title>
+    <meta name="description" content="Historical draft page kept for internal reference. Use site/index.html for the current v1.0 public story.">
+    <link rel="stylesheet" href="editorial-theme.css">
+</head>
+<body>
+    <div class="page">
+        <div class="page-frame">
+            <span class="frame-corner tl"></span>
+            <span class="frame-corner tr"></span>
+            <span class="frame-corner bl"></span>
+            <span class="frame-corner br"></span>
+
+            <header class="issue-bar">
+                <div class="issue-block">
+                    <span class="issue-chip">Archive</span>
+                    <span>historical draft</span>
+                </div>
+                <div class="issue-title">
+                    <span class="issue-kicker">Thesis Skills</span>
+                    <span class="issue-note">historical reference only</span>
+                </div>
+                <div class="issue-meta">
+                    <span>archive / cn</span>
+                    <span>2026.04</span>
+                </div>
+            </header>
+
+            <nav class="site-nav" aria-label="主导航">
+                <a class="brand-link" href="index.html">
+                    <span class="brand-mark">TS</span>
+                    <span class="brand-copy">
+                        <strong>Thesis Skills</strong>
+                        <span>historical draft</span>
+                    </span>
+                </a>
+                <div class="nav-links">
+                    <a href="index.html">当前首页</a>
+                    <a href="docs-home.html">当前文档入口</a>
+                    <a href="scenario-entry.html">当前场景入口</a>
+                    <a href="scenario-entry.html">场景入口</a>
+                    <a href="docs-home.html">文档</a>
+                    <a href="https://github.com/quzhiii/thesis-skills" class="nav-cta" target="_blank" rel="noopener">GitHub</a>
+                </div>
+            </nav>
+
+            <main class="editorial-main">
+                <section class="hero">
+                    <div class="hero-grid">
+                        <div class="hero-main">
+                            <div class="hero-tag">历史首页草稿</div>
+                            <h1 class="hero-title">
+                                <span class="title-line">这是一份保留的历史首页草稿</span>
+                                <span class="title-line title-strong">当前 v1.0 公开入口请看正式首页</span>
+                            </h1>
+                            <p class="hero-subtitle">本页不再作为当前公开叙事的一部分，仅作为历史文案和版式参考保留。请使用 `site/index.html`、`site/docs-home.html` 和 `site/scenario-entry.html` 查看当前 v1.0 public story。</p>
+                            <div class="hero-actions">
+                                <a class="btn btn-primary" href="index.html">去当前首页</a>
+                                <a class="btn btn-secondary" href="docs-home.html">去当前文档入口</a>
+                                <a class="btn btn-ghost" href="scenario-entry.html">去当前场景入口</a>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-card">
+                                    <span class="metric-value">archive</span>
+                                    <span class="metric-label">保留旧文案和版式参考</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-value">not current</span>
+                                    <span class="metric-label">不要把本页当作当前公开合同</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-value">v1.0 lives elsewhere</span>
+                                    <span class="metric-label">当前说明见 index/docs-home/scenario-entry</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <aside class="hero-side">
+                            <div class="aside-panel">
+                                <div class="aside-label">适合谁用</div>
+                                <ul class="editorial-list">
+                                    <li>有 LaTeX 基础、想建立确定性检查流程的研究者</li>
+                                    <li>用 thuthesis 的清华学生，内置规则集，零配置可用</li>
+                                    <li>其他院校学生，填四个 YAML 文件即可适配本校格式</li>
+                                </ul>
+                            </div>
+                            <div class="aside-panel">
+                                <div class="aside-label">它不做的事</div>
+                                <ul class="editorial-list">
+                                    <li>不生成或重写论文内容</li>
+                                    <li>不自动理解导师自然语言批注</li>
+                                </ul>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+
+                <section id="pain-points" class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">01 / pain-points</div>
+                            <h2 class="section-title">写论文时，这些处境是否熟悉</h2>
+                        </div>
+                    </div>
+                    <div class="card-grid grid-4">
+                        <article class="editorial-card">
+                            <div class="card-index">01</div>
+                            <h3 class="card-title">导师只审 Word，论文是 LaTeX</h3>
+                            <p class="card-text">导出格式不兼容，手动转换容易丢格式，批注无法对应回源文件。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">02</div>
+                            <h3 class="card-title">LaTeX 编译报错看不懂</h3>
+                            <p class="card-text">原始日志几百行，真正需要修的错误埋在中间，定位靠运气。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">03</div>
+                            <h3 class="card-title">修改意见分散，难以追踪</h3>
+                            <p class="card-text">批注、邮件、口头反馈散落各处，新一轮修改时不知道哪些已处理。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">04</div>
+                            <h3 class="card-title">提交前心里没底</h3>
+                            <p class="card-text">不确定引用是否完整、格式是否合规、有没有遗漏的章节要求。</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="capabilities" class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">02 / capabilities</div>
+                            <h2 class="section-title">四个核心检查能力</h2>
+                        </div>
+                        <p class="section-intro">每项检查生成独立 JSON 报告，列出具体发现和位置，不静默修改源文件。</p>
+                    </div>
+                    <div class="card-grid grid-4">
+                        <article class="editorial-card">
+                            <div class="card-index">01</div>
+                            <h3 class="card-title">引用完整性检查</h3>
+                            <p class="card-text">对照 .bib 扫描 \cite{key}，报告缺失引用、孤立 bib 条目、编号顺序异常，附行号。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">02</div>
+                            <h3 class="card-title">CJK 语言风格检查</h3>
+                            <p class="card-text">标记中英文标点混用、弱语气词（「众所周知」「不难看出」等），逐条列出位置。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">03</div>
+                            <h3 class="card-title">图表结构验证</h3>
+                            <p class="card-text">找出缺 label 或 caption 的 figure / table，以及 longtable 续页标记缺失。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">04</div>
+                            <h3 class="card-title">Word → LaTeX 迁移</h3>
+                            <p class="card-text">章节拆分 + 引用格式转换，迁移结果同步经过引用和格式检查，生成映射报告。</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="artifacts" class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">03 / artifacts</div>
+                            <h2 class="section-title">每一步都有明确的产物</h2>
+                        </div>
+                        <p class="section-intro">检查器不直接修改源文件，生成结构化 JSON 报告；修复器读取报告后生成补丁，支持 dry-run 预览。</p>
+                    </div>
+                    <div class="card-grid grid-3">
+                        <article class="spotlight-panel">
+                            <div class="panel-label">compile-findings.json</div>
+                            <pre><code>{
+  "severity": "error",
+  "source": "thesis.tex:214",
+  "message": "Undefined control sequence",
+  "hint": "检查 \\newcommand 定义"
+}</code></pre>
+                            <p class="spotlight-text">编译错误变成可读诊断。</p>
+                        </article>
+                        <article class="spotlight-panel">
+                            <div class="panel-label">review-todo.json</div>
+                            <pre><code>{
+  "id": "REV-003",
+  "status": "pending",
+  "source": "导师批注 P.12",
+  "category": "论述深度",
+  "action": "补充实验对比"
+}</code></pre>
+                            <p class="spotlight-text">返修意见变成待办项。</p>
+                        </article>
+                        <article class="spotlight-panel">
+                            <div class="panel-label">readiness-gate.json</div>
+                            <pre><code>{
+  "verdict": "WARN",
+  "blockers": [],
+  "warnings": ["3 个深度语言问题需审阅"],
+  "next_action": "优先处理 warnings"
+}</code></pre>
+                            <p class="spotlight-text">提交状态有明确裁决。</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="trustworthy" class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">04 / trustworthy</div>
+                            <h2 class="section-title">有边界、可检查、不夸大</h2>
+                        </div>
+                    </div>
+                    <div class="card-grid grid-3">
+                        <article class="editorial-card">
+                            <h3 class="card-title">有边界的工作流</h3>
+                            <p class="card-text">每个功能有明确的输入、输出和限制。不支持的构造显式报告，不静默降级。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <h3 class="card-title">显式报告</h3>
+                            <p class="card-text">检查器生成 JSON，不直接修改源文件。修复器读报告生成补丁，支持 dry-run。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <h3 class="card-title">产物可检查</h3>
+                            <p class="card-text">每步输出人类可读的 artifact，你可以打开 JSON 查看具体发现。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <h3 class="card-title">没有魔法</h3>
+                            <p class="card-text">不声称能自动理解导师意见或智能修复所有问题。含糊的修改由人做最终决定。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <h3 class="card-title">局限性被暴露</h3>
+                            <p class="card-text">导出限制、检查覆盖范围，所有边界在产物中显式报告，不藏着。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <h3 class="card-title">开源可审计</h3>
+                            <p class="card-text">MIT 协议，所有规则、检查逻辑和 YAML 规则包都可以查看和自定义。</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="quick-start" class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">05 / quick start</div>
+                            <h2 class="section-title">一条命令跑完所有检查</h2>
+                        </div>
+                        <p class="section-intro">调用 run_check_once.py，依次执行各检查模块，读取 YAML 规则配置，输出 JSON 报告。</p>
+                    </div>
+                    <div class="card-grid grid-2">
+                        <article class="module-card">
+                            <div class="module-layout">
+                                <div class="module-meta">
+                                    <div class="module-key">tsinghua-thesis</div>
+                                    <h3 class="module-title">清华 thuthesis，零配置</h3>
+                                </div>
+                                <div class="module-copy">
+                                    <pre><code>python run_check_once.py \
+  --project-root "../thuthesis-v7.6.0" \
+  --ruleset tsinghua-thesis</code></pre>
+                                    <div class="note-box"><strong>note</strong>--skip-compile 可跳过编译，加快迭代速度</div>
+                                </div>
+                            </div>
+                        </article>
+                        <article class="module-card">
+                            <div class="module-layout">
+                                <div class="module-meta">
+                                    <div class="module-key">custom rules</div>
+                                    <h3 class="module-title">其他院校，填四个 YAML</h3>
+                                </div>
+                                <div class="module-copy">
+                                    <pre><code>python run_check_once.py \
+  --project-root "../your-thesis" \
+  --ruleset my-university</code></pre>
+                                    <div class="note-box"><strong>note</strong>在 90-rules/packs/ 下创建规则包，维护 pack.yaml / rules.yaml / mappings.yaml</div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="scope" class="section">
+                    <div class="section-head">
+                        <div class="section-heading">
+                            <div class="section-code">06 / scope</div>
+                            <h2 class="section-title">v1.0 已有什么，还没有什么</h2>
+                        </div>
+                        <p class="section-intro">帮你判断 Thesis Skills 是否适合你当前的阶段。</p>
+                    </div>
+                    <div class="card-grid grid-2">
+                        <article class="module-card">
+                            <div class="module-layout">
+                                <div class="module-meta">
+                                    <div class="module-key">released</div>
+                                    <h3 class="module-title">v1.0 已包含</h3>
+                                </div>
+                                <div class="module-copy">
+                                    <ul class="editorial-list">
+                                        <li>引用完整性检查（缺失、孤立、重复）</li>
+                                        <li>CJK 语言风格检查（标点、弱语气词）</li>
+                                        <li>图表结构验证（label / caption / 交叉引用）</li>
+                                        <li>Word → LaTeX 章节拆分 + 引用迁移</li>
+                                        <li>Zotero / EndNote 导出 .bib 质量检查</li>
+                                        <li>预提交 readiness gate（PASS / WARN / BLOCK）</li>
+                                        <li>答辩前整理 artifact（大纲、要点、图表、讲稿备注）</li>
+                                        <li>可自定义 YAML 规则包、lint 和 scorecard</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </article>
+                        <article class="module-card">
+                            <div class="module-layout">
+                                <div class="module-meta">
+                                    <div class="module-key">planned</div>
+                                    <h3 class="module-title">尚未支持 / 不承诺</h3>
+                                </div>
+                                <div class="module-copy">
+                                    <ul class="editorial-list">
+                                        <li>图形界面或 Web 编辑器</li>
+                                        <li>自动理解导师自然语言批注</li>
+                                        <li>AI 生成或重写论文内容</li>
+                                        <li>一键完成论文提交</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="section">
+                    <div class="cta-panel">
+                        <div class="panel-label">next step</div>
+                        <h2 class="spotlight-title">按你现在的处境往下走</h2>
+                        <p class="spotlight-text">去场景入口按论文阶段找对应模块，或者看文档了解完整安装和配置步骤。</p>
+                        <div class="cta-actions">
+                            <a class="btn btn-primary" href="scenario-entry.html">按场景找入口</a>
+                            <a class="btn btn-secondary" href="docs-home.html">看文档</a>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="page-footer">
+                <span>Thesis Skills / product home redraft</span>
+                <span>LaTeX thesis QA / structured artifacts / bounded workflow</span>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

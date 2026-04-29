@@ -13,9 +13,9 @@ Recommended sequence:
 1. Run `run_check_once.py` first.
 2. Review compile, format, content, and language reports.
 3. Generate a report-first `02-latex-to-word` summary.
-4. Use review-friendly export as the first release target.
+4. Use review-friendly export as the first-class supported export target.
 
-First-release boundary:
+Current boundary:
 
 - review-friendly export is the primary supported mode
 - submission-friendly export is a future-facing contract, not the main first-release guarantee
@@ -62,7 +62,7 @@ Submission-friendly export would require:
 - bibliography CSL profile accuracy
 - page margin and font enforcement
 
-These are **planned** for a later release but are **not** the first-release promise of `v0.6.x`.
+These are **future-facing constraints** and are **not** part of the current v1.0 first-class export promise.
 
 ## Migration helper
 

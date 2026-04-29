@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in improving Thesis 6 Skills.
+Thanks for your interest in improving Thesis Skills.
 
 ## Development Rules
 
@@ -17,8 +17,9 @@ Thanks for your interest in improving Thesis 6 Skills.
 Run from repository root:
 
 ```bash
-python run_check_once.py --project-root "examples/minimal-project" --rules tsinghua --skip-compile
-python run_check_once.py --project-root "examples/minimal-project" --rules my-university --skip-compile
+python run_check_once.py --project-root "examples/minimal-latex-project" --ruleset university-generic --skip-compile
+python 90-rules/lint_pack.py --pack-path 90-rules/packs/university-generic
+python -m unittest discover -s tests -p "test_*.py"
 ```
 
 ## Pull Request Checklist

@@ -24,9 +24,17 @@ class ManifestTest(unittest.TestCase):
             runner = module.get("runner")
             if isinstance(runner, str):
                 self.assertTrue((ROOT / runner).exists(), runner)
+            runners = module.get("runners")
+            if isinstance(runners, list):
+                for item in runners:
+                    self.assertIsInstance(item, str)
+                    self.assertTrue((ROOT / item).exists(), item)
             draft_runner = module.get("draft_runner")
             if isinstance(draft_runner, str):
                 self.assertTrue((ROOT / draft_runner).exists(), draft_runner)
+            lint_runner = module.get("lint_runner")
+            if isinstance(lint_runner, str):
+                self.assertTrue((ROOT / lint_runner).exists(), lint_runner)
 
 
 if __name__ == "__main__":

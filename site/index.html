@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thesis Skills | LaTeX 学位论文自查工具</title>
-    <meta name="description" content="Thesis Skills 检查 LaTeX 学位论文的引用完整性、CJK 语言风格和图表结构，输出 JSON 报告。零外部依赖，支持 thuthesis。">
+    <title>Thesis Skills v1.0 | 确定性论文工作流系统</title>
+    <meta name="description" content="Thesis Skills v1.0 是一套确定性、可检查的论文工作流系统，覆盖文献接入、Word/LaTeX 交接、检查修复、审阅闭环、readiness gate、答辩前整理和规则包扩展。">
     <link rel="stylesheet" href="editorial-theme.css">
 </head>
 <body>
@@ -17,12 +17,12 @@
 
             <header class="issue-bar">
                 <div class="issue-block">
-                    <span class="issue-chip">Issue 008</span>
-                    <span>thesis workflow dispatch</span>
+                    <span class="issue-chip">Issue 010</span>
+                    <span>stable public story</span>
                 </div>
                 <div class="issue-title">
                     <span class="issue-kicker">Thesis Skills</span>
-                    <span class="issue-note">v0.8</span>
+                    <span class="issue-note">v1.0.0</span>
                 </div>
                 <div class="issue-meta">
                     <span>product / cn</span>
@@ -41,7 +41,8 @@
                 <div class="nav-links">
                     <a href="index.html" aria-current="page">首页</a>
                     <a href="#problem">问题</a>
-                    <a href="#capabilities">能力</a>
+                    <a href="#workflows">工作流</a>
+                    <a href="#boundaries">边界</a>
                     <a href="#quick-start">快速上手</a>
                     <a href="scenario-entry.html">场景入口</a>
                     <a href="docs-home.html">文档</a>
@@ -51,127 +52,120 @@
             </nav>
 
             <main class="editorial-main">
-
-                <!-- Section 1: Problem -->
                 <section id="problem" class="hero">
                     <div class="hero-grid">
                         <div class="hero-main">
-                            <div class="hero-tag">LaTeX 学位论文自查</div>
+                            <div class="hero-tag">确定性论文工作流</div>
                             <h1 class="hero-title">
-                                <span class="title-line">引用断了、格式混了、标点串了</span>
-                                <span class="title-line title-strong">LaTeX 不会替你报错</span>
+                                <span class="title-line">论文不是只靠最后通读</span>
+                                <span class="title-line title-strong">而是靠一串可检查的交付物推进</span>
                             </h1>
-                            <p class="hero-subtitle">这些问题往往到提交当天才暴露。Thesis Skills 在提交前把引用、格式、语言问题系统查一遍，输出结构化报告。</p>
+                            <p class="hero-subtitle">Thesis Skills v1.0 把文献接入、Word/LaTeX 交接、检查修复、审阅闭环、readiness 判断、答辩前整理和规则包扩展收束成一套有边界、可复现、可检查的 CLI 工作流。</p>
+                            <div class="hero-actions">
+                                <a class="btn btn-primary" href="#workflows">看当前能力</a>
+                                <a class="btn btn-secondary" href="docs-home.html">去文档入口</a>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Section 2: What it does -->
-                <section id="capabilities" class="section">
+                <section id="workflows" class="section">
                     <div class="section-head">
                         <div class="section-heading">
-                            <div class="section-code">01 / capabilities</div>
-                            <h2 class="section-title">四个核心检查模块</h2>
+                            <div class="section-code">01 / workflows</div>
+                            <h2 class="section-title">v1.0 稳定公开工作流</h2>
                         </div>
-                        <p class="section-intro">每项检查输出独立 JSON 报告，列出具体发现和位置。</p>
+                        <p class="section-intro">每条能力都对应真实入口和可检查 artifact，不靠隐藏状态或模糊承诺。</p>
                     </div>
                     <div class="card-grid grid-4">
                         <article class="editorial-card">
                             <div class="card-index">01</div>
-                            <h3 class="card-title">引用完整性检查</h3>
-                            <p class="card-text">对照 .bib 文件扫描 \cite{key}，列出缺失引用和孤立 bib 条目。</p>
+                            <h3 class="card-title">文献接入</h3>
+                            <p class="card-text">EndNote / Zotero 导入、预检、去重和稳定 refNNN 映射。</p>
                         </article>
                         <article class="editorial-card">
                             <div class="card-index">02</div>
-                            <h3 class="card-title">CJK 语言风格检查</h3>
-                            <p class="card-text">标记中英文标点混用、弱语气词位置。逐条列出，附行号。</p>
+                            <h3 class="card-title">Word / LaTeX 交接</h3>
+                            <p class="card-text">Word→LaTeX 迁移和审阅友好 LaTeX→Word 导出，并显式报告限制。</p>
                         </article>
                         <article class="editorial-card">
                             <div class="card-index">03</div>
-                            <h3 class="card-title">图表结构验证</h3>
-                            <p class="card-text">找出缺 label 或 caption 的 figure/table 环境。逐条报告。</p>
+                            <h3 class="card-title">检查与修复</h3>
+                            <p class="card-text">引用、语言、格式、内容、编译日志和 report-driven safe fixers。</p>
                         </article>
                         <article class="editorial-card">
                             <div class="card-index">04</div>
-                            <h3 class="card-title">Word → LaTeX 迁移</h3>
-                            <p class="card-text">章节拆分 + 引用格式转换 + 迁移检查报告。单次运行。</p>
+                            <h3 class="card-title">审阅与 readiness</h3>
+                            <p class="card-text">review diff、feedback ingest、TODO artifact 和 PASS/WARN/BLOCK gate。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">05</div>
+                            <h3 class="card-title">答辩前整理</h3>
+                            <p class="card-text">大纲、章节要点、图表清单、候选视觉材料和讲稿备注。</p>
+                        </article>
+                        <article class="editorial-card">
+                            <div class="card-index">06</div>
+                            <h3 class="card-title">规则包扩展</h3>
+                            <p class="card-text">学校/期刊规则包创建、草稿脚手架、lint、schema 和 scorecard。</p>
                         </article>
                     </div>
                 </section>
 
-                <!-- Section 3: Why it works -->
-                <section id="why" class="section">
+                <section id="boundaries" class="section">
                     <div class="section-head">
                         <div class="section-heading">
-                            <div class="section-code">02 / facts</div>
-                            <h2 class="section-title">三个可核实的事实</h2>
+                            <div class="section-code">02 / boundaries</div>
+                            <h2 class="section-title">它有边界，所以才可信</h2>
                         </div>
                     </div>
                     <div class="metric-row">
                         <div class="metric-card">
-                            <span class="metric-value">零外部依赖</span>
-                            <span class="metric-label">Python stdlib，不安装第三方包</span>
+                            <span class="metric-value">CLI-first</span>
+                            <span class="metric-label">不是 GUI / Web 编辑器</span>
                         </div>
                         <div class="metric-card">
-                            <span class="metric-value">GB/T 7714-2015</span>
-                            <span class="metric-label">内置 thuthesis 规则集</span>
+                            <span class="metric-value">report-first</span>
+                            <span class="metric-label">检查器先写报告，修复器读报告</span>
                         </div>
                         <div class="metric-card">
-                            <span class="metric-value">JSON + exit code</span>
-                            <span class="metric-label">结构化输出，可接入 CI</span>
+                            <span class="metric-value">bounded</span>
+                            <span class="metric-label">不生成论文，不替代人工判断</span>
                         </div>
                     </div>
                 </section>
 
-                <!-- Section 4: Architecture -->
-                <section id="architecture" class="section">
-                    <div class="section-head">
-                        <div class="section-heading">
-                            <div class="section-code">03 / architecture</div>
-                            <h2 class="section-title">运行方式</h2>
-                        </div>
-                    </div>
-                    <div class="spotlight-grid">
-                        <article class="spotlight-panel">
-                            <p class="spotlight-text">一条命令 <code>python run_check_once.py</code> 依次调用各检查模块，读取 YAML 规则配置，对你的 LaTeX 项目文件夹输出 JSON 报告。exit code 合约：0 pass / 1 findings / 2 config error。</p>
-                        </article>
-                    </div>
-                </section>
-
-                <!-- Section 5: Quick Start -->
                 <section id="quick-start" class="section">
                     <div class="section-head">
                         <div class="section-heading">
-                            <div class="section-code">04 / quick start</div>
+                            <div class="section-code">03 / quick start</div>
                             <h2 class="section-title">跑一次试试</h2>
                         </div>
                     </div>
                     <div class="spotlight-grid">
                         <article class="spotlight-panel">
-                            <pre><code>python run_check_once.py --project-root "../thuthesis-v7.6.0" --rules tsinghua</code></pre>
+                            <pre><code>python run_check_once.py --project-root examples/minimal-latex-project --ruleset university-generic --skip-compile</code></pre>
                         </article>
                     </div>
                 </section>
 
-                <!-- Section 6: Navigation CTA -->
                 <section id="next" class="section">
                     <div class="section-head">
                         <div class="section-heading">
-                            <div class="section-code">05 / next</div>
+                            <div class="section-code">04 / next</div>
                             <h2 class="section-title">继续看</h2>
                         </div>
                     </div>
                     <div class="cta-actions">
                         <a class="btn btn-primary" href="scenario-entry.html">去场景入口 →</a>
                         <a class="btn btn-secondary" href="docs-home.html">去文档 →</a>
+                        <a class="btn btn-ghost" href="artifact-gallery.html">看输出样例 →</a>
                     </div>
                 </section>
-
             </main>
 
             <footer class="page-footer">
-                <span>Thesis Skills / v0.8</span>
-                <span>LaTeX thesis QA / ts purple / bounded workflow</span>
+                <span>Thesis Skills / v1.0.0</span>
+                <span>deterministic thesis workflows / bounded artifacts / rule packs</span>
             </footer>
         </div>
     </div>
