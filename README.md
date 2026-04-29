@@ -4,8 +4,9 @@
 
 ![Thesis Skills](https://img.shields.io/badge/Thesis-Skills-4285f4?style=for-the-badge&logo=book&logoColor=white)
 
-**Deterministic, inspectable thesis and journal workflow system**
-*Bibliography intake • LaTeX/Word handoff • Checkers • Safe fixers • Readiness gates • Rule packs*
+# Spend Your Time Thinking, Not Formatting
+
+*Automate the repetitive formatting work in academic writing — citation syncing, format checking, review handoffs, and defense prep*
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/github/license/quzhiii/thesis-skills)](LICENSE)
@@ -14,189 +15,182 @@
 
 [中文文档](README.zh-CN.md) • **English** • [🚀 Showcase](https://quzhiii.github.io/thesis-skills)
 
-[Quick Start](#quick-start) • [Core Workflows](#core-workflows) • [Rule Packs](#rule-pack-system) • [Boundaries](#current-boundaries) • [Roadmap](docs/roadmap.md) • [Architecture](docs/architecture.md) • [Contributing](CONTRIBUTING.md)
+[6 Pain Points](#have-you-experienced-these) • [Capability Matrix](#core-capabilities) • [Use by Scenario](#use-by-scenario) • [Rule Packs](#rule-pack-system) • [Current Boundaries](#current-boundaries)
 
 </div>
 
 ---
 
-## What Thesis Skills Is
+## Have You Experienced These?
 
-`thesis-skills` is a deterministic, report-driven workflow layer for academic writing projects. It helps you move a thesis or journal manuscript through bibliography intake, Word/LaTeX handoff, deterministic checks, bounded fixes, review-loop artifacts, readiness decisions, defense-prep artifacts, and reusable school/journal rule packs.
+> **「Added one reference, broke a dozen citation numbers.」**
+>
+> **「Advisor asked for a Word version. Panic.」**
+>
+> **「Used AI to rewrite a paragraph. Zotero citations collapsed.」**
+>
+> **「30+ format rules. Missed something even after 3 rounds.」**
+>
+> **「Pre-submission anxiety: afraid to click submit.」**
+>
+> **「Spent 3 hours manually inventorying figures before defense.」**
 
-It is intentionally **not** a general AI writing assistant, a thesis template, a GUI editor, a collaboration platform, or a promise of universal submission compliance. Every workflow should leave explicit artifacts that a human can inspect.
+| 💔 Traditional Workflow | 😰 Typical Time Cost |
+|:---|:---|
+| Writing in Word → manually adjusting tables, cross-references, headers | Hours per issue |
+| Switching to LaTeX → manually migrating chapters, rebuilding citations | 1-3 days |
+| Using AI on Word docs → Zotero field codes corrupted, citations become plain text | Hours to fix |
+| Manually checking university format guidelines | 1-3 hours per round |
+| Flipping through 5-10 scattered reports before submission | 30-60 minutes |
+| Manually outlining chapters, inventorying figures, preparing talk notes | 2-4 hours |
 
 ---
 
-## Why Thesis Skills?
+## Core Capabilities
 
-| Pain Point | Traditional Workflow | Thesis Skills |
-|:---|:---|:---|
-| Citation migration Word→LaTeX | Manual mapping, error-prone | Auto-extract and sync with stable IDs |
-| Bibliography intake | Copy-paste from EndNote/Zotero | XML/RIS/BibTeX import and quality checks |
-| University or journal policy | Read long docs manually | YAML rule packs and repeatable checks |
-| Review handoff | Ad hoc Word exports and scattered comments | Review-friendly export, diff, ingest, and TODO artifacts |
-| Final confidence | Manually inspect many reports | Bounded `PASS / WARN / BLOCK` readiness verdict |
-| Defense prep | Re-read the whole thesis while making slides | Outline, highlights, figure inventory, candidate visuals, and talk-prep notes |
+### Before → After: Time Saved at Every Step
+
+| Stage | Traditional | Thesis Skills | Time Saved |
+|:---|:---|:---|:---|
+| **📚 Bibliography Intake** | Manual copy-paste from Zotero/EndNote, rebuild citation numbers | Auto-import, stable `refNNN` IDs, incremental sync | **30-60 min → 2-5 min** |
+| **🔄 Word ↔ LaTeX** | Manual content migration, structure rebuild, citation remapping | Auto-sync citations + structured checks; one-click review-friendly Word export | **1-3 hrs → 5-10 min** |
+| **✅ Format Checking** | Manually verify 28+ rules, easy to miss | YAML rule-pack driven, 28+ auto-checks, report in 2 min | **1-3 hrs → 2-5 min** |
+| **🔧 Safe Fixes** | Manual locate, edit, verify | Previewable patches from reports, apply after dry-run | **1-2 hrs → 5-10 min** |
+| **🚦 Pre-Submission Gate** | Flip through multiple reports, still unsure | `PASS / WARN / BLOCK` one-page summary, blockers + next actions | **30-60 min → 1-2 min** |
+| **🎯 Defense Prep** | Manual outline, figure inventory, talk notes | Auto-generate outline, highlights, figure inventory, candidate visuals | **2-4 hrs → 10-15 min** |
+
+> ⚠️ **Objective note**: Times are conservative estimates for repetitive formatting work. The tool does not replace writing/thinking time.
+
+### Real Output Examples
+
+**Readiness Gate —— Final check before submission:**
+
+```bash
+$ python 16-check-readiness/check_readiness.py \
+    --project-root thesis \
+    --ruleset tsinghua-thesis \
+    --mode advisor-handoff
+```
+
+```json
+{
+  "verdict": "WARN",
+  "mode": "advisor-handoff",
+  "blockers": [],
+  "warnings": [
+    "3 unreferenced citations (see 10-check-references report)",
+    "2 figures lack alt-text (see 13-check-content report)"
+  ],
+  "next_actions": [
+    "Run: python 20-fix-references/fix_references.py --apply false",
+    "Review: reports/13-check-content-report.json lines 45-52"
+  ]
+}
+```
+
+**Format Check Report —— Specific file, line number, fix suggestion:**
+
+```json
+{
+  "rule": "cjk_latin_spacing",
+  "severity": "warning",
+  "file": "chapters/introduction.tex",
+  "line": 42,
+  "message": "Missing space between CJK and Latin: '人工智能AI' → '人工智能 AI'",
+  "autofix_safe": true,
+  "suggested_fix": "人工智能 AI"
+}
+```
 
 ---
 
-## Core Workflows
+## Use by Scenario
+
+### 🚀 Scenario 1: Just switched from Word to LaTeX
+
+```bash
+# 1. Sync Zotero citations from Word to LaTeX (stable refNNN numbering)
+python 00-bib-zotero/sync_from_word.py \
+  --project-root thesis --word-file thesis.docx --apply
+
+# 2. Run comprehensive checks (references, language, format, content)
+python run_check_once.py \
+  --project-root thesis --ruleset tsinghua-thesis --skip-compile
+
+# 3. Preview and apply safe fixes
+python run_fix_cycle.py \
+  --project-root thesis --ruleset tsinghua-thesis --apply false
+```
+
+### 🚀 Scenario 2: Already using LaTeX, want to check my thesis
+
+```bash
+# Run full check (including compile diagnostics)
+python run_check_once.py \
+  --project-root thesis --ruleset tsinghua-thesis
+
+# Check readiness gate
+python 16-check-readiness/check_readiness.py \
+  --project-root thesis --ruleset tsinghua-thesis --mode advisor-handoff
+```
+
+### 🚀 Scenario 3: Advisor/collaborator needs Word version for review
+
+```bash
+# Generate review-friendly Word (explicitly reports degraded elements)
+python 02-latex-to-word/migrate_project.py \
+  --project-root thesis --output-file thesis-review.docx \
+  --profile review-friendly --apply true
+
+# Check reports/latex_to_word-report.json for degradation details
+```
+
+### 🚀 Scenario 4: Got Word feedback from advisor, need to update LaTeX
+
+```bash
+# 1. Normalize Word feedback into structured issues
+python 04-word-review-ingest/feedback_ingest.py \
+  --project-root thesis --input review-feedback.json
+
+# 2. Generate review diff and TODOs
+python 03-latex-review-diff/review_diff.py --project-root thesis
+```
+
+### 🚀 Scenario 5: Preparing for defense
+
+```bash
+# Auto-generate defense preparation materials
+python 17-defense-pack/generate_outline.py \
+  --project-root thesis --ruleset tsinghua-thesis
+
+python 17-defense-pack/generate_figure_inventory.py \
+  --project-root thesis --ruleset tsinghua-thesis
+```
+
+---
+
+## Feature Overview
 
 | Workflow | Entrypoint | Output / Role |
 |:---|:---|:---|
-| Zotero bibliography sync | `00-bib-zotero/sync_from_word.py` | Word citation mapping into LaTeX-friendly references |
-| Zotero bibliography quality check | `00-bib-zotero/check_bib_quality.py` | Structured bibliography findings |
-| EndNote preflight | `00-bib-endnote/check_endnote_export.py` | Export quality warnings before import |
-| EndNote import | `00-bib-endnote/import_library.py` | Normalized references with stable `refNNN` IDs |
-| Word→LaTeX migration | `01-word-to-latex/migrate_project.py` | Structured migration report |
-| LaTeX→Word export | `02-latex-to-word/migrate_project.py` | Review-friendly `.docx` and limitation summary |
-| Review package | `03-latex-review-diff/review_diff.py` | Review diff, triage, digest, and TODO-oriented artifacts |
-| Feedback ingest | `04-word-review-ingest/feedback_ingest.py` | Bounded feedback normalization into structured issues |
-| Deterministic checks | `10-check-*` to `14-check-*` | Reference, language, format, content, and deep-language reports |
-| Compile diagnostics | `15-check-compile/check_compile.py` | Structured findings from existing LaTeX logs |
-| Readiness gate | `16-check-readiness/check_readiness.py` | `PASS / WARN / BLOCK` summary from existing artifacts |
-| Defense prep | `17-defense-pack/*.py` | Outline, highlights, figures, candidate visuals, and talk notes |
-| Safe fixers | `20-fix-*` to `24-fix-*` | Report-driven patches with dry-run or review-gated application |
-| Rule-pack tooling | `90-rules/*.py` | Pack creation, draft scaffolding, lint, completeness, schema, scorecard |
-
----
-
-## Quick Start
-
-```bash
-# Clone
-git clone https://github.com/quzhiii/thesis-skills.git
-cd thesis-skills
-
-# Quick check example
-python run_check_once.py \
-  --project-root examples/minimal-latex-project \
-  --ruleset university-generic \
-  --skip-compile
-```
-
-If you are completely new to LaTeX, start with the Chinese beginner guide first:
-
-- [Beginner getting-started guide (Chinese)](docs/getting-started-zh.md)
-
-### EndNote Intake
-
-```bash
-python 00-bib-endnote/check_endnote_export.py \
-  --project-root thesis \
-  --input refs.xml
-
-python 00-bib-endnote/import_library.py \
-  --project-root thesis \
-  --input refs.xml \
-  --apply
-```
-
-### Zotero Sync + Check + Fix Loop
-
-```bash
-python 00-bib-zotero/sync_from_word.py \
-  --project-root thesis \
-  --word-file thesis.docx \
-  --apply
-
-python run_check_once.py \
-  --project-root thesis \
-  --ruleset tsinghua-thesis \
-  --skip-compile
-
-python run_fix_cycle.py \
-  --project-root thesis \
-  --ruleset tsinghua-thesis \
-  --apply false
-```
-
-### Compile Diagnostics
-
-```bash
-python run_check_once.py \
-  --project-root thesis \
-  --ruleset tsinghua-thesis
-
-python run_check_once.py \
-  --project-root thesis \
-  --ruleset tsinghua-thesis \
-  --skip-compile
-```
-
-Positioning:
-
-- compile parsing translates existing LaTeX log output into structured findings
-- it does not replace your TeX toolchain or guarantee full build orchestration
-- if no log is available, the runner reports that explicitly instead of crashing
-
-### LaTeX to Word Review Export
-
-```bash
-python 02-latex-to-word/migrate_project.py \
-  --project-root thesis \
-  --output-file thesis-review.docx \
-  --profile review-friendly \
-  --apply false
-```
-
-Positioning:
-
-- `review-friendly` is the first-class implemented export profile
-- stricter submission-friendly export remains a future path
-- unsupported constructs should be surfaced explicitly rather than hidden
-
-### Review Loop
-
-```bash
-python 03-latex-review-diff/review_diff.py \
-  --project-root thesis
-
-python 04-word-review-ingest/feedback_ingest.py \
-  --project-root thesis \
-  --input review-feedback.json
-```
-
-Positioning:
-
-- review loop is a bounded workflow for revision rounds, not a collaboration platform
-- diff/triage and feedback ingest stay inspectable through explicit JSON artifacts
-- ambiguous or high-judgement changes remain review-gated rather than auto-applied
-
-### Pre-Submission Gate
-
-```bash
-python 16-check-readiness/check_readiness.py \
-  --project-root thesis \
-  --ruleset tsinghua-thesis \
-  --mode advisor-handoff
-```
-
-Positioning:
-
-- the gate summarizes existing reports and workflow artifacts
-- it returns `PASS`, `WARN`, or `BLOCK` with blockers, warnings, next actions, and source references
-- it does not re-run the whole toolchain, auto-fix issues, or claim universal submission compliance
-- `run_check_once.py` can surface the readiness gate as `derived_artifacts.readiness_gate` in `run-summary.json`
-
-### Defense Prep
-
-```bash
-python 17-defense-pack/generate_outline.py \
-  --project-root thesis \
-  --ruleset tsinghua-thesis
-
-python 17-defense-pack/generate_figure_inventory.py \
-  --project-root thesis \
-  --ruleset tsinghua-thesis
-```
-
-Positioning:
-
-- defense-prep scripts generate bounded planning artifacts, not final slides
-- outputs are editable outlines, summaries, inventories, candidate lists, and notes
-- the system does not decide your final talk strategy or design PPT pages for you
+| Zotero citation sync | `00-bib-zotero/sync_from_word.py` | Extract Zotero citations from Word, generate stable `refNNN` mapping |
+| Zotero bibliography quality check | `00-bib-zotero/check_bib_quality.py` | Check BibTeX quality (missing fields, DOI format, etc.) |
+| EndNote export preflight | `00-bib-endnote/check_endnote_export.py` | Check EndNote export files before import |
+| EndNote import | `00-bib-endnote/import_library.py` | Normalize references with stable `refNNN` IDs |
+| Word→LaTeX migration | `01-word-to-latex/migrate_project.py` | Map files to LaTeX project structure per spec |
+| LaTeX→Word export | `02-latex-to-word/migrate_project.py` | Generate review-friendly `.docx`, explicitly reports degraded elements |
+| Review package | `03-latex-review-diff/review_diff.py` | Generate review diff, triage, and TODO artifacts |
+| Feedback ingest | `04-word-review-ingest/feedback_ingest.py` | Normalize Word feedback into structured issues |
+| Reference check | `10-check-references/check_references.py` | Validate `\cite{}` keys against bibliography |
+| Language check | `11-check-language/check_language.py` | 28+ deterministic language rule checks |
+| Format check | `12-check-format/check_format.py` | Figure/table blocks, labels, cross-references, front matter |
+| Content check | `13-check-content/check_content.py` | Content structure and abstract metadata |
+| Deep language check | `14-check-language-deep/check_language_deep.py` | Higher-order language screening |
+| Compile diagnostics | `15-check-compile/check_compile.py` | Structured parsing of LaTeX compile logs |
+| Readiness gate | `16-check-readiness/check_readiness.py` | Aggregate all reports, output PASS/WARN/BLOCK |
+| Defense prep | `17-defense-pack/*.py` | Outline, chapter highlights, figure inventory, candidate visuals, talk notes |
+| Safe fixers | `20-fix-*` to `24-fix-*` | Report-driven patches with dry-run preview before apply |
+| Rule-pack tooling | `90-rules/*.py` | Pack creation, lint, completeness checks, scorecard |
 
 ---
 
@@ -212,7 +206,7 @@ Starter and example packs included:
  └── demo-university-thesis/ # Concrete non-Tsinghua example pack
 ```
 
-Create a pack from a starter:
+Create a custom rule pack:
 
 ```bash
 python 90-rules/create_pack.py \
@@ -222,34 +216,7 @@ python 90-rules/create_pack.py \
   --kind university-thesis
 ```
 
-Create a draft pack from intake metadata:
-
-```bash
-python 90-rules/create_draft_pack.py \
-  --intake adapters/intake/example-intake.json
-```
-
-Current rule-pack contract docs:
-
-- `90-rules/THESIS_RULE_PACKS.md`
-- `90-rules/STARTER_PACK_BASELINE.md`
-- `90-rules/MIXED_PACK_WORKFLOWS.md`
-
-Lint a pack before trusting or sharing it:
-
-```bash
-python 90-rules/lint_pack.py --pack-path 90-rules/packs/university-generic
-```
-
-The current linter checks and reports:
-
-- required pack files: `pack.yaml`, `rules.yaml`, `mappings.yaml`
-- baseline metadata completeness in `pack.yaml`
-- required top-level sections in `rules.yaml`: `project`, `reference`, `language`
-- accepted `mappings.yaml` shapes:
-  - starter-pack shape: `mappings`
-  - draft-pack shape: `source_template_mappings` + `chapter_role_mappings`
-- scorecard status for required files, metadata completeness, baseline completeness, schema consistency, overall status, and finding counts
+Rule packs encode school/journal-specific policy: project layout, reference format, language rules, formatting requirements, content requirements.
 
 ---
 
@@ -258,12 +225,14 @@ The current linter checks and reports:
 | Not Supported / Not Promised | Current Position |
 |:---|:---|
 | Full GUI or web editor | CLI-first repository |
-| Full compile orchestration | Parses existing logs; does not replace TeX tools |
+| Full compile orchestration | Parses existing logs; does not replace TeX toolchain |
 | Universal school compliance | Rule packs encode policy; institutions still need manual confirmation |
 | Automatic understanding of advisor intent | Feedback ingest is bounded and review-gated |
-| AI-generated thesis content | The system checks, organizes, and fixes bounded issues; it does not write the thesis |
-| Final PPT generation | Defense prep creates artifacts for humans to edit |
+| AI-generated thesis content | System checks and fixes bounded issues; it does not write the thesis |
+| Final PPT generation | Defense prep creates editable planning artifacts only |
 | Formal rule-pack registry | Current workflows are local, Git-tracked, or handoff-oriented |
+| Word .docx direct parsing | Word→LaTeX migration requires pre-export to `.tex` and `.bib` |
+| Perfect LaTeX→Word conversion | Review-friendly mode is primary; some constructs will degrade |
 
 ---
 
@@ -271,22 +240,31 @@ The current linter checks and reports:
 
 ```text
 thesis-skills/
-├── core/                   # Shared implementations
-├── 00-bib-*/               # Bibliography workflows
-├── 01-word-to-latex/       # Migration workflow
-├── 02-latex-to-word/       # Review-first export workflow
+├── core/                   # Shared implementations (project discovery, checkers, fixers, reports)
+├── 00-bib-endnote/         # EndNote bibliography intake
+├── 00-bib-zotero/          # Zotero bibliography intake and Word sync
+├── 01-word-to-latex/       # Word→LaTeX migration (file mapping layer)
+├── 02-latex-to-word/       # LaTeX→Word export (review-friendly)
 ├── 03-latex-review-diff/   # Review package and triage workflow
-├── 04-word-review-ingest/  # Bounded feedback normalization workflow
-├── 10-check-*/             # Deterministic checkers
-├── 15-check-compile/       # Compile-log diagnostic translation
-├── 16-check-readiness/     # Bounded pre-submission readiness gate
-├── 17-defense-pack/        # Bounded defense-prep artifact generators
-├── 20-fix-*/               # Safe fixers
+├── 04-word-review-ingest/  # Word feedback normalization
+├── 10-check-references/    # Reference checks
+├── 11-check-language/      # Language checks (28+ rules)
+├── 12-check-format/        # Format checks
+├── 13-check-content/       # Content checks
+├── 14-check-language-deep/ # Deep language screening
+├── 15-check-compile/       # Compile-log diagnostics
+├── 16-check-readiness/     # Pre-submission readiness gate
+├── 17-defense-pack/        # Defense preparation materials
+├── 20-fix-references/      # Reference fixes
+├── 21-fix-language-style/  # Language style fixes
+├── 22-fix-format-structure/# Format structure fixes
+├── 24-fix-language-deep/   # Deep language fixes (preview)
 ├── 90-rules/               # Rule pack system
-└── 99-runner/              # Entry points
+├── 99-runner/              # Unified entry points (run_check_once.py, run_fix_cycle.py)
+└── examples/               # Example projects
 ```
 
-See [`docs/architecture.md`](docs/architecture.md) for the detailed layer model.
+Detailed architecture in [`docs/architecture.md`](docs/architecture.md).
 
 ---
 
@@ -301,8 +279,6 @@ See [`docs/architecture.md`](docs/architecture.md) for the detailed layer model.
 | v0.7.x | Readiness gate, review-summary hardening, feedback-ingest calibration |
 | v0.8.x | Defense prep, static showcase, rule-pack lint/completeness/schema/scorecard hardening |
 | v1.0.0 | Stable public story across README, roadmap, site, manifest, rule-pack docs, and actual code paths |
-
-See [`docs/roadmap.md`](docs/roadmap.md) for the current stabilization checklist.
 
 ---
 
