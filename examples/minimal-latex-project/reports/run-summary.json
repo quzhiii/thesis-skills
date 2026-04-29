@@ -13,107 +13,106 @@
         "infos": 0,
         "status": "PASS",
         "files_scanned": 2,
-        "entries_scanned": 3
+        "entries_scanned": 1
       }
     },
     "references": {
-      "exit_code": 1,
+      "exit_code": 0,
       "report": "reports/check_references-report.json",
       "report_summary": {
         "checker": "check_references",
         "ruleset": "university-generic",
-        "errors": 1,
-        "warnings": 2,
+        "errors": 0,
+        "warnings": 0,
         "infos": 0,
-        "status": "FAIL",
+        "status": "PASS",
         "files_scanned": 3
       }
     },
     "language": {
-      "exit_code": 1,
+      "exit_code": 0,
       "report": "reports/check_language-report.json",
       "report_summary": {
         "checker": "check_language",
         "ruleset": "university-generic",
-        "errors": 1,
-        "warnings": 2,
+        "errors": 0,
+        "warnings": 0,
         "infos": 0,
-        "status": "FAIL",
+        "status": "PASS",
         "files_scanned": 2
       }
     },
     "language-deep": {
-      "exit_code": 1,
+      "exit_code": 0,
       "report": "reports/check_language_deep-report.json",
       "report_summary": {
         "checker": "check_language_deep",
         "ruleset": "university-generic",
         "errors": 0,
-        "warnings": 1,
+        "warnings": 0,
         "infos": 0,
-        "status": "FAIL",
+        "status": "PASS",
         "files_scanned": 2,
         "coverage_mode": "partial_latex_aware_screening",
         "review_mode": "manual_first",
-        "review_required": 1,
+        "review_required": 0,
         "stratified_counts": {
           "deep_language": 0,
-          "consistency": 1,
-          "high_confidence": 1,
-          "conservative_suggestions": 1
+          "consistency": 0,
+          "high_confidence": 0,
+          "conservative_suggestions": 0
         },
-        "category_counts": {
-          "acronym_first_use": 1
-        },
+        "category_counts": {},
         "review_digest": {
           "priority_counts": {
-            "high": 1,
+            "high": 0,
             "medium": 0,
             "low": 0
           },
-          "cluster_count": 1,
-          "deduplicated_action_items": 1
+          "cluster_count": 0,
+          "deduplicated_action_items": 0
         }
       }
     },
     "format": {
-      "exit_code": 1,
+      "exit_code": 0,
       "report": "reports/check_format-report.json",
       "report_summary": {
         "checker": "check_format",
         "ruleset": "university-generic",
-        "errors": 3,
-        "warnings": 2,
+        "errors": 0,
+        "warnings": 0,
         "infos": 0,
-        "status": "FAIL",
+        "status": "PASS",
         "files_scanned": 3
       }
     },
     "content": {
-      "exit_code": 1,
+      "exit_code": 0,
       "report": "reports/check_content-report.json",
       "report_summary": {
         "checker": "check_content",
         "ruleset": "university-generic",
-        "errors": 1,
+        "errors": 0,
         "warnings": 0,
         "infos": 0,
-        "status": "FAIL",
+        "status": "PASS",
         "files_scanned": 3,
-        "acronym_candidates": []
+        "acronym_candidates": [
+          "DID"
+        ]
       }
     },
     "compile": {
-      "status": "missing-log",
-      "reason": "No compile log discovered for the main TeX file",
-      "expected_log": "main.log"
+      "status": "skipped",
+      "reason": "Skipped by --skip-compile"
     }
   },
   "derived_artifacts": {
     "readiness_gate": {
       "mode": "advisor-handoff",
       "report": "reports/readiness-report.json",
-      "overall_verdict": "BLOCK"
+      "overall_verdict": "WARN"
     }
   }
 }
