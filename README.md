@@ -13,7 +13,7 @@ Spend your time thinking, not fixing formatting.
 
 [中文文档](README.zh-CN.md) · **English** · [Showcase](https://quzhiii.github.io/thesis-skills)
 
-[Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Rule Packs](#rule-packs) · [Boundaries](#boundaries)
+[Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
 
 </div>
 
@@ -122,6 +122,8 @@ A real run writes machine-readable artifacts such as:
 
 - `reports/check_references-report.json`
 - `reports/citation-integrity-report.json`
+- `reports/citation-integrity-report.md`
+- `reports/citation-issues.csv`
 - `reports/check_language-report.json`
 - `reports/check_format-report.json`
 - `reports/check_content-report.json`
@@ -214,25 +216,135 @@ More scenarios: [`docs/examples.md`](docs/examples.md).
 
 ## Rule Packs
 
-Rule packs encode institution- or journal-specific requirements: project layout, reference format, language rules, formatting rules, content requirements, and readiness criteria.
+Rule packs are the most important concept in Thesis Skills: they encode your institution's formatting requirements as structured YAML so the checkers know what counts as "correct" and what counts as an issue.
+
+### Built-in Packs
 
 ```text
 90-rules/packs/
- ├── university-generic/      # Generic university thesis starter
- ├── journal-generic/         # Generic journal article starter
- ├── tsinghua-thesis/         # Tsinghua University example
- └── demo-university-thesis/  # Concrete non-Tsinghua example pack
+ ├── university-generic/        # Generic university thesis starter (default, permissive)
+ ├── journal-generic/           # Generic journal article starter (English, minimal)
+ ├── tsinghua-thesis/           # Tsinghua University Master's/PhD thesis pack
+ │                              #   Calibrated against 《研究生学位论文写作指南（202503）》
+ │                              #   CJK/English rules, figure numbering, reference format aligned to spec
+ ├── tsinghua-thesis-experimental/  # Same pack, experimental calibration (kept in sync)
+ └── demo-university-thesis/    # Concrete non-Tsinghua example pack
 ```
 
-Create a custom rule pack:
+- `university-generic` is suitable for **most Chinese universities** — broad coverage, moderate thresholds.
+- `tsinghua-thesis` is specifically calibrated for Tsinghua students: GB/T 7714 reference style, mixed CJK/English rules per the university writing guide, Chinese chapter naming conventions. Tsinghua students can use this directly with no extra config.
+- `journal-generic` targets English journal submissions, with CJK-specific rules disabled.
+
+### Inside a Rule Pack
+
+Each pack is a folder with three files:
+
+```
+90-rules/packs/your-school/
+ ├── pack.yaml      # Metadata: name, kind, version
+ ├── rules.yaml     # Rules: what to check, severity, thresholds
+ └── mappings.yaml  # File/path mappings (main tex candidates, bib paths)
+```
+
+`rules.yaml` is organized by dimension:
+
+| Section | Controls | Examples |
+|---|---|---|
+| `project` | Project structure: main tex file names, chapter globs, bib paths | `main_tex_candidates`, `chapter_globs` |
+| `reference` | Citation integrity: missing keys, orphans, duplicates, bib quality | `missing_key: error` |
+| `language` | Surface language: CJK/Latin spacing, brackets, punctuation, weak phrases | `cjk_latin_spacing`, `bracket_mismatch` |
+| `language_deep` | Deep language: connectors, collocations, inference strength, boundary signposts | `inference_overclaim`, `boundary_signpost` |
+| `consistency` | Terminology: variant detection for the same concept | `terminology_consistency` |
+| `format` | Format structure: figure/table lists, numbering, cross-references | `require_list_of_figures` |
+| `content` | Content completeness: required sections, keyword count | `required_sections` |
+| `compile` | Compile diagnostics: engine, error categories, severity mapping | `engine_hint: xelatex` |
+
+### Creating Your Own School Rule Pack
+
+If you are not a Tsinghua student, or your department/journal has specific requirements, create a custom pack from one of the built-in starters.
+
+**Step 1: Scaffold the pack**
 
 ```bash
 python 90-rules/create_pack.py \
   --pack-id my-university \
-  --display-name "My University Thesis" \
+  --display-name "My University Master's Thesis" \
   --starter university-generic \
   --kind university-thesis
 ```
+
+This generates three files under `90-rules/packs/my-university/`, copied from `university-generic` as a starting point.
+
+**Step 2: Adjust project structure**
+
+Edit `rules.yaml` → `project` to match your thesis directory layout:
+
+```yaml
+project:
+  main_tex_candidates:       # Possible names for your main tex file, in priority order
+    - thesis.tex
+    - main.tex
+  chapter_globs:             # Where chapter files live and their naming pattern
+    - chapters/*.tex
+  bibliography_files:        # Paths to .bib files
+    - ref/refs.bib
+```
+
+**Step 3: Tune rules to your school's guide**
+
+Check your institutional thesis writing guide and decide rule by rule:
+
+- **Keep enabled**: Rules that your guide explicitly requires and the checker can reliably detect (e.g., missing citation keys, figure/table numbering)
+- **Demote**: Rules your guide does not mandate — change `severity` from `warning` to `info` (e.g., CJK/Latin spacing if not required)
+- **Disable**: Rules clearly irrelevant to your institution or discipline — set `enabled: false` (e.g., CJK rules for English-only theses)
+
+Example — demoting CJK spacing when your guide doesn't require it:
+
+```yaml
+# Before
+cjk_latin_spacing:
+  enabled: true
+  severity: warning
+
+# After (school guide does not mandate CJK-Latin spacing)
+cjk_latin_spacing:
+  enabled: true
+  severity: info
+```
+
+**Step 4: Update required section names**
+
+If your thesis uses Chinese section naming (not English IMRaD), sync the content rules:
+
+```yaml
+content:
+  required_sections:
+    - Introduction (or 绪论)
+    - Literature Review (or 文献综述)
+    - Methods (or 研究方法)
+    - Conclusion (or 结论)
+```
+
+**Step 5: Run checks with your custom pack**
+
+```bash
+python run_check_once.py \
+  --project-root thesis \
+  --ruleset my-university \
+  --skip-compile
+```
+
+**Step 6: Validate and iterate**
+
+After running, inspect the JSON reports under `reports/`. If you notice:
+
+- **Too many false positives in a category** → demote or disable that rule
+- **Real issues not detected** → check if the rule is enabled and severity is set high enough
+- **Project discovery failed** → adjust `main_tex_candidates` or `chapter_globs`
+
+Tweak → re-run → review reports. Most packs converge in 1–2 calibration rounds.
+
+> **For non-Tsinghua users**: If your calibrated rule pack is stable and you'd like it featured, PRs adding new packs to `90-rules/packs/` are welcome. Future students from your school won't have to start from scratch.
 
 ---
 

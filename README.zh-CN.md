@@ -13,7 +13,7 @@
 
 **中文文档** · [English](README.md) · [展示页面](https://quzhiii.github.io/thesis-skills)
 
-[快速开始](#快速开始) · [输出](#输出) · [使用场景](#使用场景) · [规则包](#规则包) · [边界](#边界)
+[快速开始](#快速开始) · [输出](#输出) · [使用场景](#使用场景) · [规则包](#规则包) · [创建自己的规则包](#创建你自己的学校规则包) · [边界](#边界)
 
 </div>
 
@@ -199,25 +199,135 @@ python 17-defense-pack/generate_figure_inventory.py \
 
 ## 规则包
 
-规则包用于编码学校或期刊的具体要求：项目布局、引用格式、语言规则、格式规则、内容要求，以及 readiness criteria。
+规则包是 Thesis Skills 最核心的概念之一：它把你学校的格式要求编码成结构化的 YAML 配置，让检查器知道什么算"对"、什么算"错"。
+
+### 内置规则包
 
 ```text
 90-rules/packs/
- ├── university-generic/      # 通用高校论文启动包
- ├── journal-generic/         # 通用期刊文章启动包
- ├── tsinghua-thesis/         # 清华大学示例
- └── demo-university-thesis/  # 具体的非清华示例包
+ ├── university-generic/        # 通用高校论文启动包（默认、宽松）
+ ├── journal-generic/           # 通用期刊文章启动包（英文、精简）
+ ├── tsinghua-thesis/           # 清华大学硕士/博士学位论文包
+ │                              #   已对标《研究生学位论文写作指南（202503）》
+ │                              #   中英文混排规则、图表编号、参考文献格式等均与校内规范一致
+ ├── tsinghua-thesis-experimental/  # 同上，实验校准版（与正式包同步更新）
+ └── demo-university-thesis/    # 非清华高校的具体示例包
 ```
 
-创建自定义规则包：
+- `university-generic` 适合**大部分国内高校**的学位论文，规则覆盖面广、阈值适中。
+- `tsinghua-thesis` 针对清华同学做了专门校准：引用格式按 GB/T 7714、中英混排参照学校写作指南、章节命名匹配中文学位论文惯例。清华同学直接用这个包即可，无需额外配置。
+- `journal-generic` 适合英文期刊投稿场景，关闭了 CJK 特有规则（中英空格、全半角标点等）。
+
+### 规则包内部结构
+
+每个规则包是一个文件夹，包含三个文件：
+
+```
+90-rules/packs/your-school/
+ ├── pack.yaml      # 包元信息：名称、类型、版本
+ ├── rules.yaml     # 规则定义：做什么检查、什么行业、报什么级别
+ └── mappings.yaml  # 文件名/路径映射（如主文件候选名、bib 文件位置）
+```
+
+`rules.yaml` 是核心，按维度分为：
+
+| 配置区 | 控制什么 | 示例 |
+|---|---|---|
+| `project` | 项目结构：主 tex 文件名、章节文件 glob、bib 文件路径 | `main_tex_candidates`、`chapter_globs` |
+| `reference` | 引用完整性：缺失 key、孤立条目、重复标题、bib 质量 | `missing_key: error` |
+| `language` | 语言规范：中英空格、括号配对、标点风格、弱词检测 | `cjk_latin_spacing`、`bracket_mismatch` |
+| `language_deep` | 深层语言：连接词、搭配、推断力度、边界声明 | `inference_overclaim`、`boundary_signpost` |
+| `consistency` | 术语一致性：相同概念的不同写法 | `terminology_consistency` |
+| `format` | 格式结构：图表清单、编号、交叉引用 | `require_list_of_figures` |
+| `content` | 内容完整性：必含章节、摘要关键词数量 | `required_sections` |
+| `compile` | 编译诊断：引擎、错误分类、严重度 | `engine_hint: xelatex` |
+
+### 创建你自己的学校规则包
+
+如果你不是清华学生，或者你的学院/期刊有特殊要求，可以基于内置包创建自己的规则包。
+
+**第 1 步：创建包骨架**
 
 ```bash
 python 90-rules/create_pack.py \
   --pack-id my-university \
-  --display-name "我的大学论文" \
+  --display-name "我的大学硕士学位论文" \
   --starter university-generic \
   --kind university-thesis
 ```
+
+这会在 `90-rules/packs/my-university/` 下生成三个文件，内容从 `university-generic` 复制而来作为起点。
+
+**第 2 步：修改项目结构配置**
+
+打开 `rules.yaml`，修改 `project` 部分让它匹配你的论文目录结构：
+
+```yaml
+project:
+  main_tex_candidates:       # 主文件可能叫这些名字，按优先级排列
+    - thesis.tex
+    - main.tex
+    - 毕业论文.tex
+  chapter_globs:             # 章节文件在哪里、叫什么模式
+    - chapters/*.tex
+  bibliography_files:        # bib 文件路径
+    - ref/refs.bib
+```
+
+**第 3 步：按学校要求调整规则**
+
+对照你学校的学位论文写作指南，逐条决定：
+
+- **要开的规则**：你的学校规范里明确要求、且 checker 能自动检测的（如引用 key 缺失、图表编号格式）
+- **要降级的规则**：学校规范没有强制要求的，把 `severity` 从 `warning` 改成 `info`（如中英空格）
+- **要关的规则**：明显不适用于你们学校或学科的，设 `enabled: false`（如英文投稿不需要 CJK 规则）
+
+一个常见的调整示例——把中英空格从强警告降为信息提示：
+
+```yaml
+# 修改前
+cjk_latin_spacing:
+  enabled: true
+  severity: warning
+
+# 修改后（学校指南没规定中英空格）
+cjk_latin_spacing:
+  enabled: true
+  severity: info
+```
+
+**第 4 步：更新 content 要求的章节名**
+
+如果你的论文章节不是英文 IMRaD 结构，记得同步修改：
+
+```yaml
+content:
+  required_sections:
+    - 绪论
+    - 文献综述
+    - 研究方法
+    - 结论
+```
+
+**第 5 步：使用自定义包运行检查**
+
+```bash
+python run_check_once.py \
+  --project-root thesis \
+  --ruleset my-university \
+  --skip-compile
+```
+
+**第 6 步：验证并迭代**
+
+运行后查看 `reports/` 下的 JSON 报告。如果发现：
+- **某类误报过多** → 降低该规则的 severity 或禁用
+- **某类真实问题没检测到** → 检查规则是否已启用、severity 是否过低
+- **项目发现失败** → 调整 `main_tex_candidates` 或 `chapter_globs`
+
+修改 → 重新运行 → 查看报告，通常 1-2 轮就能校准到位。
+
+> **给非清华同学的建议**：如果你希望我们宣传你的学校规则包，欢迎提 PR 把校准好的规则包放到 `90-rules/packs/` 下。这样后来的同学就不需要从零开始。
 
 ---
 
