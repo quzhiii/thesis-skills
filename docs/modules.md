@@ -54,7 +54,7 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Migration | `02-latex-to-word/` | `migrate_project.py` | Generate review-friendly `.docx` and report degraded elements |
 | Review | `03-latex-review-diff/` | `review_diff.py` | Generate review diff, triage, and TODO artifacts |
 | Review | `04-word-review-ingest/` | `feedback_ingest.py` | Normalize Word feedback into structured issues |
-| Check | `10-check-references/` | `check_references.py` | Validate `\cite{}` keys against bibliography files |
+| Check | `10-check-references/` | `check_references.py` | Validate local citation integrity: cited keys, BibTeX fields, duplicate keys, and local log citation warnings |
 | Check | `11-check-language/` | `check_language.py` | Run deterministic language checks, including CJK/Latin spacing |
 | Check | `12-check-format/` | `check_format.py` | Check figure/table blocks, labels, references, and front matter |
 | Check | `13-check-content/` | `check_content.py` | Check abstract metadata and content structure |

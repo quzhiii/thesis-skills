@@ -121,6 +121,7 @@ Next actions:
 A real run writes machine-readable artifacts such as:
 
 - `reports/check_references-report.json`
+- `reports/citation-integrity-report.json`
 - `reports/check_language-report.json`
 - `reports/check_format-report.json`
 - `reports/check_content-report.json`
@@ -128,6 +129,20 @@ A real run writes machine-readable artifacts such as:
 - `reports/run-summary.json`
 
 Example JSON snippets and demo walkthroughs: [`docs/examples.md`](docs/examples.md).
+
+### Citation Integrity preview
+
+V1.1 adds a local-first Citation Integrity report for pre-submission reference risk:
+
+```text
+References: BLOCK
+- cited keys missing from bibliography files
+- duplicate citation keys with conflicting metadata
+- DOI/year field warnings
+- LaTeX undefined-citation warnings from local compile logs
+```
+
+Boundary: V1.1 only checks local citation integrity. It does not query external databases, does not detect hallucinated references yet, and never auto-inserts or rewrites citations.
 
 ---
 

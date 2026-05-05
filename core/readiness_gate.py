@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import Any, TypedDict
 
+from core.citation_integrity.readiness_adapter import citation_integrity_dimension
+
 
 VALID_MODES = {"advisor-handoff", "submission-prep"}
 
@@ -104,6 +106,7 @@ def collect_readiness_sources(project_root: str | Path) -> dict[str, dict[str, o
             compile_payload = payload
 
     sources: dict[str, dict[str, object]] = {
+        "project_root": {"status": "present", "path": str(root)},
         "run_summary": _present_source(
             run_summary_path.relative_to(root).as_posix(), run_summary
         )
@@ -313,6 +316,13 @@ def _evaluate_dimensions(
         "format": from_checker("check_format", "format evidence missing"),
         "content": from_checker("check_content", "content evidence missing"),
     }
+
+    project_root_source = sources.get("project_root", {})
+    project_root = project_root_source.get("path") if isinstance(project_root_source, dict) else None
+    if isinstance(project_root, str):
+        rich_references = citation_integrity_dimension(project_root)
+        if rich_references is not None:
+            dimensions["references"] = rich_references
 
     compile_source = sources.get("compile", {})
     if compile_source.get("status") == "present":

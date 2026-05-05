@@ -9,6 +9,13 @@ All notable changes to Thesis Skills are summarized here.
 - Hardened rule-pack documentation and module references for public use.
 - Documented the boundary that Thesis Skills checks and prepares thesis workflows; it does not generate thesis content.
 
+## v1.1.0
+
+- Added the local-first Citation Integrity Engine under `10-check-references`.
+- Added `reports/citation-integrity-report.json` alongside the compatibility `check_references-report.json`.
+- Added local checks for missing cited keys, unused bibliography entries, duplicate key conflicts, BibTeX field warnings, DOI/year shape warnings, and local undefined-citation log evidence.
+- Integrated Citation Integrity evidence into the References dimension of the readiness gate.
+
 ## v0.8.x
 
 - Added defense preparation workflows for outlines, figure inventories, candidate visuals, and talk notes.
