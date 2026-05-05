@@ -120,6 +120,29 @@ language:
         self.assertFalse(missing.autofix_safe)
         self.assertEqual(missing.patterns, ())
 
+    def test_tsinghua_pack_matches_chinese_thesis_layout(self) -> None:
+        pack = load_rule_pack(PACK_ROOT / "tsinghua-thesis")
+        project = pack.rules["project"]
+        self.assertIn("论文初稿.tex", project["main_tex_candidates"])
+        self.assertIn("ref/refs-wordfix.bib", project["bibliography_files"])
+        required_sections = pack.rules["content"]["required_sections"]
+        self.assertIn("绪论", required_sections)
+        self.assertIn("研究方法", required_sections)
+        self.assertNotIn("Introduction", required_sections)
+        self.assertNotIn("Methods", required_sections)
+
+    def test_experimental_pack_matches_guide_calibrated_behavior(self) -> None:
+        pack = load_rule_pack(PACK_ROOT / "tsinghua-thesis-experimental")
+        lang = pack.rules["language"]
+        self.assertTrue(lang["bracket_mismatch"]["enabled"])
+        self.assertEqual(lang["number_range_style"]["severity"], "info")
+        self.assertEqual(lang["cjk_latin_spacing"]["severity"], "info")
+        self.assertFalse(lang["cjk_latin_spacing"]["autofix_safe"])
+        self.assertEqual(lang["dash_style"]["severity"], "info")
+        self.assertTrue(lang["fullwidth_halfwidth_mix"]["enabled"])
+        self.assertEqual(lang["fullwidth_halfwidth_mix"]["severity"], "warning")
+        self.assertTrue(lang["zh_en_symbol_spacing"]["enabled"])
+
 
 if __name__ == "__main__":
     unittest.main()

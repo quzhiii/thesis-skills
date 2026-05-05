@@ -2,9 +2,16 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
 
 from core.common import Finding
+from core.citation_integrity.report import (
+    build_citation_integrity_report,
+    citation_integrity_findings,
+    write_citation_integrity_report,
+)
+from core.citation_integrity.latex_log_parser import lint_latex_log_text
 from core.compile_parser import parse_compile_log_file
 from core.language_rules import get_language_rule
 from core.project import ThesisProject
@@ -168,71 +175,47 @@ def run_bib_quality_check(
 def run_reference_check(
     project: ThesisProject, pack: RulePack, report_path: Path
 ) -> int:
-    ref_rules = pack.rules["reference"]
-    findings: list[Finding] = []
-    bib_keys: set[str] = set()
-    title_to_keys: defaultdict[str, list[str]] = defaultdict(list)
-    for bib in project.bibliography_files:
-        text = bib.read_text(encoding="utf-8", errors="ignore")
-        bib_keys |= set(re.findall(r"@\w+\s*\{\s*([^,\s]+)\s*,", text))
-        for match in re.finditer(r"@\w+\s*\{\s*([^,\s]+)\s*,(.*?)\n\}\s*", text, re.S):
-            title = re.search(r"title\s*=\s*\{(.*?)\}", match.group(2), re.S)
-            if title:
-                title_to_keys[title.group(1).strip().lower()].append(match.group(1))
-
-    cited: list[tuple[str, str, int]] = []
-    pattern = re.compile(r"\\cite[a-zA-Z*]*\s*(?:\[[^\]]*\]\s*)?\{([^}]+)\}")
-    for tex in [project.main_tex] + project.chapter_files:
-        text = tex.read_text(encoding="utf-8", errors="ignore")
-        for match in pattern.finditer(text):
-            for key in [
-                item.strip() for item in match.group(1).split(",") if item.strip()
-            ]:
-                cited.append((key, project.rel(tex), _line_of(text, match.start())))
-                if key not in bib_keys:
-                    findings.append(
-                        Finding(
-                            _level(ref_rules, "missing_key", "error"),
-                            "REF_MISSING_KEY",
-                            f"Citation key not found in bibliography: {key}",
-                            project.rel(tex),
-                            _line_of(text, match.start()),
-                            "Add the missing key or fix the cite command",
-                        )
-                    )
-
-    cited_keys = {key for key, _, _ in cited}
-    for key in sorted(bib_keys - cited_keys):
-        findings.append(
-            Finding(
-                _level(ref_rules, "orphan_entry", "warning"),
-                "REF_ORPHAN_BIB",
-                f"Bibliography key not cited: {key}",
-                "|".join(project.rel(path) for path in project.bibliography_files),
-                0,
-                "Remove unused entry or cite it",
-            )
+    tex_files = [project.main_tex] + project.chapter_files
+    tex_texts = {
+        project.rel(path): path.read_text(encoding="utf-8", errors="ignore")
+        for path in tex_files
+        if path.exists()
+    }
+    bib_texts = {
+        project.rel(path): path.read_text(encoding="utf-8", errors="ignore")
+        for path in project.bibliography_files
+        if path.exists()
+    }
+    log_path = project.main_tex.with_suffix(".log")
+    extra_issues = (
+        lint_latex_log_text(
+            log_path.read_text(encoding="utf-8", errors="ignore"),
+            project.rel(log_path) if log_path.is_relative_to(project.root) else str(log_path),
+            default_file=project.rel(project.main_tex),
         )
-
-    for title, keys in title_to_keys.items():
-        if len(keys) > 1:
-            findings.append(
-                Finding(
-                    _level(ref_rules, "duplicate_title", "warning"),
-                    "REF_DUPLICATE_TITLE",
-                    f"Possible duplicate title group: {', '.join(sorted(keys))}",
-                    "|".join(project.rel(path) for path in project.bibliography_files),
-                    0,
-                    "Merge duplicate bibliography entries if appropriate",
-                )
-            )
-
+        if log_path.exists()
+        else []
+    )
+    report = build_citation_integrity_report(
+        tex_texts,
+        bib_texts,
+        current_year=datetime.now().year,
+        extra_issues=extra_issues,
+    )
+    write_citation_integrity_report(
+        report, project.reports_dir / "citation-integrity-report.json"
+    )
+    findings = citation_integrity_findings(report)
     return write_report(
         report_path,
         "check_references",
         pack.ruleset,
         findings,
-        {"files_scanned": len(project.chapter_files) + 1},
+        {
+            "files_scanned": len(tex_texts),
+            "citation_integrity_status": report["status"],
+            "citation_integrity_report": "reports/citation-integrity-report.json",
+        },
     )
 
 
@@ -266,6 +249,22 @@ def run_language_check(
     for tex in project.chapter_files:
         lines = tex.read_text(encoding="utf-8", errors="ignore").splitlines()
         rel = project.rel(tex)
+
+        blocks: list[tuple[int, str]] = []
+        block_lines: list[str] = []
+        block_start = 0
+        for line_no, line in enumerate(lines, start=1):
+            if line.strip():
+                if not block_lines:
+                    block_start = line_no
+                block_lines.append(line)
+            else:
+                if block_lines:
+                    blocks.append((block_start, _language_view("\n".join(block_lines))))
+                    block_lines = []
+        if block_lines:
+            blocks.append((block_start, _language_view("\n".join(block_lines))))
+
         for line_no, line in enumerate(lines, start=1):
             text = _language_view(line)
             if repeated_punctuation.enabled and _REPEATED_PUNCTUATION_RE.search(text):
@@ -279,6 +278,73 @@ def run_language_check(
                     line_no,
                     "Replace repeated punctuation with a single mark",
                     default_severity="error",
+                )
+
+            if mixed_quote_style.enabled and (
+                ('"' in text or "'" in text)
+                and any(mark in text for mark in ["\u201c", "\u201d", "\u2018", "\u2019"])
+            ):
+                _append_language_finding(
+                    findings,
+                    lang,
+                    "mixed_quote_style",
+                    "LANG_MIXED_QUOTES",
+                    "Mixed quote styles detected",
+                    rel,
+                    line_no,
+                    "Use one quote style consistently",
+                )
+
+            if cjk_latin_spacing.enabled and _CJK_LATIN_GLUE_RE.search(text):
+                _append_language_finding(
+                    findings,
+                    lang,
+                    "cjk_latin_spacing",
+                    "LANG_CJK_LATIN_SPACING",
+                    "Possible missing spacing between CJK and Latin tokens",
+                    rel,
+                    line_no,
+                    "Add a space between Chinese and English tokens where appropriate",
+                )
+
+            if weak_phrases.enabled:
+                for pattern in weak_phrases.patterns:
+                    if pattern in text:
+                        _append_language_finding(
+                            findings,
+                            lang,
+                            "weak_phrases",
+                            "LANG_WEAK_PHRASE",
+                            f"Weak academic phrase detected: {pattern}",
+                            rel,
+                            line_no,
+                            "Consider replacing with more precise wording",
+                            default_severity="info",
+                        )
+
+        for block_start, block_text in blocks:
+            if bracket_mismatch.enabled and _has_bracket_mismatch(block_text):
+                _append_language_finding(
+                    findings,
+                    lang,
+                    "bracket_mismatch",
+                    "LANG_BRACKET_MISMATCH",
+                    "Bracket pairing looks inconsistent",
+                    rel,
+                    block_start,
+                    "Check whether opening and closing brackets are balanced",
+                )
+
+            if quote_mismatch.enabled and _has_quote_mismatch(block_text):
+                _append_language_finding(
+                    findings,
+                    lang,
+                    "quote_mismatch",
+                    "LANG_QUOTE_MISMATCH",
+                    "Quote pairing looks inconsistent",
+                    rel,
+                    block_start,
+                    "Check whether opening and closing quotation marks are balanced",
                 )
 
             if mixed_quote_style.enabled and (
@@ -606,6 +672,7 @@ def run_content_check(project: ThesisProject, pack: RulePack, report_path: Path)
     acronym_candidates: set[str] = set()
     for tex in project.chapter_files:
         text = tex.read_text(encoding="utf-8", errors="ignore")
+        titles.extend(re.findall(r"\\chapter\{([^}]+)\}", text))
         titles.extend(re.findall(r"\\section\{([^}]+)\}", text))
         acronym_candidates |= set(re.findall(r"(?<!\\)\b[A-Z][A-Z0-9-]{1,}\b", text))
     for required in content.get("required_sections", []):

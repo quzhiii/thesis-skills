@@ -60,6 +60,36 @@ class ProjectTest(unittest.TestCase):
             ["data/chap01.tex", "data/chap02.tex"],
         )
 
+    def test_project_discovery_finds_chinese_main_tex_candidate(self) -> None:
+        from tests.helpers import materialize_project, workspace_tempdir
+
+        with workspace_tempdir("project-discovery-zh-") as base:
+            materialize_project(
+                base,
+                {
+                    "论文初稿.tex": (
+                        "\\documentclass{thuthesis}\n"
+                        "\\begin{document}\n"
+                        "\\input{chapters/chap01}\n"
+                        "\\end{document}\n"
+                    ),
+                    "chapters/chap01.tex": "\\chapter{绪论}\n\\section{研究背景}\n",
+                    "ref/refs.bib": "@article{ref1,\n  title = {Reference One},\n}\n",
+                },
+            )
+            project = ThesisProject.discover(
+                base,
+                ["论文初稿.tex", "main.tex", "thesis.tex"],
+                ["chapters/*.tex"],
+                ["ref/refs.bib"],
+            )
+
+        self.assertEqual(project.main_tex.relative_to(base).as_posix(), "论文初稿.tex")
+        self.assertEqual(
+            [path.relative_to(base).as_posix() for path in project.chapter_files],
+            ["chapters/chap01.tex"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
