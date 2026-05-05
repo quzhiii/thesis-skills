@@ -16,6 +16,11 @@ All notable changes to Thesis Skills are summarized here.
 - Added local checks for missing cited keys, unused bibliography entries, duplicate key conflicts, BibTeX field warnings, DOI/year shape warnings, and local undefined-citation log evidence.
 - Integrated Citation Integrity evidence into the References dimension of the readiness gate.
 
+## v1.2.0
+
+- Added Markdown and CSV Citation Integrity outputs for review-friendly service reports.
+- Added a clean Citation Integrity demo alongside the intentionally broken demo.
+
 ## v0.8.x
 
 - Added defense preparation workflows for outlines, figure inventories, candidate visuals, and talk notes.

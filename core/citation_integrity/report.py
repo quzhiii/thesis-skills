@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import csv
 from pathlib import Path
 
 from core.common import Finding
@@ -191,3 +192,82 @@ def write_citation_integrity_report(report: dict[str, object], output: str | Pat
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _issue_dicts(report: dict[str, object]) -> list[dict[str, object]]:
+    issues = report.get("issues")
+    if not isinstance(issues, list):
+        return []
+    return [issue for issue in issues if isinstance(issue, dict)]
+
+
+def render_citation_integrity_markdown(report: dict[str, object]) -> str:
+    summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
+    issues = _issue_dicts(report)
+    blocks = [issue for issue in issues if issue.get("severity") == "BLOCK"]
+    warnings = [issue for issue in issues if issue.get("severity") == "WARN"]
+    lines = [
+        "# Citation Integrity Report",
+        "",
+        f"**Status:** {report.get('status', 'UNKNOWN')}",
+        "",
+        "## Summary",
+        "",
+    ]
+    for key in sorted(summary):
+        lines.append(f"- `{key}`: {summary[key]}")
+    lines.extend(["", "## Blocking Issues", ""])
+    if blocks:
+        for issue in blocks:
+            lines.append(
+                f"- `{issue.get('code')}` {issue.get('file')}:{issue.get('line')} - {issue.get('message')}"
+            )
+    else:
+        lines.append("- None")
+    lines.extend(["", "## Warnings", ""])
+    if warnings:
+        for issue in warnings:
+            lines.append(
+                f"- `{issue.get('code')}` {issue.get('file')}:{issue.get('line')} - {issue.get('message')}"
+            )
+    else:
+        lines.append("- None")
+    lines.extend(
+        [
+            "",
+            "## Next Actions",
+            "",
+            "1. Resolve all BLOCK issues before submission or advisor handoff.",
+            "2. Review WARN issues and decide whether they are acceptable for your ruleset.",
+            "3. Re-run the checker after updating citations, bibliography files, or compile logs.",
+            "",
+            "V1.2 report boundary: this is a local citation-integrity report. It does not verify references against external databases and does not detect hallucinated references.",
+        ]
+    )
+    return "\n".join(lines) + "\n"
+
+
+def write_citation_integrity_markdown(report: dict[str, object], output: str | Path) -> None:
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(render_citation_integrity_markdown(report), encoding="utf-8")
+
+
+def write_citation_integrity_csv(report: dict[str, object], output: str | Path) -> None:
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = ["severity", "code", "category", "file", "line", "message", "suggested_action"]
+    issues = sorted(
+        _issue_dicts(report),
+        key=lambda issue: (
+            0 if issue.get("severity") == "BLOCK" else 1,
+            str(issue.get("code", "")),
+            str(issue.get("file", "")),
+            int(issue.get("line") or 0),
+        ),
+    )
+    with output.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for issue in issues:
+            writer.writerow({key: issue.get(key, "") for key in fieldnames})

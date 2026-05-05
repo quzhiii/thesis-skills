@@ -56,7 +56,7 @@ language:
       - 不难看出
       - 本文将
   bracket_mismatch:
-    enabled: false
+    enabled: true
     severity: error
     autofix_safe: false
   quote_mismatch:
@@ -84,8 +84,8 @@ language:
     severity: warning
     autofix_safe: false
   number_range_style:
-    enabled: false
-    severity: warning
+    enabled: true
+    severity: info
     autofix_safe: false
   enum_punctuation_style:
     enabled: true

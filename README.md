@@ -225,14 +225,13 @@ Rule packs are the most important concept in Thesis Skills: they encode your ins
  ├── university-generic/        # Generic university thesis starter (default, permissive)
  ├── journal-generic/           # Generic journal article starter (English, minimal)
  ├── tsinghua-thesis/           # Tsinghua University Master's/PhD thesis pack
- │                              #   Calibrated against 《研究生学位论文写作指南（202503）》
- │                              #   CJK/English rules, figure numbering, reference format aligned to spec
- ├── tsinghua-thesis-experimental/  # Same pack, experimental calibration (kept in sync)
+ │                              #   First-pass calibrated against 《研究生学位论文写作指南（202503）》
+ │                              #   CJK/English rules, figure numbering, and reference defaults tuned to the guide
  └── demo-university-thesis/    # Concrete non-Tsinghua example pack
 ```
 
 - `university-generic` is suitable for **most Chinese universities** — broad coverage, moderate thresholds.
-- `tsinghua-thesis` is specifically calibrated for Tsinghua students: GB/T 7714 reference style, mixed CJK/English rules per the university writing guide, Chinese chapter naming conventions. Tsinghua students can use this directly with no extra config.
+- `tsinghua-thesis` is specifically calibrated for Tsinghua students: GB/T 7714 reference style, mixed CJK/English rules per the university writing guide, and Chinese chapter naming conventions. For many Tsinghua thesis projects this works as a direct starting point, but you should still verify against your department template and local requirements.
 - `journal-generic` targets English journal submissions, with CJK-specific rules disabled.
 
 ### Inside a Rule Pack

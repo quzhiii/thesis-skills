@@ -9,6 +9,8 @@ from core.common import Finding
 from core.citation_integrity.report import (
     build_citation_integrity_report,
     citation_integrity_findings,
+    write_citation_integrity_csv,
+    write_citation_integrity_markdown,
     write_citation_integrity_report,
 )
 from core.citation_integrity.latex_log_parser import lint_latex_log_text
@@ -205,6 +207,12 @@ def run_reference_check(
     write_citation_integrity_report(
         report, project.reports_dir / "citation-integrity-report.json"
     )
+    write_citation_integrity_markdown(
+        report, project.reports_dir / "citation-integrity-report.md"
+    )
+    write_citation_integrity_csv(
+        report, project.reports_dir / "citation-issues.csv"
+    )
     findings = citation_integrity_findings(report)
     return write_report(
         report_path,
@@ -322,97 +330,6 @@ def run_language_check(
                             default_severity="info",
                         )
 
-        for block_start, block_text in blocks:
-            if bracket_mismatch.enabled and _has_bracket_mismatch(block_text):
-                _append_language_finding(
-                    findings,
-                    lang,
-                    "bracket_mismatch",
-                    "LANG_BRACKET_MISMATCH",
-                    "Bracket pairing looks inconsistent",
-                    rel,
-                    block_start,
-                    "Check whether opening and closing brackets are balanced",
-                )
-
-            if quote_mismatch.enabled and _has_quote_mismatch(block_text):
-                _append_language_finding(
-                    findings,
-                    lang,
-                    "quote_mismatch",
-                    "LANG_QUOTE_MISMATCH",
-                    "Quote pairing looks inconsistent",
-                    rel,
-                    block_start,
-                    "Check whether opening and closing quotation marks are balanced",
-                )
-
-            if mixed_quote_style.enabled and (
-                ('"' in text or "'" in text)
-                and any(mark in text for mark in ["“", "”", "‘", "’"])
-            ):
-                _append_language_finding(
-                    findings,
-                    lang,
-                    "mixed_quote_style",
-                    "LANG_MIXED_QUOTES",
-                    "Mixed quote styles detected",
-                    rel,
-                    line_no,
-                    "Use one quote style consistently",
-                )
-
-            if cjk_latin_spacing.enabled and _CJK_LATIN_GLUE_RE.search(text):
-                _append_language_finding(
-                    findings,
-                    lang,
-                    "cjk_latin_spacing",
-                    "LANG_CJK_LATIN_SPACING",
-                    "Possible missing spacing between CJK and Latin tokens",
-                    rel,
-                    line_no,
-                    "Add a space between Chinese and English tokens where appropriate",
-                )
-
-            if weak_phrases.enabled:
-                for pattern in weak_phrases.patterns:
-                    if pattern in text:
-                        _append_language_finding(
-                            findings,
-                            lang,
-                            "weak_phrases",
-                            "LANG_WEAK_PHRASE",
-                            f"Weak academic phrase detected: {pattern}",
-                            rel,
-                            line_no,
-                            "Consider replacing with more precise wording",
-                            default_severity="info",
-                        )
-
-            if bracket_mismatch.enabled and _has_bracket_mismatch(text):
-                _append_language_finding(
-                    findings,
-                    lang,
-                    "bracket_mismatch",
-                    "LANG_BRACKET_MISMATCH",
-                    "Bracket pairing looks inconsistent",
-                    rel,
-                    line_no,
-                    "Check whether opening and closing brackets are balanced",
-                )
-
-            if quote_mismatch.enabled and _has_quote_mismatch(text):
-                _append_language_finding(
-                    findings,
-                    lang,
-                    "quote_mismatch",
-                    "LANG_QUOTE_MISMATCH",
-                    "Quote pairing looks inconsistent",
-                    rel,
-                    line_no,
-                    "Check whether opening and closing quotation marks are balanced",
-                )
-
             if booktitle_mixed_style.enabled and _has_booktitle_mixed_style(text):
                 _append_language_finding(
                     findings,
@@ -523,6 +440,31 @@ def run_language_check(
                     rel,
                     line_no,
                     "Normalize punctuation width in contexts where the style is obvious",
+                )
+
+        for block_start, block_text in blocks:
+            if bracket_mismatch.enabled and _has_bracket_mismatch(block_text):
+                _append_language_finding(
+                    findings,
+                    lang,
+                    "bracket_mismatch",
+                    "LANG_BRACKET_MISMATCH",
+                    "Bracket pairing looks inconsistent",
+                    rel,
+                    block_start,
+                    "Check whether opening and closing brackets are balanced",
+                )
+
+            if quote_mismatch.enabled and _has_quote_mismatch(block_text):
+                _append_language_finding(
+                    findings,
+                    lang,
+                    "quote_mismatch",
+                    "LANG_QUOTE_MISMATCH",
+                    "Quote pairing looks inconsistent",
+                    rel,
+                    block_start,
+                    "Check whether opening and closing quotation marks are balanced",
                 )
     return write_report(
         report_path,

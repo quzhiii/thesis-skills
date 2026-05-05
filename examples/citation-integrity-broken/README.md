@@ -21,5 +21,7 @@ Expected artifacts:
 
 - `reports/check_references-report.json`
 - `reports/citation-integrity-report.json`
+- `reports/citation-integrity-report.md`
+- `reports/citation-issues.csv`
 
 V1.1 is local-only. It does not verify whether references exist in external databases, does not detect hallucinated references, and does not automatically edit citations or bibliography entries.

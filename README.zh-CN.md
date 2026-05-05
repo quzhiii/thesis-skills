@@ -208,14 +208,13 @@ python 17-defense-pack/generate_figure_inventory.py \
  ├── university-generic/        # 通用高校论文启动包（默认、宽松）
  ├── journal-generic/           # 通用期刊文章启动包（英文、精简）
  ├── tsinghua-thesis/           # 清华大学硕士/博士学位论文包
- │                              #   已对标《研究生学位论文写作指南（202503）》
- │                              #   中英文混排规则、图表编号、参考文献格式等均与校内规范一致
- ├── tsinghua-thesis-experimental/  # 同上，实验校准版（与正式包同步更新）
+ │                              #   已按《研究生学位论文写作指南（202503）》做过首轮校准
+ │                              #   中英文混排规则、图表编号、参考文献默认项已按写作指南调整
  └── demo-university-thesis/    # 非清华高校的具体示例包
 ```
 
 - `university-generic` 适合**大部分国内高校**的学位论文，规则覆盖面广、阈值适中。
-- `tsinghua-thesis` 针对清华同学做了专门校准：引用格式按 GB/T 7714、中英混排参照学校写作指南、章节命名匹配中文学位论文惯例。清华同学直接用这个包即可，无需额外配置。
+- `tsinghua-thesis` 针对清华同学做了专门校准：引用格式按 GB/T 7714、中英混排参照学校写作指南、章节命名匹配中文学位论文惯例。对很多清华论文项目来说，这个包可以直接作为起点使用，但仍建议结合院系模板和本地要求再复核 1 轮。
 - `journal-generic` 适合英文期刊投稿场景，关闭了 CJK 特有规则（中英空格、全半角标点等）。
 
 ### 规则包内部结构
@@ -225,7 +224,7 @@ python 17-defense-pack/generate_figure_inventory.py \
 ```
 90-rules/packs/your-school/
  ├── pack.yaml      # 包元信息：名称、类型、版本
- ├── rules.yaml     # 规则定义：做什么检查、什么行业、报什么级别
+  ├── rules.yaml     # 规则定义：做什么检查、报什么级别
  └── mappings.yaml  # 文件名/路径映射（如主文件候选名、bib 文件位置）
 ```
 

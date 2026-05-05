@@ -148,15 +148,64 @@ class CitationIntegrityKeyParsingTest(unittest.TestCase):
             )
 
             rich_report = project / "reports" / "citation-integrity-report.json"
+            markdown_report = project / "reports" / "citation-integrity-report.md"
+            csv_report = project / "reports" / "citation-issues.csv"
             rich_report_exists = rich_report.exists()
+            markdown_report_exists = markdown_report.exists()
+            csv_report_exists = csv_report.exists()
             compatibility = json.loads(compatibility_report.read_text(encoding="utf-8"))
             rich = json.loads(rich_report.read_text(encoding="utf-8"))
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertEqual(compatibility["summary"]["checker"], "check_references")
         self.assertTrue(rich_report_exists)
+        self.assertTrue(markdown_report_exists)
+        self.assertTrue(csv_report_exists)
         self.assertEqual(rich["status"], "BLOCK")
         self.assertEqual(rich["summary"]["missing_cited_keys"], 1)
+
+    def test_check_references_cli_emits_markdown_and_csv_for_clean_demo(self) -> None:
+        with workspace_tempdir("citation-clean-cli-") as base:
+            project = materialize_project(
+                base / "project",
+                {
+                    "main.tex": "\\documentclass{article}\n\\begin{document}\n\\cite{clean2024}\n\\end{document}\n",
+                    "ref/refs.bib": "@article{clean2024, title={Clean}, author={A}, year={2024}, journal={J}, doi={10.1000/clean}}\n",
+                },
+            )
+            compatibility_report = project / "reports" / "check_references-report.json"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "10-check-references" / "check_references.py"),
+                    "--project-root",
+                    str(project),
+                    "--ruleset",
+                    "university-generic",
+                    "--report",
+                    str(compatibility_report),
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+
+            rich = json.loads(
+                (project / "reports" / "citation-integrity-report.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            markdown = (project / "reports" / "citation-integrity-report.md").read_text(
+                encoding="utf-8"
+            )
+            csv_text = (project / "reports" / "citation-issues.csv").read_text(
+                encoding="utf-8"
+            )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(rich["status"], "PASS")
+        self.assertIn("**Status:** PASS", markdown)
+        self.assertTrue(csv_text.startswith("severity,code,category,file,line,message,suggested_action"))
 
 
 if __name__ == "__main__":
