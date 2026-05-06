@@ -46,8 +46,13 @@ Important files:
 
 - `run-summary.json` — step-by-step checker results
 - `readiness-report.json` — aggregate `PASS / WARN / BLOCK` readiness gate
-- `check_references-report.json` — citation key integrity
+- `check_bib_quality-report.json` — bibliography-field and duplicate-entry precheck
+- `check_references-report.json` — compatibility reference checker report
+- `citation-integrity-report.json` — machine-readable Citation Integrity status
+- `citation-integrity-report.md` — human-readable citation risk summary
+- `citation-issues.csv` — spreadsheet-friendly list of BLOCK/WARN citation issues
 - `check_language-report.json` — deterministic language checks
+- `check_language_deep-report.json` — manual-first deeper language screening
 - `check_format-report.json` — labels, references, figures, tables, structure
 - `check_content-report.json` — abstract and content metadata checks
 

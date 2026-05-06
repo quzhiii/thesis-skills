@@ -146,11 +146,16 @@
                                 <h3 class="step-title">预期输出</h3>
                             </div>
                             <div class="step-body">
-                                <p>命令跑完后，会在 <code>examples/minimal-latex-project/reports/</code> 目录下生成 6 个 JSON 文件：</p>
+                                <p>命令跑完后，会在 <code>examples/minimal-latex-project/reports/</code> 目录下生成一组 JSON / Markdown / CSV 文件：</p>
                                 <pre class="terminal-block">examples/minimal-latex-project/reports/
 ├── run-summary.json              <span class="terminal-comment"># 所有检查的汇总索引</span>
-├── check_references-report.json  <span class="terminal-comment"># 引用完整性检查</span>
+├── check_bib_quality-report.json <span class="terminal-comment"># Bib 字段与重复项预检</span>
+├── check_references-report.json  <span class="terminal-comment"># 兼容引用检查报告</span>
+├── citation-integrity-report.json <span class="terminal-comment"># Citation Integrity 机器可读状态</span>
+├── citation-integrity-report.md  <span class="terminal-comment"># Citation Integrity 人工可读摘要</span>
+├── citation-issues.csv           <span class="terminal-comment"># 可导入表格的风险列表</span>
 ├── check_language-report.json    <span class="terminal-comment"># 中文语言风格检查</span>
+├── check_language_deep-report.json <span class="terminal-comment"># 深度语言筛查</span>
 ├── check_format-report.json      <span class="terminal-comment"># 格式规范检查</span>
 ├── check_content-report.json     <span class="terminal-comment"># 内容结构检查</span>
 └── readiness-report.json         <span class="terminal-comment"># 总 verdict：PASS / WARN / BLOCK</span></pre>
@@ -160,10 +165,11 @@
                         <article class="step-item">
                             <div class="step-header">
                                 <span class="step-badge">5</span>
-                                <h3 class="step-title">先看这三个文件</h3>
+                                <h3 class="step-title">先看这四个文件</h3>
                             </div>
                             <div class="step-body">
                                 <p><strong>先看 readiness-report.json</strong>：总 verdict 是什么。PASS 表示通过，WARN 有警告但不阻塞，BLOCK 需要处理后才能继续。</p>
+                                <p><strong>再看 citation-integrity-report.md</strong>：这是最适合人工先读的引用风险摘要，能直接看到 BLOCK / WARN 项和下一步动作。</p>
                                 <p><strong>再看 check_language-report.json</strong>：中文语言风格检查结果，比如口语化表达、标点混用、重复用词。</p>
                                 <p><strong>最后看 run-summary.json</strong>：所有检查的汇总索引，方便你快速定位哪一项需要细看。</p>
                             </div>

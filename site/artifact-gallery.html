@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>输出样例 | Thesis Skills v1.0.0</title>
-    <meta name="description" content="Thesis Skills 6类核心输出样例展示。从文献接入到答辩准备，每个阶段都有对应的输出文件。">
+    <title>输出样例 | Thesis Skills v1.2</title>
+    <meta name="description" content="Thesis Skills 6类核心输出样例展示，并额外展开 Citation Integrity 的 JSON、Markdown、CSV 报告。从文献接入到答辩准备，每个阶段都有对应的输出文件。">
     <link rel="stylesheet" href="editorial-theme.css">
 </head>
 <body>
@@ -23,11 +23,11 @@
                 </div>
                 <div class="issue-title">
                     <span class="issue-kicker">Thesis Skills</span>
-                    <span class="issue-note">v1.0.0 / 输出样例</span>
+                    <span class="issue-note">v1.2 / 输出样例</span>
                 </div>
                 <div class="issue-meta">
                     <span>showcase / cn</span>
-                    <span>2026.04</span>
+                    <span>2026.05</span>
                 </div>
             </header>
 
@@ -59,7 +59,7 @@
                                 <span class="title-line">每一步都留下</span>
                                 <span class="title-line title-strong">可检查的输出</span>
                             </h1>
-                            <p class="hero-subtitle">从文献接入到答辩准备，每个阶段都有对应的输出文件。这里展示6类核心输出长什么样、怎么用。</p>
+                            <p class="hero-subtitle">从文献接入到答辩准备，每个阶段都有对应的输出文件。这里展示 6 类核心输出长什么样、怎么用，并额外展开 v1.2 Citation Integrity 的 JSON / Markdown / CSV 报告。</p>
                             <div class="hero-actions">
                                 <a class="btn btn-primary" href="#artifacts">查看6类输出</a>
                                 <a class="btn btn-secondary" href="scenario-entry.html">去场景入口</a>
@@ -70,7 +70,7 @@
                                     <span class="metric-label">核心输出</span>
                                 </div>
                                 <div class="metric-card">
-                                    <span class="metric-value">JSON + Markdown</span>
+                                    <span class="metric-value">JSON + Markdown + CSV</span>
                                     <span class="metric-label">输出形态</span>
                                 </div>
                                 <div class="metric-card">
@@ -100,7 +100,7 @@
                             <div class="section-code">01 / artifacts</div>
                             <h2 class="section-title">6类输出，按流程顺序排列</h2>
                         </div>
-                        <p class="section-intro">每个卡片包含输入、命令、输出路径、使用时机、边界说明和一段样例。</p>
+                            <p class="section-intro">每个卡片包含输入、命令、输出路径、使用时机、边界说明和一段样例。检查报告卡片额外展示 v1.2 Citation Integrity 的 compatibility JSON、rich JSON、Markdown 和 CSV。</p>
                     </div>
 
                     <div class="module-list">
@@ -159,7 +159,7 @@
                         <article class="artifact-card">
                             <div class="artifact-header">
                                 <span class="artifact-number">02</span>
-                                <h3 class="artifact-title">检查报告输出</h3>
+                                <h3 class="artifact-title">检查报告输出 / Citation Integrity</h3>
                             </div>
                             <div class="artifact-meta">
                                 <div class="artifact-meta-row">
@@ -172,7 +172,11 @@
                                 </div>
                                 <div class="artifact-meta-row">
                                     <span class="artifact-meta-label">输出</span>
-                                    <span class="artifact-meta-value">4 个 JSON 报告（references / language / format / content）</span>
+                                    <span class="artifact-meta-value"><code>check_references-report.json</code> + <code>citation-integrity-report.json</code> + <code>citation-integrity-report.md</code> + <code>citation-issues.csv</code> + 其他检查报告</span>
+                                </div>
+                                <div class="artifact-meta-row">
+                                    <span class="artifact-meta-label">示例</span>
+                                    <span class="artifact-meta-value"><code>examples/citation-integrity-broken/</code>, <code>examples/citation-integrity-clean/</code></span>
                                 </div>
                                 <div class="artifact-meta-row">
                                     <span class="artifact-meta-label">使用时机</span>
@@ -185,22 +189,19 @@
                             </div>
                             <pre class="artifact-sample">{
   "check_id": "check_references",
-  "timestamp": "2026-04-28T09:14:32",
+  "timestamp": "2026-05-05T12:14:32",
+  "status": "BLOCK",
   "summary": {
-    "total_refs": 83,
-    "broken_citekeys": ["Wang2022_unknown"],
-    "duplicate_labels": [],
-    "unused_bibentries": ["Li2019_old"]
+    "missing_cited_keys": 1,
+    "duplicate_bib_keys": 1,
+    "warnings": 2
   },
-  "severity": "WARN",
-  "items": [
-    {
-      "type": "broken_citekey",
-      "citekey": "Wang2022_unknown",
-      "location": "chapter3.tex:142",
-      "message": "cite key not found in .bib"
-    }
-  ]
+  "artifacts": {
+    "compatibility_report": "reports/check_references-report.json",
+    "citation_integrity_report": "reports/citation-integrity-report.json",
+    "markdown_report": "reports/citation-integrity-report.md",
+    "csv_report": "reports/citation-issues.csv"
+  }
 }</pre>
                         </article>
 
@@ -417,7 +418,7 @@
                             <h3 class="compare-title">经过 thesis-skills 整理后会变成什么</h3>
                             <ul class="editorial-list">
                                 <li><strong>citation mapping</strong>：编号和来源一一对应，可追踪。</li>
-                                <li><strong>structured check reports</strong>：4 份 JSON 报告，定位问题到行号。</li>
+                                <li><strong>structured check reports</strong>：Citation Integrity JSON / Markdown / CSV 加上其他检查报告，定位问题到行号。</li>
                                 <li><strong>dry-run fixes</strong>：先看改什么，确认后再应用。</li>
                                 <li><strong>readiness gate</strong>：提交前跑一遍，知道还差什么。</li>
                                 <li><strong>defense packet</strong>：大纲、要点、图表清单一次生成；不是自动生成答辩成品。</li>
@@ -442,7 +443,7 @@
             </main>
 
             <footer class="page-footer">
-                <span>Thesis Skills / v1.0.0 / output samples</span>
+                <span>Thesis Skills / v1.2 / output samples</span>
                 <span>6 outputs / one bounded chain</span>
             </footer>
         </div>

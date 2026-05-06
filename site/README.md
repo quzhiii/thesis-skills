@@ -1,6 +1,6 @@
 # Thesis Skills 静态站点
 
-这是 Thesis Skills v1.1 showcase 入口的静态页面目录，用于帮助潜在用户快速了解项目定位、使用场景、输出样例和能力边界。
+这是 Thesis Skills 当前公开入口的静态页面目录，用于帮助潜在用户快速了解项目定位、使用场景、输出样例和能力边界。
 
 ## 文件结构
 
@@ -128,7 +128,7 @@ jobs:
 - 不使用 JavaScript（保持极简）
 - 不引入外部 CSS 框架（避免依赖）
 - 使用统一 CSS 文件维护视觉系统
-- 所有能力描述必须与 README 和 `docs/roadmap.md` 的 v1.0 public contract 一致
+- 所有能力描述必须与 README 和 `docs/roadmap.md` 的当前 public contract 一致
 
 ## 后续可能方向
 

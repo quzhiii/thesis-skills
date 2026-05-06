@@ -17,6 +17,51 @@ python run_check_once.py \
   --skip-compile
 ```
 
+## Citation Integrity demos
+
+The repository includes two focused reference-check demos:
+
+```text
+examples/citation-integrity-broken/
+examples/citation-integrity-clean/
+```
+
+### Broken demo
+
+```bash
+python 10-check-references/check_references.py \
+  --project-root examples/citation-integrity-broken \
+  --ruleset university-generic
+```
+
+Expected outputs:
+
+- `reports/check_references-report.json` for pipeline compatibility
+- `reports/citation-integrity-report.json` for machine-readable status
+- `reports/citation-integrity-report.md` for human review
+- `reports/citation-issues.csv` for spreadsheet-style triage
+
+This demo should end in `BLOCK` and populate the CSV with concrete citation risks.
+
+### Clean demo
+
+```bash
+python 10-check-references/check_references.py \
+  --project-root examples/citation-integrity-clean \
+  --ruleset university-generic
+```
+
+Expected outputs:
+
+- `reports/check_references-report.json`
+- `reports/citation-integrity-report.json`
+- `reports/citation-integrity-report.md`
+- `reports/citation-issues.csv`
+
+This demo should end in `PASS`. The CSV is still written, but on a clean run it only contains the header row.
+
+Boundary: Citation Integrity is still local-only and report-first. It does not verify references against external databases and does not auto-edit citations or bibliography entries.
+
 ## Readiness gate preview
 
 ```json
