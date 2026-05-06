@@ -1,4 +1,4 @@
-# Thesis Skills v1.0.0
+# Thesis Skills v1.2.0
 
 <div align="center">
 
@@ -134,7 +134,7 @@ Example JSON snippets and demo walkthroughs: [`docs/examples.md`](docs/examples.
 
 ### Citation Integrity preview
 
-V1.1 adds a local-first Citation Integrity report for pre-submission reference risk:
+The current v1.2 release line includes a local-first Citation Integrity workflow for pre-submission reference risk:
 
 ```text
 References: BLOCK
@@ -144,7 +144,7 @@ References: BLOCK
 - LaTeX undefined-citation warnings from local compile logs
 ```
 
-Boundary: V1.1 only checks local citation integrity. It does not query external databases, does not detect hallucinated references yet, and never auto-inserts or rewrites citations.
+Boundary: the current Citation Integrity workflow only checks local citation integrity. It does not query external databases, does not detect hallucinated references yet, and never auto-inserts or rewrites citations.
 
 ---
 

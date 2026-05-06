@@ -6,7 +6,7 @@
 
 ```text
 site/
-├── editorial-theme.css       # 统一展示主题样式（含 v1.1 新增组件）
+├── editorial-theme.css       # 统一展示主题样式
 ├── index.html                # 首页：产品定位 + 快速试跑 + 输出预览
 ├── quickstart.html           # 3 分钟跑通最小示例
 ├── scenario-entry.html       # 按论文阶段进入（含输入-命令-输出）
@@ -14,8 +14,8 @@ site/
 ├── docs-home.html            # 文档首页入口
 ├── advisor-handoff.html      # 交导师/合作者场景页
 ├── submission-prep.html      # 送审/投稿前场景页
-├── v1.0-backup/              # v1.0 原始文件备份
-├── v1.1-showcase/            # v1.1 开发目录（含优化计划）
+├── v1.0-backup/              # 历史 v1.0 页面备份
+├── v1.1-showcase/            # 历史 v1.1 设计迭代目录（保留参考）
 ├── copy-source.md            # 可继续维护的页面文案源文件
 ├── index-product-redraft.html # 历史首页草稿
 ├── v0.8-roadmap.md           # 历史 v0.8 范围记录

@@ -1,6 +1,6 @@
 # Starter Pack Baseline
 
-This document records the **current repository baseline** for rule-pack starters in the v1.0 public contract.
+This document records the **current repository baseline** for rule-pack starters in the current v1.2.0 public contract.
 
 It is intentionally descriptive, not aspirational: the goal is to state what a starter pack currently means in this repo, which assumptions are explicit, and which assumptions are checked by the current lint / completeness / schema-consistency tooling.
 
@@ -177,7 +177,7 @@ The current `pack.yaml` starter baseline visibly includes:
 - `precedence`
 - `starter`
 
-For v1.0, a third-party pack should treat these fields as part of the practical baseline. Missing fields are lint errors.
+For the current v1.2.0 line, a third-party pack should treat these fields as part of the practical baseline. Missing fields are lint errors.
 
 ---
 
@@ -211,7 +211,7 @@ Extending from a starter is therefore a policy inheritance decision, not just a 
 
 ---
 
-## 8. Current v1.0 baseline summary
+## 8. Current v1.2.0 baseline summary
 
 Treat the following as the documented baseline:
 

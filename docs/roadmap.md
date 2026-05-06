@@ -2,7 +2,9 @@
 
 ## Release Positioning
 
-`v1.0.0` is the current public-story stabilization target for `thesis-skills`.
+`v1.0.0` was the public-story stabilization milestone for `thesis-skills`.
+
+`v1.2.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0` and `v1.2.0`.
 
 The repository now presents one coherent, bounded workflow system:
 
@@ -19,7 +21,9 @@ bibliography intake
 -> reusable rule-pack creation and linting
 ```
 
-`v1.0.0` does not mean a broad new feature expansion. It means the public contract is stable: README, roadmap, docs, site pages, manifests, examples, and actual code paths should all describe the same capabilities with the same names and limits.
+`v1.0.0` did not mean a broad new feature expansion. It marked the point where the public contract became stable: README, roadmap, docs, site pages, manifests, examples, and actual code paths described the same capabilities with the same names and limits.
+
+`v1.1.0` and `v1.2.0` build on that stabilized contract by extending the References workflow with local-first Citation Integrity reports, review-friendly Markdown/CSV outputs, and clean/broken demos.
 
 ## Product Direction
 
@@ -50,7 +54,7 @@ Design rules that stay in effect:
 
 ## Current Workflow Status
 
-All listed workflow families are part of the `v1.0.0` public contract:
+All listed workflow families remain part of the current `v1.2.0` public contract:
 
 | Workflow | Status | Entrypoint |
 |---|---|---|
@@ -109,6 +113,8 @@ All listed workflow families are part of the `v1.0.0` public contract:
 | v0.8.0 | Bounded defense-prep artifacts and static showcase surfaces |
 | v0.8.1 | Rule-pack ecosystem hardening: lint, completeness, schema consistency, scorecard, and concrete non-Tsinghua example pack |
 | v1.0.0 | Stable public story across README, roadmap, site, manifest, rule-pack docs, and actual code paths |
+| v1.1.0 | Local-first Citation Integrity engine and readiness integration |
+| v1.2.0 | Citation Integrity Markdown/CSV reports, clean demo, and public-example expansion |
 
 ## V1.0 Stabilization Scope
 
@@ -118,7 +124,7 @@ Ship a stable public narrative covering intake, migration, export, review, compi
 
 ### Acceptance
 
-`v1.0.0` is complete when:
+`v1.0.0` was complete when:
 
 1. README, roadmap, docs, landing page, manifest, and actual code paths all match.
 2. The repository does not claim support that does not exist.
@@ -127,15 +133,27 @@ Ship a stable public narrative covering intake, migration, export, review, compi
 5. The site tells the same bounded story as the GitHub README.
 6. Rule-pack docs describe the current lint/completeness/schema/scorecard behavior in present tense.
 
-### Active cleanup checklist
+### Historical stabilization checklist
 
-- [ ] Align root `README.md` with the v1.0 public contract.
-- [ ] Align `README.zh-CN.md` with the same contract in native Chinese wording.
-- [ ] Align `skills-manifest.json` and package metadata with the v1.0 version.
-- [ ] Align `site/` pages and static copy sources with the v1.0 scope.
-- [ ] Align `90-rules/` docs with current lint and scorecard behavior.
-- [ ] Sweep public examples for stale CLI flags such as `--rules` instead of `--ruleset`.
-- [ ] Keep historical planning docs as history unless they are linked as current guidance.
+- [x] Align root `README.md` with the v1.0 public contract.
+- [x] Align `README.zh-CN.md` with the same contract in native Chinese wording.
+- [x] Align `skills-manifest.json` and package metadata with the v1.0 version.
+- [x] Align `site/` pages and static copy sources with the v1.0 scope.
+- [x] Align `90-rules/` docs with current lint and scorecard behavior.
+- [x] Sweep public examples for stale CLI flags such as `--rules` instead of `--ruleset`.
+- [x] Keep historical planning docs as history unless they are linked as current guidance.
+
+## Current release-line focus
+
+The current public alignment work should target `v1.2.0` consistency:
+
+1. README, Chinese README, roadmap, and site pages should all present `v1.2.0` as the current release line.
+2. Citation Integrity outputs must be described consistently across docs and examples:
+   - `reports/check_references-report.json`
+   - `reports/citation-integrity-report.json`
+   - `reports/citation-integrity-report.md`
+   - `reports/citation-issues.csv`
+3. Public docs should distinguish the stabilized v1.0 workflow foundation from the shipped v1.1/v1.2 Citation Integrity additions.
 
 ## Showcase And Scenario Track
 
@@ -167,13 +185,12 @@ Showcase work must follow the same bounded philosophy as code: no marketing copy
 
 Given the current repository state, the next work should proceed in this order:
 
-1. align roadmap and release positioning around `v1.0.0`
-2. align package and manifest version metadata
-3. align English README as the primary public contract
-4. align Chinese README with parity on workflows, commands, limitations, and rule-pack hardening
-5. align `site/` pages with the same version and capability story
-6. align `90-rules/` docs with current lint/completeness/schema/scorecard behavior
-7. run grep/link/test verification before treating the cleanup as complete
+1. align roadmap and release positioning around `v1.2.0`
+2. align English README as the primary public contract
+3. align Chinese README with parity on workflows, commands, limitations, and Citation Integrity outputs
+4. align `site/` pages with the same version and capability story
+5. align `90-rules/` docs with current lint/completeness/schema/scorecard behavior
+6. run grep/link/test verification before treating the cleanup as complete
 
 ## Cross-Release Acceptance Gates
 

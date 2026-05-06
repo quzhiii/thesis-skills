@@ -60,6 +60,78 @@ class CitationIntegrityDocsTest(unittest.TestCase):
             with self.subTest(path=relative_path):
                 self._assert_contains_all(relative_path, required_snippets)
 
+    def test_readmes_have_v12_title_and_citation_integrity_parity(self) -> None:
+        self._assert_contains_all(
+            "README.md",
+            [
+                "# Thesis Skills v1.2.0",
+                "citation-integrity-report.json",
+                "citation-integrity-report.md",
+                "citation-issues.csv",
+                "Citation Integrity preview",
+            ],
+        )
+        self._assert_contains_all(
+            "README.zh-CN.md",
+            [
+                "# Thesis Skills v1.2.0",
+                "citation-integrity-report.json",
+                "citation-integrity-report.md",
+                "citation-issues.csv",
+                "Citation Integrity 预览",
+            ],
+        )
+
+    def test_roadmap_positions_v12_as_current_release_line(self) -> None:
+        self._assert_contains_all(
+            "docs/roadmap.md",
+            [
+                "`v1.0.0` was the public-story stabilization milestone",
+                "`v1.2.0` is the current documented public release line",
+                "| v1.2.0 | Citation Integrity Markdown/CSV reports, clean demo, and public-example expansion |",
+            ],
+        )
+
+    def test_primary_site_pages_show_v12_version_line(self) -> None:
+        for relative_path in [
+            "site/index.html",
+            "site/quickstart.html",
+            "site/scenario-entry.html",
+        ]:
+            with self.subTest(path=relative_path):
+                self._assert_contains_all(relative_path, ["v1.2.0"])
+
+    def test_current_supporting_docs_reference_v12_not_v10_as_current(self) -> None:
+        checks = {
+            "site/copy-source.md": [
+                "### v1.2.0 已包含",
+                "Thesis Skills v1.2.0 — MIT License — quzhiii/thesis-skills",
+            ],
+            "site/README.md": [
+                "# Thesis Skills 静态站点",
+                "历史 v1.0 页面备份",
+                "历史 v1.1 设计迭代目录（保留参考）",
+            ],
+            "docs/architecture.md": [
+                "current v1.2.0 public contract",
+            ],
+            "90-rules/STARTER_PACK_BASELINE.md": [
+                "current v1.2.0 public contract",
+                "Current v1.2.0 baseline summary",
+            ],
+            "02-latex-to-word/THESIS_LATEX_TO_WORD.md": [
+                "current v1.2.0 first-class export promise",
+            ],
+            "site/index-product-redraft.html": [
+                "current v1.2.0 public story",
+                "当前 v1.2.0 公开入口请看正式首页",
+                "当前版本已包含",
+            ],
+        }
+        for relative_path, snippets in checks.items():
+            with self.subTest(path=relative_path):
+                self._assert_contains_all(relative_path, snippets)
+
 
 if __name__ == "__main__":
     unittest.main()

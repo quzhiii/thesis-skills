@@ -1,4 +1,4 @@
-# Thesis Skills v1.0.0
+# Thesis Skills v1.2.0
 
 <div align="center">
 
@@ -121,6 +121,9 @@ Word/LaTeX       格式结构           显式确认修改         阻断       
 一次真实运行会生成这些机器可读 artifacts：
 
 - `reports/check_references-report.json`
+- `reports/citation-integrity-report.json`
+- `reports/citation-integrity-report.md`
+- `reports/citation-issues.csv`
 - `reports/check_language-report.json`
 - `reports/check_format-report.json`
 - `reports/check_content-report.json`
@@ -128,6 +131,20 @@ Word/LaTeX       格式结构           显式确认修改         阻断       
 - `reports/run-summary.json`
 
 输出示例和演示流程见 [`docs/examples.md`](docs/examples.md)。
+
+### Citation Integrity 预览
+
+当前 `v1.2.0` 版本线已经包含本地优先的 Citation Integrity 工作流，用于提交前的引用风险检查：
+
+```text
+References: BLOCK
+- 文中引用 key 在 bibliography 文件中缺失
+- 重复 citation key 且 metadata 冲突
+- DOI/year 字段警告
+- 本地编译日志中的 undefined citation 警告
+```
+
+边界：当前 Citation Integrity 只检查本地引用完整性，不会联网查询外部数据库，也还不能识别幻觉引用，更不会自动插入或重写参考文献。
 
 ---
 
