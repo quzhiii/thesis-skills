@@ -13,7 +13,7 @@ Spend your time thinking, not fixing formatting.
 
 [中文文档](README.zh-CN.md) · **English** · [Showcase](https://quzhiii.github.io/thesis-skills)
 
-[Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
+[Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
 
 </div>
 
@@ -81,6 +81,50 @@ python run_check_once.py \
 ```
 
 More details: [`docs/quickstart.md`](docs/quickstart.md).
+
+## Updating your local copy
+
+Downloading or cloning the repository once does **not** make future updates appear automatically on your machine.
+
+Choose the update path that matches how you got Thesis Skills:
+
+### If you cloned with Git
+
+Run:
+
+```bash
+git pull origin main
+```
+
+This fetches the newest committed changes from GitHub into your local checkout.
+
+If you want to see what changed before pulling:
+
+```bash
+git fetch origin
+git log --oneline HEAD..origin/main
+```
+
+### If you downloaded a ZIP
+
+A ZIP download is just a snapshot. It will **not** sync by itself.
+
+To get updates, either:
+
+1. download a fresh ZIP from GitHub and replace your local copy manually, or
+2. switch to a Git clone so future updates only need `git pull`
+
+### If you edited the repository locally
+
+Pulling new changes is easiest when your local copy has no uncommitted edits.
+
+Before updating, check:
+
+```bash
+git status
+```
+
+If you have local modifications, commit or back them up first so `git pull` does not create conflicts unexpectedly.
 
 ---
 

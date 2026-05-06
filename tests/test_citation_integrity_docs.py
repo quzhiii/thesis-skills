@@ -69,6 +69,9 @@ class CitationIntegrityDocsTest(unittest.TestCase):
                 "citation-integrity-report.md",
                 "citation-issues.csv",
                 "Citation Integrity preview",
+                "## Updating your local copy",
+                "git pull origin main",
+                "download a fresh ZIP",
             ],
         )
         self._assert_contains_all(
@@ -79,6 +82,9 @@ class CitationIntegrityDocsTest(unittest.TestCase):
                 "citation-integrity-report.md",
                 "citation-issues.csv",
                 "Citation Integrity 预览",
+                "## 如何同步后续更新",
+                "git pull origin main",
+                "ZIP 只是一个快照",
             ],
         )
 
