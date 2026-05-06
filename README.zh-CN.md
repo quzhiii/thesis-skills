@@ -82,48 +82,6 @@ python run_check_once.py \
 
 更多说明见 [`docs/quickstart.md`](docs/quickstart.md)。
 
-## 如何同步后续更新
-
-无论你是第一次下载还是第一次 `git clone`，后续更新都**不会自动出现在你的本地**。
-
-你需要根据自己的获取方式手动更新：
-
-### 如果你是用 Git clone 下来的
-
-运行：
-
-```bash
-git pull origin main
-```
-
-这会把 GitHub 上最新提交的内容拉到你的本地仓库。
-
-如果你想先看远端有哪些更新，再决定是否同步：
-
-```bash
-git fetch origin
-git log --oneline HEAD..origin/main
-```
-
-### 如果你是直接下载 ZIP
-
-ZIP 只是一个快照，**不会自己同步更新**。
-
-后续要拿新版本，你有两种办法：
-
-1. 去 GitHub 重新下载新的 ZIP，然后手动替换本地目录
-2. 改用 `git clone`，以后只需要 `git pull`
-
-### 如果你已经在本地改过代码或文档
-
-本地有未提交修改时，直接更新更容易遇到冲突。先检查：
-
-```bash
-git status
-```
-
-如果看到有本地改动，建议先自己提交、备份，或者复制出一份，再去执行 `git pull`。
-
 ---
 
 ## 输出
@@ -187,6 +145,19 @@ References: BLOCK
 ```
 
 边界：当前 Citation Integrity 只检查本地引用完整性，不会联网查询外部数据库，也还不能识别幻觉引用，更不会自动插入或重写参考文献。
+
+## v1.2.0 有哪些更新
+
+- Citation Integrity 现在已经是公开工作流的一部分，而不再只是隐藏在内部实现里的检查增强。
+- 一次运行可以额外生成：
+  - `reports/citation-integrity-report.json`
+  - `reports/citation-integrity-report.md`
+  - `reports/citation-issues.csv`
+- 仓库现在同时提供：
+  - `examples/citation-integrity-broken/`
+  - `examples/citation-integrity-clean/`
+  方便你直接看到 `BLOCK` 和 `PASS` 两种情况。
+- readiness gate 的 References 维度现在会直接使用 Citation Integrity 证据。
 
 ---
 
@@ -420,6 +391,59 @@ python run_check_once.py \
 | [`docs/architecture.md`](docs/architecture.md) | 工作流与模块架构 |
 | [`docs/getting-started-zh.md`](docs/getting-started-zh.md) | 中文新手完整教程 |
 | [`CHANGELOG.md`](CHANGELOG.md) | 版本历史 |
+
+---
+
+## 历史迭代记录
+
+- `v1.0.0`：把公开工作流叙事稳定下来，让 README、roadmap、站点、示例和代码路径一致。
+- `v1.1.0`：加入本地优先的 Citation Integrity 引擎，并接入 readiness gate。
+- `v1.2.0`：加入 Citation Integrity 的 Markdown/CSV 输出、clean/broken demo，以及公开版本线对齐。
+- 更完整的变更记录见 [`CHANGELOG.md`](CHANGELOG.md)。
+
+---
+
+## 如何同步后续更新
+
+无论你是第一次下载还是第一次 `git clone`，后续更新都**不会自动出现在你的本地**。
+
+你需要根据自己的获取方式手动更新：
+
+### 如果你是用 Git clone 下来的
+
+运行：
+
+```bash
+git pull origin main
+```
+
+这会把 GitHub 上最新提交的内容拉到你的本地仓库。
+
+如果你想先看远端有哪些更新，再决定是否同步：
+
+```bash
+git fetch origin
+git log --oneline HEAD..origin/main
+```
+
+### 如果你是直接下载 ZIP
+
+ZIP 只是一个快照，**不会自己同步更新**。
+
+后续要拿新版本，你有两种办法：
+
+1. 去 GitHub 重新下载新的 ZIP，然后手动替换本地目录
+2. 改用 `git clone`，以后只需要 `git pull`
+
+### 如果你已经在本地改过代码或文档
+
+本地有未提交修改时，直接更新更容易遇到冲突。先检查：
+
+```bash
+git status
+```
+
+如果看到有本地改动，建议先自己提交、备份，或者复制出一份，再去执行 `git pull`。
 
 ---
 

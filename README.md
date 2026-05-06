@@ -82,50 +82,6 @@ python run_check_once.py \
 
 More details: [`docs/quickstart.md`](docs/quickstart.md).
 
-## Updating your local copy
-
-Downloading or cloning the repository once does **not** make future updates appear automatically on your machine.
-
-Choose the update path that matches how you got Thesis Skills:
-
-### If you cloned with Git
-
-Run:
-
-```bash
-git pull origin main
-```
-
-This fetches the newest committed changes from GitHub into your local checkout.
-
-If you want to see what changed before pulling:
-
-```bash
-git fetch origin
-git log --oneline HEAD..origin/main
-```
-
-### If you downloaded a ZIP
-
-A ZIP download is just a snapshot. It will **not** sync by itself.
-
-To get updates, either:
-
-1. download a fresh ZIP from GitHub and replace your local copy manually, or
-2. switch to a Git clone so future updates only need `git pull`
-
-### If you edited the repository locally
-
-Pulling new changes is easiest when your local copy has no uncommitted edits.
-
-Before updating, check:
-
-```bash
-git status
-```
-
-If you have local modifications, commit or back them up first so `git pull` does not create conflicts unexpectedly.
-
 ---
 
 ## Outputs
@@ -189,6 +145,13 @@ References: BLOCK
 ```
 
 Boundary: the current Citation Integrity workflow only checks local citation integrity. It does not query external databases, does not detect hallucinated references yet, and never auto-inserts or rewrites citations.
+
+## What's new in v1.2.0
+
+- Local-first Citation Integrity is now part of the public workflow rather than a hidden internal add-on.
+- A run can emit `reports/citation-integrity-report.json`, `reports/citation-integrity-report.md`, and `reports/citation-issues.csv` for machine review, human review, and spreadsheet triage.
+- The repository includes both `examples/citation-integrity-broken/` and `examples/citation-integrity-clean/` so users can see a `BLOCK` case and a `PASS` case immediately.
+- The readiness gate now uses Citation Integrity evidence for the References dimension.
 
 ---
 
@@ -422,6 +385,61 @@ Tweak → re-run → review reports. Most packs converge in 1–2 calibration ro
 | [`docs/architecture.md`](docs/architecture.md) | Workflow and module architecture |
 | [`docs/getting-started-zh.md`](docs/getting-started-zh.md) | Step-by-step beginner guide in Chinese |
 | [`CHANGELOG.md`](CHANGELOG.md) | Release history |
+
+---
+
+## Release history
+
+- `v1.0.0`: stabilized the public workflow story across README, roadmap, site, examples, and code paths.
+- `v1.1.0`: added the local-first Citation Integrity engine and readiness integration.
+- `v1.2.0`: added Markdown/CSV Citation Integrity outputs, clean/broken demos, and public version-line alignment.
+- See [`CHANGELOG.md`](CHANGELOG.md) for the full changelog.
+
+---
+
+## Updating your local copy
+
+Downloading or cloning the repository once does **not** make future updates appear automatically on your machine.
+
+Choose the update path that matches how you got Thesis Skills:
+
+### If you cloned with Git
+
+Run:
+
+```bash
+git pull origin main
+```
+
+This fetches the newest committed changes from GitHub into your local checkout.
+
+If you want to see what changed before pulling:
+
+```bash
+git fetch origin
+git log --oneline HEAD..origin/main
+```
+
+### If you downloaded a ZIP
+
+A ZIP download is just a snapshot. It will **not** sync by itself.
+
+To get updates, either:
+
+1. download a fresh ZIP from GitHub and replace your local copy manually, or
+2. switch to a Git clone so future updates only need `git pull`
+
+### If you edited the repository locally
+
+Pulling new changes is easiest when your local copy has no uncommitted edits.
+
+Before updating, check:
+
+```bash
+git status
+```
+
+If you have local modifications, commit or back them up first so `git pull` does not create conflicts unexpectedly.
 
 ---
 
