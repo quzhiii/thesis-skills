@@ -146,6 +146,33 @@ References: BLOCK
 
 Boundary: the current Citation Integrity workflow only checks local citation integrity. It does not query external databases, does not detect hallucinated references yet, and never auto-inserts or rewrites citations.
 
+### External Verification (v2.0-alpha)
+
+An optional external metadata verification layer queries **CrossRef** and **OpenAlex** for each bibliography entry and writes `reports/external-verification-report.json`.
+
+```bash
+python 18-verify-references/verify_external_references.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+Or via the existing reference checker with an explicit flag:
+
+```bash
+python 10-check-references/check_references.py \
+  --project-root thesis \
+  --ruleset university-generic \
+  --with-external-verification
+```
+
+Alpha boundaries:
+
+- Providers: CrossRef and OpenAlex only.
+- No readiness gate blocking.
+- No hallucination-risk score.
+- No automatic citation rewriting.
+- Network failures degrade to `UNAVAILABLE`, never crash.
+
 ## What's new in v1.2.0
 
 - Local-first Citation Integrity is now part of the public workflow rather than a hidden internal add-on.

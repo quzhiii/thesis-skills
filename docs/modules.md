@@ -33,13 +33,16 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
    · Deep language patches             24-fix-language-deep/
 
 5. Submission readiness
-   · PASS / WARN / BLOCK gate          16-check-readiness/
+    · PASS / WARN / BLOCK gate          16-check-readiness/
 
-6. Defense preparation
-   · Outline, figure inventory, notes  17-defense-pack/
+6. External verification (alpha)
+    · CrossRef / OpenAlex lookup        18-verify-references/
 
-7. Institutional adaptation
-   · Custom rule packs                 90-rules/
+7. Defense preparation
+    · Outline, figure inventory, notes  17-defense-pack/
+
+8. Institutional adaptation
+    · Custom rule packs                 90-rules/
 ```
 
 ## Entrypoint table
@@ -61,6 +64,7 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Check | `14-check-language-deep/` | `check_language_deep.py` | Flag higher-order language and consistency review items |
 | Check | `15-check-compile/` | `check_compile.py` | Parse existing LaTeX compile logs into structured diagnostics |
 | Gate | `16-check-readiness/` | `check_readiness.py` | Aggregate reports into `PASS / WARN / BLOCK` readiness artifact |
+| Verify (alpha) | `18-verify-references/` | `verify_external_references.py` | Query CrossRef and OpenAlex for each bibliography entry; write `external-verification-report.json` |
 | Defense | `17-defense-pack/` | `generate_outline.py` | Generate thesis outline for defense preparation |
 | Defense | `17-defense-pack/` | `generate_figure_inventory.py` | Inventory figures and visual evidence |
 | Defense | `17-defense-pack/` | `generate_talk_prep_notes.py` | Generate editable talk-prep notes |

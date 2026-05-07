@@ -146,6 +146,33 @@ References: BLOCK
 
 边界：当前 Citation Integrity 只检查本地引用完整性，不会联网查询外部数据库，也还不能识别幻觉引用，更不会自动插入或重写参考文献。
 
+### 外部引用验证（v2.0-alpha）
+
+可选的外部元数据验证层，对每条参考文献查询 **CrossRef** 和 **OpenAlex**，输出 `reports/external-verification-report.json`。
+
+```bash
+python 18-verify-references/verify_external_references.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+或通过现有引用检查器加显式标志：
+
+```bash
+python 10-check-references/check_references.py \
+  --project-root thesis \
+  --ruleset university-generic \
+  --with-external-verification
+```
+
+Alpha 边界：
+
+- 数据源：仅 CrossRef 和 OpenAlex。
+- 不影响 readiness gate 的 blocking 逻辑。
+- 不含幻觉风险评分。
+- 不自动改写引用。
+- 网络故障降级为 `UNAVAILABLE`，不会崩溃。
+
 ## v1.2.0 有哪些更新
 
 - Citation Integrity 现在已经是公开工作流的一部分，而不再只是隐藏在内部实现里的检查增强。

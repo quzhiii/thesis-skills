@@ -2,6 +2,15 @@
 
 All notable changes to Thesis Skills are summarized here.
 
+## v2.0.0-alpha
+
+- Added external metadata verification for bibliography entries via CrossRef and OpenAlex.
+- New CLI: `18-verify-references/verify_external_references.py` writes `reports/external-verification-report.json`.
+- Optional bridge flag `--with-external-verification` on `10-check-references/check_references.py`.
+- Local JSON cache under `reports/.external-cache/` for repeat runs.
+- Alpha scope: no readiness blocking, no hallucination score, no automatic citation rewriting.
+- Network failures degrade to `UNAVAILABLE`, never crash the local checker path.
+
 ## v1.0.0
 
 - Stabilized the public README story around citation sync, deterministic checks, safe fixes, readiness gate, and defense preparation.
