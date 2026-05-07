@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 import json
+from datetime import datetime
 
 from core.citation_integrity import (
     ExternalProviderEvidence,
@@ -69,6 +70,8 @@ class CitationExternalReportTest(unittest.TestCase):
 
         self.assertEqual(report["module"], "citation_external_verification")
         self.assertEqual(report["version"], "2.0-alpha")
+        self.assertIn("generated_at", report)
+        self.assertIsNotNone(datetime.fromisoformat(str(report["generated_at"])))
         self.assertEqual(report["status"], "PASS")
         self.assertEqual(report["summary"]["entries_considered"], 1)
         self.assertEqual(report["summary"]["doi_queries"], 1)

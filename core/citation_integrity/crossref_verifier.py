@@ -9,6 +9,9 @@ from core.citation_integrity.external_cache import read_cache, write_cache
 from core.citation_integrity.external_models import ExternalProviderEvidence
 
 
+_HTTP_TIMEOUT_SECONDS = 3.0
+
+
 def _first_string(value: object) -> str | None:
     if isinstance(value, list) and value and isinstance(value[0], str):
         return value[0]
@@ -103,7 +106,7 @@ def _payload_from_response(response: dict[str, object], query_type: str) -> dict
 
 def _fetch_json(url: str) -> dict[str, object]:
     request = urllib.request.Request(url, headers={"User-Agent": "thesis-skills/2.0-alpha"})
-    with urllib.request.urlopen(request, timeout=10) as response:
+    with urllib.request.urlopen(request, timeout=_HTTP_TIMEOUT_SECONDS) as response:
         payload = json.loads(response.read().decode("utf-8"))
     return payload if isinstance(payload, dict) else {}
 
@@ -125,7 +128,7 @@ def verify_with_crossref(
         else:
             url = f"https://api.crossref.org/works?query.title={quote(query)}&rows=1"
         payload = _payload_from_response(_fetch_json(url), query_type)
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         payload = {
             "source": "crossref",
             "success": False,

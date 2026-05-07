@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 from core.citation_integrity.external_models import (
@@ -100,6 +101,7 @@ def build_external_verification_report(
     return {
         "module": "citation_external_verification",
         "version": "2.0-alpha",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": _status(verification_entries),
         "summary": _summary(verification_entries).to_dict(),
         "entries": [entry.to_dict() for entry in verification_entries],

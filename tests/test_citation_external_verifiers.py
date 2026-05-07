@@ -44,7 +44,16 @@ class CitationExternalVerifierTest(unittest.TestCase):
         self.assertEqual(evidence.candidate_count, 1)
         self.assertEqual(evidence.top_candidate["title"], "Example Title")
         self.assertEqual(evidence.top_candidate["year"], 2024)
-        urlopen.assert_called_once()
+        self.assertLessEqual(urlopen.call_args.kwargs["timeout"], 3.0)
+
+    def test_crossref_non_json_response_returns_unavailable_evidence(self) -> None:
+        with workspace_tempdir("crossref-invalid-cache-") as cache_dir:
+            with patch("urllib.request.urlopen", return_value=_MockResponse(b"not json")):
+                evidence = verify_with_crossref({"doi": "10.1000/invalid-json"}, cache_dir=cache_dir)
+
+        self.assertFalse(evidence.success)
+        self.assertEqual(evidence.candidate_count, 0)
+        self.assertIsNotNone(evidence.error)
 
     def test_crossref_title_lookup_success_when_doi_absent(self) -> None:
         payload = {
@@ -116,6 +125,15 @@ class CitationExternalVerifierTest(unittest.TestCase):
         self.assertEqual(evidence.query_type, "doi")
         self.assertEqual(evidence.top_candidate["doi"], "10.1000/openalex")
         self.assertEqual(evidence.top_candidate["venue"], "Open Journal")
+
+    def test_openalex_non_json_response_returns_unavailable_evidence(self) -> None:
+        with workspace_tempdir("openalex-invalid-cache-") as cache_dir:
+            with patch("urllib.request.urlopen", return_value=_MockResponse(b"not json")):
+                evidence = verify_with_openalex({"doi": "10.1000/invalid-json"}, cache_dir=cache_dir)
+
+        self.assertFalse(evidence.success)
+        self.assertEqual(evidence.source, "openalex")
+        self.assertIsNotNone(evidence.error)
 
     def test_openalex_title_lookup_success_when_doi_absent(self) -> None:
         payload = {
