@@ -1,0 +1,6 @@
+! LaTeX Error: File `ctexbook.cls' not found.
+
+Type X to quit or <RETURN> to proceed,
+or enter new name. (Default extension: cls)
+
+l.3 \documentclass{ctexbook}
