@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import patch
 
 from core.citation_integrity.crossref_verifier import verify_with_crossref
+from core.citation_integrity.openalex_verifier import verify_with_openalex
 from tests.helpers import workspace_tempdir
 
 
@@ -96,6 +97,63 @@ class CitationExternalVerifierTest(unittest.TestCase):
         self.assertTrue(second.used_cache)
         self.assertFalse(second.success)
         urlopen.assert_not_called()
+
+    def test_openalex_doi_lookup_success(self) -> None:
+        payload = {
+            "display_name": "OpenAlex Title",
+            "doi": "https://doi.org/10.1000/openalex",
+            "publication_year": 2024,
+            "primary_location": {"source": {"display_name": "Open Journal"}},
+        }
+        with workspace_tempdir("openalex-cache-") as cache_dir:
+            with patch("urllib.request.urlopen", return_value=_response(payload)):
+                evidence = verify_with_openalex(
+                    {"title": "OpenAlex Title", "doi": "10.1000/openalex"}, cache_dir=cache_dir
+                )
+
+        self.assertTrue(evidence.success)
+        self.assertEqual(evidence.source, "openalex")
+        self.assertEqual(evidence.query_type, "doi")
+        self.assertEqual(evidence.top_candidate["doi"], "10.1000/openalex")
+        self.assertEqual(evidence.top_candidate["venue"], "Open Journal")
+
+    def test_openalex_title_lookup_success_when_doi_absent(self) -> None:
+        payload = {
+            "results": [
+                {
+                    "display_name": "Title Search",
+                    "doi": "https://doi.org/10.1000/title-search",
+                    "publication_year": 2022,
+                    "host_venue": {"display_name": "Legacy Venue"},
+                }
+            ]
+        }
+        with workspace_tempdir("openalex-title-cache-") as cache_dir:
+            with patch("urllib.request.urlopen", return_value=_response(payload)):
+                evidence = verify_with_openalex({"title": "Title Search"}, cache_dir=cache_dir)
+
+        self.assertTrue(evidence.success)
+        self.assertEqual(evidence.query_type, "title")
+        self.assertEqual(evidence.query, "Title Search")
+        self.assertEqual(evidence.top_candidate["year"], 2022)
+
+    def test_openalex_no_candidate_case(self) -> None:
+        with workspace_tempdir("openalex-empty-cache-") as cache_dir:
+            with patch("urllib.request.urlopen", return_value=_response({"results": []})):
+                evidence = verify_with_openalex({"title": "Missing"}, cache_dir=cache_dir)
+
+        self.assertTrue(evidence.success)
+        self.assertEqual(evidence.candidate_count, 0)
+        self.assertIsNone(evidence.top_candidate)
+
+    def test_openalex_network_failure_returns_unavailable_evidence(self) -> None:
+        with workspace_tempdir("openalex-failure-cache-") as cache_dir:
+            with patch("urllib.request.urlopen", side_effect=OSError("offline")):
+                evidence = verify_with_openalex({"doi": "10.1000/fail"}, cache_dir=cache_dir)
+
+        self.assertFalse(evidence.success)
+        self.assertEqual(evidence.source, "openalex")
+        self.assertIn("offline", evidence.error)
 
 
 if __name__ == "__main__":
