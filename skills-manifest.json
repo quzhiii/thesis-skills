@@ -21,6 +21,7 @@
     {"id": "15-check-compile", "entry": "15-check-compile/THESIS_CHECK_COMPILE.md", "type": "checker", "runner": "15-check-compile/check_compile.py"},
     {"id": "16-check-readiness", "entry": "16-check-readiness/THESIS_CHECK_READINESS.md", "type": "checker", "runner": "16-check-readiness/check_readiness.py"},
     {"id": "17-defense-pack", "entry": "17-defense-pack/README.md", "type": "workflow", "runners": ["17-defense-pack/generate_outline.py", "17-defense-pack/generate_chapter_highlights.py", "17-defense-pack/generate_figure_inventory.py", "17-defense-pack/generate_candidate_tables_diagrams.py", "17-defense-pack/generate_talk_prep_notes.py"]},
+    {"id": "18-verify-references", "entry": "18-verify-references/THESIS_VERIFY_EXTERNAL_REFERENCES.md", "type": "checker", "runner": "18-verify-references/verify_external_references.py"},
     {"id": "20-fix-references", "entry": "20-fix-references/THESIS_FIX_REFERENCES.md", "type": "fixer"},
     {"id": "21-fix-language-style", "entry": "21-fix-language-style/THESIS_FIX_LANGUAGE_STYLE.md", "type": "fixer"},
     {"id": "22-fix-format-structure", "entry": "22-fix-format-structure/THESIS_FIX_FORMAT_STRUCTURE.md", "type": "fixer"},

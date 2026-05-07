@@ -21,6 +21,7 @@ class LayoutTest(unittest.TestCase):
             ROOT / "11-check-language",
             ROOT / "12-check-format",
             ROOT / "13-check-content",
+            ROOT / "18-verify-references",
             ROOT / "20-fix-references",
             ROOT / "21-fix-language-style",
             ROOT / "22-fix-format-structure",
