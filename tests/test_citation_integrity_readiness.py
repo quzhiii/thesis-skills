@@ -64,6 +64,72 @@ class CitationIntegrityReadinessTest(unittest.TestCase):
         self.assertEqual(artifact["dimensions"]["references"]["verdict"], "WARN")
         self.assertNotIn("source", artifact["dimensions"]["references"])
 
+    def test_readiness_includes_external_verification_as_advisory_dimension(self) -> None:
+        with workspace_tempdir("citation-readiness-") as base:
+            files = readiness_pass_fixture_files()
+            files["reports/citation-integrity-report.json"] = json.dumps(
+                {
+                    "module": "citation_integrity",
+                    "version": "1.2",
+                    "status": "PASS",
+                    "summary": {},
+                    "issues": [],
+                },
+                ensure_ascii=False,
+            )
+            files["reports/external-verification-report.json"] = json.dumps(
+                {
+                    "module": "citation_external_verification",
+                    "version": "2.0-stable",
+                    "status": "REVIEW",
+                    "summary": {
+                        "entries_considered": 3,
+                        "matched_entries": 1,
+                        "review_entries": 2,
+                        "network_failures": 0,
+                    },
+                    "entries": [],
+                },
+                ensure_ascii=False,
+            )
+            project = materialize_project(base / "project", files)
+
+            artifact = build_readiness_artifact(mode="advisor-handoff", project_root=Path(project))
+
+        self.assertEqual(artifact["dimensions"]["references"]["verdict"], "PASS")
+        self.assertEqual(artifact["dimensions"]["external_verification"]["verdict"], "WARN")
+        self.assertEqual(
+            artifact["dimensions"]["external_verification"]["source"],
+            "external-verification-report.json",
+        )
+        self.assertEqual(artifact["dimensions"]["external_verification"]["review_entries"], 2)
+
+    def test_readiness_treats_unavailable_external_verification_as_advisory_warn(self) -> None:
+        with workspace_tempdir("citation-readiness-") as base:
+            files = readiness_pass_fixture_files()
+            files["reports/external-verification-report.json"] = json.dumps(
+                {
+                    "module": "citation_external_verification",
+                    "version": "2.0-stable",
+                    "status": "UNAVAILABLE",
+                    "summary": {
+                        "entries_considered": 1,
+                        "matched_entries": 0,
+                        "review_entries": 0,
+                        "network_failures": 2,
+                    },
+                    "entries": [],
+                },
+                ensure_ascii=False,
+            )
+            project = materialize_project(base / "project", files)
+
+            artifact = build_readiness_artifact(mode="submission-prep", project_root=Path(project))
+
+        self.assertEqual(artifact["dimensions"]["external_verification"]["verdict"], "WARN")
+        self.assertEqual(artifact["dimensions"]["external_verification"]["network_failures"], 2)
+        self.assertEqual(artifact["overall_verdict"], "WARN")
+
 
 if __name__ == "__main__":
     unittest.main()

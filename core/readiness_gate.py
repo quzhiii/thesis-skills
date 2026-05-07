@@ -4,7 +4,10 @@ import json
 from pathlib import Path
 from typing import Any, TypedDict
 
-from core.citation_integrity.readiness_adapter import citation_integrity_dimension
+from core.citation_integrity.readiness_adapter import (
+    citation_integrity_dimension,
+    external_verification_dimension,
+)
 
 
 VALID_MODES = {"advisor-handoff", "submission-prep"}
@@ -323,6 +326,9 @@ def _evaluate_dimensions(
         rich_references = citation_integrity_dimension(project_root)
         if rich_references is not None:
             dimensions["references"] = rich_references
+        external_verification = external_verification_dimension(project_root)
+        if external_verification is not None:
+            dimensions["external_verification"] = external_verification
 
     compile_source = sources.get("compile", {})
     if compile_source.get("status") == "present":
