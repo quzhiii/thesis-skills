@@ -63,6 +63,14 @@ class CitationExternalReportTest(unittest.TestCase):
             success=True,
             candidate_count=1,
             top_candidate={"title": "Example Title", "doi": "10.1000/example"},
+            candidates=[
+                {
+                    "title": "Example Title",
+                    "doi": "10.1000/example",
+                    "doi_exact_match": True,
+                    "title_similarity": 1.0,
+                }
+            ],
             match_score=1.0,
         )
 
@@ -76,8 +84,92 @@ class CitationExternalReportTest(unittest.TestCase):
         self.assertEqual(report["summary"]["entries_considered"], 1)
         self.assertEqual(report["summary"]["doi_queries"], 1)
         self.assertEqual(report["summary"]["crossref_matches"], 1)
+        self.assertEqual(report["summary"]["semantic_scholar_matches"], 0)
         self.assertEqual(report["entries"][0]["match_status"], "MATCH")
         json.dumps(report)
+
+    def test_consensus_merges_same_doi_candidates_across_sources(self) -> None:
+        entry = BibEntry(
+            key="shared2024",
+            entry_type="article",
+            file="ref/refs.bib",
+            line=1,
+            fields={"title": "Shared Title", "doi": "10.1000/shared", "year": "2024"},
+            body="",
+        )
+        crossref = ExternalProviderEvidence(
+            source="crossref",
+            query_type="doi",
+            query="10.1000/shared",
+            used_cache=False,
+            success=True,
+            candidate_count=1,
+            top_candidate={"title": "Shared Title", "doi": "10.1000/shared"},
+            candidates=[{"title": "Shared Title", "doi": "10.1000/shared", "title_similarity": 1.0, "doi_exact_match": True}],
+            match_score=1.0,
+        )
+        openalex = ExternalProviderEvidence(
+            source="openalex",
+            query_type="doi",
+            query="10.1000/shared",
+            used_cache=False,
+            success=True,
+            candidate_count=1,
+            top_candidate={"title": "Shared Title Revised", "doi": "10.1000/shared"},
+            candidates=[{"title": "Shared Title Revised", "doi": "10.1000/shared", "title_similarity": 0.88, "doi_exact_match": True}],
+            match_score=1.0,
+        )
+
+        report = build_external_verification_report(
+            [entry],
+            evidence_by_key={"shared2024": [crossref, openalex]},
+        )
+
+        consensus = report["entries"][0]["consensus"]
+        self.assertEqual(report["entries"][0]["match_status"], "MATCH")
+        self.assertEqual(consensus["candidate_count"], 1)
+        self.assertEqual(consensus["top_candidate"]["doi"], "10.1000/shared")
+        self.assertEqual(consensus["top_candidate"]["source_count"], 2)
+
+    def test_consensus_marks_conflicting_title_candidates_for_review(self) -> None:
+        entry = BibEntry(
+            key="review2024",
+            entry_type="article",
+            file="ref/refs.bib",
+            line=1,
+            fields={"title": "Reference Checking in Practice", "year": "2024"},
+            body="",
+        )
+        crossref = ExternalProviderEvidence(
+            source="crossref",
+            query_type="title",
+            query="Reference Checking in Practice",
+            used_cache=False,
+            success=True,
+            candidate_count=1,
+            top_candidate={"title": "Reference Checking for Practice"},
+            candidates=[{"title": "Reference Checking for Practice", "title_similarity": 0.78}],
+            match_score=0.78,
+        )
+        semantic = ExternalProviderEvidence(
+            source="semantic_scholar",
+            query_type="title",
+            query="Reference Checking in Practice",
+            used_cache=False,
+            success=True,
+            candidate_count=1,
+            top_candidate={"title": "A Different Research Topic"},
+            candidates=[{"title": "A Different Research Topic", "title_similarity": 0.31}],
+            match_score=0.31,
+        )
+
+        report = build_external_verification_report(
+            [entry],
+            evidence_by_key={"review2024": [crossref, semantic]},
+        )
+
+        self.assertEqual(report["entries"][0]["match_status"], "REVIEW")
+        self.assertEqual(report["status"], "REVIEW")
 
     def test_provider_failure_yields_unavailable_report_without_throwing(self) -> None:
         entry = BibEntry(

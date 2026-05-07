@@ -13,58 +13,45 @@ from core.citation_integrity.external_models import ExternalProviderEvidence
 _HTTP_TIMEOUT_SECONDS = 3.0
 
 
-def _first_string(value: object) -> str | None:
-    if isinstance(value, list) and value and isinstance(value[0], str):
-        return value[0]
-    if isinstance(value, str):
-        return value
-    return None
+def _normalize_doi(value: object) -> str | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    return value.strip().lower()
 
 
-def _year(item: dict[str, object]) -> int | None:
-    for key in ("published-print", "published-online", "published", "issued"):
-        value = item.get(key)
-        if not isinstance(value, dict):
+def _authors(item: dict[str, object]) -> list[str]:
+    raw_authors = item.get("authors")
+    if not isinstance(raw_authors, list):
+        return []
+    names: list[str] = []
+    for author in raw_authors:
+        if not isinstance(author, dict):
             continue
-        date_parts = value.get("date-parts")
-        if (
-            isinstance(date_parts, list)
-            and date_parts
-            and isinstance(date_parts[0], list)
-            and date_parts[0]
-            and isinstance(date_parts[0][0], int)
-        ):
-            return date_parts[0][0]
-    return None
+        name = author.get("name")
+        if isinstance(name, str) and name.strip():
+            names.append(name.strip())
+    return names
 
 
 def _candidate(item: dict[str, object]) -> dict[str, object]:
     candidate: dict[str, object] = {}
-    title = _first_string(item.get("title"))
-    doi = item.get("DOI")
-    venue = _first_string(item.get("container-title"))
-    year = _year(item)
-    if title:
-        candidate["title"] = title
-    if isinstance(doi, str) and doi:
-        candidate["doi"] = doi.lower()
-    if year is not None:
+    title = item.get("title")
+    year = item.get("year")
+    venue = item.get("venue")
+    external_ids = item.get("externalIds")
+    doi = external_ids.get("DOI") if isinstance(external_ids, dict) else None
+    if isinstance(title, str) and title.strip():
+        candidate["title"] = title.strip()
+    normalized_doi = _normalize_doi(doi)
+    if normalized_doi:
+        candidate["doi"] = normalized_doi
+    if isinstance(year, int):
         candidate["year"] = year
-    if venue:
-        candidate["venue"] = venue
-    authors = item.get("author")
-    if isinstance(authors, list):
-        names = []
-        for author in authors:
-            if not isinstance(author, dict):
-                continue
-            given = str(author.get("given", "")).strip()
-            family = str(author.get("family", "")).strip()
-            name = " ".join(part for part in [given, family] if part)
-            if name:
-                names.append(name)
-        if names:
-            candidate["authors"] = names
+    if isinstance(venue, str) and venue.strip():
+        candidate["venue"] = venue.strip()
+    names = _authors(item)
+    if names:
+        candidate["authors"] = names
     return candidate
 
 
@@ -87,7 +74,7 @@ def _evidence_from_payload(
     payload: dict[str, object], query_type: str, query: str, *, used_cache: bool
 ) -> ExternalProviderEvidence:
     return ExternalProviderEvidence(
-        source="crossref",
+        source="semantic_scholar",
         query_type=query_type,
         query=query,
         used_cache=used_cache,
@@ -103,14 +90,10 @@ def _evidence_from_payload(
 def _payload_from_response(
     response: dict[str, object], query_type: str, local_metadata: dict[str, object]
 ) -> dict[str, object]:
-    message = response.get("message")
-    if not isinstance(message, dict):
-        message = {}
     if query_type == "doi":
-        item = message if message.get("title") or message.get("DOI") else None
-        items = [item] if isinstance(item, dict) else []
+        items = [response] if response.get("title") or response.get("externalIds") else []
     else:
-        raw_items = message.get("items")
+        raw_items = response.get("data")
         items = raw_items if isinstance(raw_items, list) else []
     candidates = [_candidate(item) for item in items if isinstance(item, dict)]
     candidates = [item for item in candidates if item]
@@ -123,7 +106,7 @@ def _payload_from_response(
         else:
             match_score = float(top_candidate.get("title_similarity", 0.0))
     return {
-        "source": "crossref",
+        "source": "semantic_scholar",
         "success": True,
         "candidate_count": len(scored_candidates),
         "top_candidate": top_candidate,
@@ -133,32 +116,38 @@ def _payload_from_response(
 
 
 def _fetch_json(url: str) -> dict[str, object]:
-    request = urllib.request.Request(url, headers={"User-Agent": "thesis-skills/2.0-alpha"})
+    request = urllib.request.Request(url, headers={"User-Agent": "thesis-skills/2.0-stable"})
     with urllib.request.urlopen(request, timeout=_HTTP_TIMEOUT_SECONDS) as response:
         payload = json.loads(response.read().decode("utf-8"))
     return payload if isinstance(payload, dict) else {}
 
 
-def verify_with_crossref(
+def verify_with_semantic_scholar(
     local_metadata: dict[str, object], *, cache_dir: str | Path
 ) -> ExternalProviderEvidence:
     doi = str(local_metadata.get("doi", "")).strip()
     title = str(local_metadata.get("title", "")).strip()
     query_type = "doi" if doi else "title"
     query = doi or title
-    cache_hit = read_cache(cache_dir, "crossref", query_type, query)
+    cache_hit = read_cache(cache_dir, "semantic_scholar", query_type, query)
     if cache_hit.hit:
         return _evidence_from_payload(cache_hit.payload, query_type, query, used_cache=True)
 
     try:
         if query_type == "doi":
-            url = f"https://api.crossref.org/works/{quote(query)}"
+            url = (
+                "https://api.semanticscholar.org/graph/v1/paper/DOI:"
+                f"{quote(query)}?fields=title,year,venue,authors,externalIds"
+            )
         else:
-            url = f"https://api.crossref.org/works?query.title={quote(query)}&rows=1"
+            url = (
+                "https://api.semanticscholar.org/graph/v1/paper/search?query="
+                f"{quote(query)}&limit=1&fields=title,year,venue,authors,externalIds"
+            )
         payload = _payload_from_response(_fetch_json(url), query_type, local_metadata)
     except (OSError, ValueError) as exc:
         payload = {
-            "source": "crossref",
+            "source": "semantic_scholar",
             "success": False,
             "candidate_count": 0,
             "top_candidate": None,
@@ -166,5 +155,5 @@ def verify_with_crossref(
             "match_score": 0.0,
             "error": str(exc),
         }
-    write_cache(cache_dir, "crossref", query_type, query, payload)
+    write_cache(cache_dir, "semantic_scholar", query_type, query, payload)
     return _evidence_from_payload(payload, query_type, query, used_cache=False)

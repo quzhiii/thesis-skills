@@ -42,6 +42,7 @@ def main() -> int:
             write_external_verification_report,
         )
         from core.citation_integrity.openalex_verifier import verify_with_openalex
+        from core.citation_integrity.semantic_scholar_verifier import verify_with_semantic_scholar
 
         cache_dir = project.reports_dir / ".external-cache"
         entries: list[object] = []
@@ -60,6 +61,7 @@ def main() -> int:
                 evidence_by_key[entry.key] = [
                     verify_with_crossref(local_meta, cache_dir=cache_dir),
                     verify_with_openalex(local_meta, cache_dir=cache_dir),
+                    verify_with_semantic_scholar(local_meta, cache_dir=cache_dir),
                 ]
         ext_report = build_external_verification_report(entries, evidence_by_key=evidence_by_key)
         write_external_verification_report(ext_report, project.reports_dir / "external-verification-report.json")

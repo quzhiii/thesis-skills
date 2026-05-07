@@ -16,6 +16,7 @@ from core.citation_integrity.external_report import (
 from core.citation_integrity.models import BibEntry
 from core.citation_integrity.openalex_verifier import verify_with_openalex
 from core.citation_integrity.external_models import ExternalProviderEvidence
+from core.citation_integrity.semantic_scholar_verifier import verify_with_semantic_scholar
 from core.project import ThesisProject
 from core.rules import find_rule_pack
 
@@ -46,6 +47,7 @@ def _verify_entries(
         providers: list[ExternalProviderEvidence] = [
             verify_with_crossref(local_metadata, cache_dir=cache_dir),
             verify_with_openalex(local_metadata, cache_dir=cache_dir),
+            verify_with_semantic_scholar(local_metadata, cache_dir=cache_dir),
         ]
         evidence_by_key[entry.key] = providers
     return evidence_by_key
@@ -53,7 +55,7 @@ def _verify_entries(
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Verify references against CrossRef and OpenAlex (alpha)"
+        description="Verify references against CrossRef, OpenAlex, and Semantic Scholar"
     )
     parser.add_argument("--project-root", required=True)
     parser.add_argument("--ruleset", default="tsinghua-thesis")

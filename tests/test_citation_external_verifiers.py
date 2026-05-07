@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 from core.citation_integrity.crossref_verifier import verify_with_crossref
 from core.citation_integrity.openalex_verifier import verify_with_openalex
+from core.citation_integrity.semantic_scholar_verifier import verify_with_semantic_scholar
 from tests.helpers import workspace_tempdir
 
 
@@ -172,6 +173,81 @@ class CitationExternalVerifierTest(unittest.TestCase):
         self.assertFalse(evidence.success)
         self.assertEqual(evidence.source, "openalex")
         self.assertIn("offline", evidence.error)
+
+    def test_semantic_scholar_doi_lookup_success(self) -> None:
+        payload = {
+            "title": "Semantic Scholar Title",
+            "year": 2024,
+            "venue": "Semantic Venue",
+            "authors": [{"name": "Jane Smith"}],
+            "externalIds": {"DOI": "10.1000/semantic"},
+        }
+        with workspace_tempdir("semantic-cache-") as cache_dir:
+            with patch("urllib.request.urlopen", return_value=_response(payload)):
+                evidence = verify_with_semantic_scholar(
+                    {"title": "Semantic Scholar Title", "doi": "10.1000/semantic"},
+                    cache_dir=cache_dir,
+                )
+
+        self.assertTrue(evidence.success)
+        self.assertEqual(evidence.source, "semantic_scholar")
+        self.assertEqual(evidence.query_type, "doi")
+        self.assertEqual(evidence.top_candidate["doi"], "10.1000/semantic")
+        self.assertEqual(evidence.top_candidate["venue"], "Semantic Venue")
+
+    def test_semantic_scholar_title_lookup_success_when_doi_absent(self) -> None:
+        payload = {
+            "data": [
+                {
+                    "title": "Semantic Title Search",
+                    "year": 2023,
+                    "venue": "Semantic Proceedings",
+                    "authors": [{"name": "Wei Chen"}],
+                    "externalIds": {"DOI": "10.1000/semantic-title"},
+                }
+            ]
+        }
+        with workspace_tempdir("semantic-title-cache-") as cache_dir:
+            with patch("urllib.request.urlopen", return_value=_response(payload)):
+                evidence = verify_with_semantic_scholar(
+                    {"title": "Semantic Title Search"},
+                    cache_dir=cache_dir,
+                )
+
+        self.assertTrue(evidence.success)
+        self.assertEqual(evidence.query_type, "title")
+        self.assertEqual(evidence.query, "Semantic Title Search")
+        self.assertEqual(evidence.top_candidate["year"], 2023)
+
+    def test_semantic_scholar_no_candidate_case(self) -> None:
+        with workspace_tempdir("semantic-empty-cache-") as cache_dir:
+            with patch("urllib.request.urlopen", return_value=_response({"data": []})):
+                evidence = verify_with_semantic_scholar({"title": "Missing"}, cache_dir=cache_dir)
+
+        self.assertTrue(evidence.success)
+        self.assertEqual(evidence.candidate_count, 0)
+        self.assertIsNone(evidence.top_candidate)
+
+    def test_semantic_scholar_network_failure_returns_unavailable_evidence(self) -> None:
+        with workspace_tempdir("semantic-failure-cache-") as cache_dir:
+            with patch("urllib.request.urlopen", side_effect=OSError("offline")):
+                evidence = verify_with_semantic_scholar({"doi": "10.1000/fail"}, cache_dir=cache_dir)
+
+        self.assertFalse(evidence.success)
+        self.assertEqual(evidence.source, "semantic_scholar")
+        self.assertIn("offline", evidence.error)
+
+    def test_semantic_scholar_non_json_response_returns_unavailable_evidence(self) -> None:
+        with workspace_tempdir("semantic-invalid-cache-") as cache_dir:
+            with patch("urllib.request.urlopen", return_value=_MockResponse(b"not json")):
+                evidence = verify_with_semantic_scholar(
+                    {"doi": "10.1000/invalid-json"},
+                    cache_dir=cache_dir,
+                )
+
+        self.assertFalse(evidence.success)
+        self.assertEqual(evidence.source, "semantic_scholar")
+        self.assertIsNotNone(evidence.error)
 
 
 if __name__ == "__main__":

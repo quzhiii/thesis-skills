@@ -12,6 +12,7 @@ class ExternalProviderEvidence:
     success: bool
     candidate_count: int
     top_candidate: dict[str, object] | None = None
+    candidates: list[dict[str, object]] = field(default_factory=list)
     match_score: float | None = None
     error: str | None = None
 
@@ -25,6 +26,7 @@ class ExternalVerificationEntry:
     local_metadata: dict[str, object]
     match_status: str
     providers: list[ExternalProviderEvidence] = field(default_factory=list)
+    consensus: dict[str, object] = field(default_factory=dict)
     recommended_action: str = ""
 
     def to_dict(self) -> dict[str, object]:
@@ -33,6 +35,7 @@ class ExternalVerificationEntry:
             "local_metadata": self.local_metadata,
             "match_status": self.match_status,
             "providers": [provider.to_dict() for provider in self.providers],
+            "consensus": self.consensus,
             "recommended_action": self.recommended_action,
         }
 
@@ -44,6 +47,7 @@ class ExternalVerificationSummary:
     title_queries: int = 0
     crossref_matches: int = 0
     openalex_matches: int = 0
+    semantic_scholar_matches: int = 0
     matched_entries: int = 0
     review_entries: int = 0
     unavailable_queries: int = 0
