@@ -60,16 +60,16 @@ class CitationIntegrityDocsTest(unittest.TestCase):
             with self.subTest(path=relative_path):
                 self._assert_contains_all(relative_path, required_snippets)
 
-    def test_readmes_have_v12_title_and_citation_integrity_parity(self) -> None:
+    def test_readmes_have_v20_title_and_citation_integrity_parity(self) -> None:
         self._assert_contains_all(
             "README.md",
             [
-                "# Thesis Skills v1.2.0",
+                "# Thesis Skills v2.0.0",
                 "citation-integrity-report.json",
                 "citation-integrity-report.md",
                 "citation-issues.csv",
                 "Citation Integrity preview",
-                "## What's new in v1.2.0",
+                "## What's new in v2.0.0",
                 "## Release history",
                 "## Updating your local copy",
                 "git pull origin main",
@@ -79,12 +79,12 @@ class CitationIntegrityDocsTest(unittest.TestCase):
         self._assert_contains_all(
             "README.zh-CN.md",
             [
-                "# Thesis Skills v1.2.0",
+                "# Thesis Skills v2.0.0",
                 "citation-integrity-report.json",
                 "citation-integrity-report.md",
                 "citation-issues.csv",
                 "Citation Integrity 预览",
-                "## v1.2.0 有哪些更新",
+                "## v2.0.0 有哪些更新",
                 "## 历史迭代记录",
                 "## 如何同步后续更新",
                 "git pull origin main",

@@ -1,4 +1,4 @@
-# Thesis Skills v1.2.0
+# Thesis Skills v2.0.0
 
 <div align="center">
 
@@ -146,9 +146,9 @@ References: BLOCK
 
 边界：当前 Citation Integrity 只检查本地引用完整性，不会联网查询外部数据库，也还不能识别幻觉引用，更不会自动插入或重写参考文献。
 
-### 外部引用验证（v2.0-alpha）
+### 外部引用验证（v2.0.0）
 
-可选的外部元数据验证层，对每条参考文献查询 **CrossRef** 和 **OpenAlex**，输出 `reports/external-verification-report.json`。
+可选的外部元数据验证层，对每条参考文献查询 **CrossRef**、**OpenAlex** 和 **Semantic Scholar**，输出 `reports/external-verification-report.json`。
 
 ```bash
 python 18-verify-references/verify_external_references.py \
@@ -165,26 +165,21 @@ python 10-check-references/check_references.py \
   --with-external-verification
 ```
 
-Alpha 边界：
+V2.0 边界：
 
-- 数据源：仅 CrossRef 和 OpenAlex。
-- 不影响 readiness gate 的 blocking 逻辑。
-- 不含幻觉风险评分。
+- 数据源：CrossRef、OpenAlex、Semantic Scholar。
+- 不影响 readiness gate 里本地 `references` 的 blocking 逻辑。
+- `external_verification` 只是 advisory 维度。
+- 暂不包含幻觉风险评分。
 - 不自动改写引用。
 - 网络故障降级为 `UNAVAILABLE`，不会崩溃。
 
-## v1.2.0 有哪些更新
+## v2.0.0 有哪些更新
 
-- Citation Integrity 现在已经是公开工作流的一部分，而不再只是隐藏在内部实现里的检查增强。
-- 一次运行可以额外生成：
-  - `reports/citation-integrity-report.json`
-  - `reports/citation-integrity-report.md`
-  - `reports/citation-issues.csv`
-- 仓库现在同时提供：
-  - `examples/citation-integrity-broken/`
-  - `examples/citation-integrity-clean/`
-  方便你直接看到 `BLOCK` 和 `PASS` 两种情况。
-- readiness gate 的 References 维度现在会直接使用 Citation Integrity 证据。
+- 外部元数据验证现在已经是公开工作流的一部分，但保持为 advisory 层。
+- 一次运行可以额外生成 `reports/external-verification-report.json`，方便人工核验和服务交付。
+- 仓库同时提供 Citation Integrity 和外部验证的稳定行为：网络不可用时不会崩溃，仍会输出可读报告。
+- readiness gate 的 `external_verification` 维度会暴露外部证据，但不会改变本地 `references` 的判定。
 
 ---
 
@@ -423,6 +418,7 @@ python run_check_once.py \
 
 ## 历史迭代记录
 
+- `v2.0.0`：加入 CrossRef / OpenAlex / Semantic Scholar 外部验证、候选合并，以及 `external_verification` advisory。
 - `v1.0.0`：把公开工作流叙事稳定下来，让 README、roadmap、站点、示例和代码路径一致。
 - `v1.1.0`：加入本地优先的 Citation Integrity 引擎，并接入 readiness gate。
 - `v1.2.0`：加入 Citation Integrity 的 Markdown/CSV 输出、clean/broken demo，以及公开版本线对齐。

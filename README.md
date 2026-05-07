@@ -1,4 +1,4 @@
-# Thesis Skills v1.2.0
+# Thesis Skills v2.0.0
 
 <div align="center">
 
@@ -146,9 +146,9 @@ References: BLOCK
 
 Boundary: the current Citation Integrity workflow only checks local citation integrity. It does not query external databases, does not detect hallucinated references yet, and never auto-inserts or rewrites citations.
 
-### External Verification (v2.0-alpha)
+### External Verification (v2.0.0)
 
-An optional external metadata verification layer queries **CrossRef** and **OpenAlex** for each bibliography entry and writes `reports/external-verification-report.json`.
+An optional external metadata verification layer queries **CrossRef**, **OpenAlex**, and **Semantic Scholar** for each bibliography entry and writes `reports/external-verification-report.json`.
 
 ```bash
 python 18-verify-references/verify_external_references.py \
@@ -165,20 +165,21 @@ python 10-check-references/check_references.py \
   --with-external-verification
 ```
 
-Alpha boundaries:
+V2.0 boundaries:
 
-- Providers: CrossRef and OpenAlex only.
-- No readiness gate blocking.
-- No hallucination-risk score.
+- Providers: CrossRef, OpenAlex, and Semantic Scholar.
+- No readiness gate blocking from the local References dimension.
+- `external_verification` is advisory only.
+- No hallucination-risk score yet.
 - No automatic citation rewriting.
 - Network failures degrade to `UNAVAILABLE`, never crash.
 
-## What's new in v1.2.0
+## What's new in v2.0.0
 
-- Local-first Citation Integrity is now part of the public workflow rather than a hidden internal add-on.
-- A run can emit `reports/citation-integrity-report.json`, `reports/citation-integrity-report.md`, and `reports/citation-issues.csv` for machine review, human review, and spreadsheet triage.
-- The repository includes both `examples/citation-integrity-broken/` and `examples/citation-integrity-clean/` so users can see a `BLOCK` case and a `PASS` case immediately.
-- The readiness gate now uses Citation Integrity evidence for the References dimension.
+- External metadata verification is now part of the public workflow as an advisory layer.
+- A run can emit `reports/external-verification-report.json` alongside the Citation Integrity reports for machine review and manual triage.
+- The repository includes both `examples/citation-integrity-broken/` and `examples/citation-integrity-clean/` plus external verification behavior that stays stable when the network is unavailable.
+- The readiness gate now surfaces `external_verification` as an advisory dimension without changing the local `references` verdict.
 
 ---
 
@@ -417,6 +418,7 @@ Tweak → re-run → review reports. Most packs converge in 1–2 calibration ro
 
 ## Release history
 
+- `v2.0.0`: added CrossRef / OpenAlex / Semantic Scholar external verification, consensus candidates, and an `external_verification` readiness advisory.
 - `v1.0.0`: stabilized the public workflow story across README, roadmap, site, examples, and code paths.
 - `v1.1.0`: added the local-first Citation Integrity engine and readiness integration.
 - `v1.2.0`: added Markdown/CSV Citation Integrity outputs, clean/broken demos, and public version-line alignment.

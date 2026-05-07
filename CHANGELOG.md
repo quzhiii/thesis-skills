@@ -11,6 +11,14 @@ All notable changes to Thesis Skills are summarized here.
 - Alpha scope: no readiness blocking, no hallucination score, no automatic citation rewriting.
 - Network failures degrade to `UNAVAILABLE`, never crash the local checker path.
 
+## v2.0.0
+
+- Added Semantic Scholar as the third external verification source alongside CrossRef and OpenAlex.
+- Added multi-source consensus candidates using DOI exact match and title similarity.
+- Added `generated_at` timestamps to `external-verification-report.json`.
+- Added `external_verification` as a readiness advisory dimension while preserving local References blocking logic.
+- Updated examples, roadmap, and artifact gallery for the stable external verification workflow.
+
 ## v1.0.0
 
 - Stabilized the public README story around citation sync, deterministic checks, safe fixes, readiness gate, and defense preparation.
