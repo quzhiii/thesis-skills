@@ -36,6 +36,36 @@ class CitationExternalDocsTest(unittest.TestCase):
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         self.assertIn("v2.0.0-alpha", changelog)
 
+    def test_examples_doc_mentions_v2_stable_external_verification(self) -> None:
+        examples = (ROOT / "docs" / "examples.md").read_text(encoding="utf-8")
+        for required in (
+            "18-verify-references/verify_external_references.py",
+            "Semantic Scholar",
+            "external_verification",
+            "readiness",
+        ):
+            self.assertIn(required, examples)
+
+    def test_roadmap_marks_v2_external_verification_released(self) -> None:
+        roadmap = (ROOT / "docs" / "roadmap.md").read_text(encoding="utf-8")
+        for required in (
+            "v2.0.0",
+            "CrossRef / OpenAlex / Semantic Scholar",
+            "external_verification",
+            "V3.0",
+        ):
+            self.assertIn(required, roadmap)
+
+    def test_artifact_gallery_surfaces_external_verification_report(self) -> None:
+        gallery = (ROOT / "site" / "artifact-gallery.html").read_text(encoding="utf-8")
+        for required in (
+            "external-verification-report.json",
+            "Semantic Scholar",
+            "external_verification",
+            "readiness",
+        ):
+            self.assertIn(required, gallery)
+
 
 if __name__ == "__main__":
     unittest.main()

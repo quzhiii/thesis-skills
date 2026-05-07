@@ -62,6 +62,25 @@ This demo should end in `PASS`. The CSV is still written, but on a clean run it 
 
 Boundary: Citation Integrity is still local-only and report-first. It does not verify references against external databases and does not auto-edit citations or bibliography entries.
 
+## External verification demo
+
+The external verification runner adds a separate evidence layer on top of the local Citation Integrity checks:
+
+```bash
+python 18-verify-references/verify_external_references.py \
+  --project-root examples/citation-integrity-broken \
+  --ruleset university-generic
+```
+
+Expected outputs:
+
+- `reports/external-verification-report.json`
+- `reports/.external-cache/`
+
+This report combines CrossRef / OpenAlex / Semantic Scholar candidates and surfaces them as the `external_verification` readiness advisory dimension. It keeps the local readiness verdict unchanged and does not rewrite citations or bibliography entries.
+
+Run the same command against `examples/citation-integrity-clean/` to see the clean case with the same external verification envelope and fewer review items.
+
 ## Readiness gate preview
 
 ```json

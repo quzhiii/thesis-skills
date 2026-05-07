@@ -59,7 +59,7 @@
                                 <span class="title-line">每一步都留下</span>
                                 <span class="title-line title-strong">可检查的输出</span>
                             </h1>
-                            <p class="hero-subtitle">从文献接入到答辩准备，每个阶段都有对应的输出文件。这里展示 6 类核心输出长什么样、怎么用，并额外展开 v1.2 Citation Integrity 的 JSON / Markdown / CSV 报告。</p>
+                            <p class="hero-subtitle">从文献接入到答辩准备，每个阶段都有对应的输出文件。这里展示 6 类核心输出长什么样、怎么用，并额外展开 Citation Integrity 与外部 metadata verification 的 JSON / Markdown / CSV 报告。</p>
                             <div class="hero-actions">
                                 <a class="btn btn-primary" href="#artifacts">查看6类输出</a>
                                 <a class="btn btn-secondary" href="scenario-entry.html">去场景入口</a>
@@ -100,7 +100,7 @@
                             <div class="section-code">01 / artifacts</div>
                             <h2 class="section-title">6类输出，按流程顺序排列</h2>
                         </div>
-                            <p class="section-intro">每个卡片包含输入、命令、输出路径、使用时机、边界说明和一段样例。检查报告卡片额外展示 v1.2 Citation Integrity 的 compatibility JSON、rich JSON、Markdown 和 CSV。</p>
+                            <p class="section-intro">每个卡片包含输入、命令、输出路径、使用时机、边界说明和一段样例。检查报告卡片额外展示 Citation Integrity 的 compatibility JSON、rich JSON、Markdown、CSV，以及 CrossRef / OpenAlex / Semantic Scholar 外部核验报告。</p>
                     </div>
 
                     <div class="module-list">
@@ -172,7 +172,7 @@
                                 </div>
                                 <div class="artifact-meta-row">
                                     <span class="artifact-meta-label">输出</span>
-                                    <span class="artifact-meta-value"><code>check_references-report.json</code> + <code>citation-integrity-report.json</code> + <code>citation-integrity-report.md</code> + <code>citation-issues.csv</code> + 其他检查报告</span>
+                                    <span class="artifact-meta-value"><code>check_references-report.json</code> + <code>citation-integrity-report.json</code> + <code>citation-integrity-report.md</code> + <code>citation-issues.csv</code> + <code>external-verification-report.json</code> + 其他检查报告</span>
                                 </div>
                                 <div class="artifact-meta-row">
                                     <span class="artifact-meta-label">示例</span>
@@ -184,7 +184,7 @@
                                 </div>
                                 <div class="artifact-meta-row">
                                     <span class="artifact-meta-label">边界</span>
-                                    <span class="artifact-meta-value">规则要按学校配置</span>
+                                    <span class="artifact-meta-value">外部核验是 readiness advisory，不自动改引用或文献库</span>
                                 </div>
                             </div>
                             <pre class="artifact-sample">{
@@ -200,7 +200,13 @@
     "compatibility_report": "reports/check_references-report.json",
     "citation_integrity_report": "reports/citation-integrity-report.json",
     "markdown_report": "reports/citation-integrity-report.md",
-    "csv_report": "reports/citation-issues.csv"
+    "csv_report": "reports/citation-issues.csv",
+    "external_verification": "reports/external-verification-report.json"
+  },
+  "external_verification": {
+    "status": "REVIEW",
+    "providers": ["CrossRef", "OpenAlex", "Semantic Scholar"],
+    "readiness_dimension": "external_verification"
   }
 }</pre>
                         </article>
@@ -283,7 +289,11 @@
     "format":        { "status": "PASS", "reason": "labels and refs are stable" },
     "compile":       { "status": "WARN", "reason": "skipped in demo mode" },
     "export":        { "status": "WARN", "reason": "not produced by smoke test" },
-    "review_loop":   { "status": "WARN", "reason": "not produced by smoke test" }
+    "review_loop":   { "status": "WARN", "reason": "not produced by smoke test" },
+    "external_verification": {
+      "status": "WARN",
+      "reason": "metadata candidates require manual review"
+    }
   },
   "next_actions": [
     "Review reports/check_language-report.json",

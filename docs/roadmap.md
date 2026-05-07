@@ -4,7 +4,7 @@
 
 `v1.0.0` was the public-story stabilization milestone for `thesis-skills`.
 
-`v1.2.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0` and `v1.2.0`.
+`v2.0.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, and the V2.0 external metadata verification layer.
 
 The repository now presents one coherent, bounded workflow system:
 
@@ -23,7 +23,7 @@ bibliography intake
 
 `v1.0.0` did not mean a broad new feature expansion. It marked the point where the public contract became stable: README, roadmap, docs, site pages, manifests, examples, and actual code paths described the same capabilities with the same names and limits.
 
-`v1.1.0` and `v1.2.0` build on that stabilized contract by extending the References workflow with local-first Citation Integrity reports, review-friendly Markdown/CSV outputs, and clean/broken demos.
+`v1.1.0` and `v1.2.0` build on that stabilized contract by extending the References workflow with local-first Citation Integrity reports, review-friendly Markdown/CSV outputs, and clean/broken demos. `v2.0.0` adds report-first CrossRef / OpenAlex / Semantic Scholar metadata verification as an advisory evidence layer.
 
 ## Product Direction
 
@@ -54,7 +54,7 @@ Design rules that stay in effect:
 
 ## Current Workflow Status
 
-All listed workflow families remain part of the current `v1.2.0` public contract:
+All listed workflow families remain part of the current `v2.0.0` public contract:
 
 | Workflow | Status | Entrypoint |
 |---|---|---|
@@ -67,6 +67,7 @@ All listed workflow families remain part of the current `v1.2.0` public contract
 | Review package and triage | Stable | `03-latex-review-diff/review_diff.py` |
 | Feedback normalization | Stable | `04-word-review-ingest/feedback_ingest.py` |
 | Reference checking | Stable | `10-check-references/check_references.py` |
+| External reference verification | Stable advisory | `18-verify-references/verify_external_references.py` |
 | Baseline language lint | Stable | `11-check-language/check_language.py` |
 | Format checking | Stable | `12-check-format/check_format.py` |
 | Content checking | Stable | `13-check-content/check_content.py` |
@@ -94,6 +95,7 @@ All listed workflow families remain part of the current `v1.2.0` public contract
 | GUI or web editor | Repository is CLI-first |
 | Natural-language advisor intent | Feedback ingest normalizes bounded inputs; it does not automatically understand all advisor intent |
 | Full compile orchestration | Compile support parses existing logs; it does not replace `latexmk`, `xelatex`, or `bibtex` |
+| External metadata verification | CrossRef / OpenAlex / Semantic Scholar evidence is advisory; unavailable networks degrade to `UNAVAILABLE` and do not rewrite local readiness blockers |
 | Pack publishing ecosystem | Rule packs have local/Git/handoff workflows; there is no formal registry or versioned export bundle yet |
 | AI writing | The repository checks, organizes, and fixes bounded issues; it does not generate or rewrite thesis content |
 
@@ -115,6 +117,21 @@ All listed workflow families remain part of the current `v1.2.0` public contract
 | v1.0.0 | Stable public story across README, roadmap, site, manifest, rule-pack docs, and actual code paths |
 | v1.1.0 | Local-first Citation Integrity engine and readiness integration |
 | v1.2.0 | Citation Integrity Markdown/CSV reports, clean demo, and public-example expansion |
+| v2.0.0 | CrossRef / OpenAlex / Semantic Scholar external verification, consensus candidates, and `external_verification` readiness advisory |
+
+## Current release-line focus
+
+The current public alignment work should target `v2.0.0` consistency:
+
+1. README, Chinese README, roadmap, examples, and site pages should present external verification as a bounded advisory workflow.
+2. Citation Integrity and external verification outputs must be described consistently across docs and examples:
+   - `reports/check_references-report.json`
+   - `reports/citation-integrity-report.json`
+   - `reports/citation-integrity-report.md`
+   - `reports/citation-issues.csv`
+   - `reports/external-verification-report.json`
+3. Public docs should distinguish local deterministic References blockers from external metadata evidence.
+4. V3.0 should build on this evidence layer with hallucination risk scoring, not LLM-based citation rewriting.
 
 ## V1.0 Stabilization Scope
 
@@ -142,18 +159,6 @@ Ship a stable public narrative covering intake, migration, export, review, compi
 - [x] Align `90-rules/` docs with current lint and scorecard behavior.
 - [x] Sweep public examples for stale CLI flags such as `--rules` instead of `--ruleset`.
 - [x] Keep historical planning docs as history unless they are linked as current guidance.
-
-## Current release-line focus
-
-The current public alignment work should target `v1.2.0` consistency:
-
-1. README, Chinese README, roadmap, and site pages should all present `v1.2.0` as the current release line.
-2. Citation Integrity outputs must be described consistently across docs and examples:
-   - `reports/check_references-report.json`
-   - `reports/citation-integrity-report.json`
-   - `reports/citation-integrity-report.md`
-   - `reports/citation-issues.csv`
-3. Public docs should distinguish the stabilized v1.0 workflow foundation from the shipped v1.1/v1.2 Citation Integrity additions.
 
 ## Showcase And Scenario Track
 

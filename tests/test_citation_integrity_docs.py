@@ -92,13 +92,14 @@ class CitationIntegrityDocsTest(unittest.TestCase):
             ],
         )
 
-    def test_roadmap_positions_v12_as_current_release_line(self) -> None:
+    def test_roadmap_positions_v20_as_current_release_line(self) -> None:
         self._assert_contains_all(
             "docs/roadmap.md",
             [
                 "`v1.0.0` was the public-story stabilization milestone",
-                "`v1.2.0` is the current documented public release line",
+                "`v2.0.0` is the current documented public release line",
                 "| v1.2.0 | Citation Integrity Markdown/CSV reports, clean demo, and public-example expansion |",
+                "| v2.0.0 | CrossRef / OpenAlex / Semantic Scholar external verification",
             ],
         )
 
