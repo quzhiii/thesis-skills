@@ -13,7 +13,7 @@ Spend your time thinking, not fixing formatting.
 
 [中文文档](README.zh-CN.md) · **English** · [Showcase](https://quzhiii.github.io/thesis-skills)
 
-[Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
+[What's New](#whats-new-in-v200) · [Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
 
 </div>
 
@@ -50,6 +50,15 @@ For repetitive finishing work, the expected time savings are concrete:
 | Defense prep inventory | 2-4 hrs | 10-15 min | **~15× faster** |
 
 > Time savings are conservative estimates for repetitive formatting and handoff work. Thesis Skills does not replace writing, thinking, advisor judgment, or institutional confirmation.
+
+---
+
+## What's new in v2.0.0
+
+- Local Citation Integrity still handles deterministic reference risks such as missing keys, duplicate entries, DOI/year warnings, and undefined citations.
+- External verification now adds **CrossRef**, **OpenAlex**, and **Semantic Scholar** evidence per bibliography entry and writes `reports/external-verification-report.json`.
+- The readiness gate now surfaces `external_verification` as an advisory dimension without changing the local `references` blocker logic.
+- If you use AI to draft or expand references, this gives you a fast authenticity screen for suspicious citations while staying inside a bounded, report-first workflow.
 
 ---
 
@@ -134,7 +143,7 @@ Example JSON snippets and demo walkthroughs: [`docs/examples.md`](docs/examples.
 
 ### Citation Integrity preview
 
-The current v1.2 release line includes a local-first Citation Integrity workflow for pre-submission reference risk:
+The current v2.0.0 release line keeps local Citation Integrity as the first layer of pre-submission reference checking:
 
 ```text
 References: BLOCK
@@ -149,6 +158,8 @@ Boundary: the current Citation Integrity workflow only checks local citation int
 ### External Verification (v2.0.0)
 
 An optional external metadata verification layer queries **CrossRef**, **OpenAlex**, and **Semantic Scholar** for each bibliography entry and writes `reports/external-verification-report.json`.
+
+Use this when you want a fast authenticity screen for AI-drafted or suspicious-looking references before a manual final check.
 
 ```bash
 python 18-verify-references/verify_external_references.py \
@@ -172,16 +183,8 @@ V2.0 boundaries:
 - `external_verification` is advisory only.
 - No hallucination-risk score yet.
 - No automatic citation rewriting.
+- Helpful for screening suspicious or AI-drafted references, but not a final verdict on whether a citation is fabricated.
 - Network failures degrade to `UNAVAILABLE`, never crash.
-
-## What's new in v2.0.0
-
-- External metadata verification is now part of the public workflow as an advisory layer.
-- A run can emit `reports/external-verification-report.json` alongside the Citation Integrity reports for machine review and manual triage.
-- The repository includes both `examples/citation-integrity-broken/` and `examples/citation-integrity-clean/` plus external verification behavior that stays stable when the network is unavailable.
-- The readiness gate now surfaces `external_verification` as an advisory dimension without changing the local `references` verdict.
-
----
 
 ## Scenarios
 
@@ -244,6 +247,21 @@ python 17-defense-pack/generate_figure_inventory.py \
   --project-root thesis \
   --ruleset university-generic
 ```
+
+### 6. I want to screen AI-generated or suspicious references
+
+```bash
+python 18-verify-references/verify_external_references.py \
+  --project-root thesis \
+  --ruleset university-generic
+
+python 10-check-references/check_references.py \
+  --project-root thesis \
+  --ruleset university-generic \
+  --with-external-verification
+```
+
+Use this when you want a fast authenticity screen for references drafted by AI or copied from sources you do not fully trust. It highlights suspicious, weak, or unavailable entries without rewriting the bibliography.
 
 More scenarios: [`docs/examples.md`](docs/examples.md).
 

@@ -17,6 +17,7 @@ class CitationExternalDocsTest(unittest.TestCase):
             "Semantic Scholar",
             "external_verification",
             "## What's new in v2.0.0",
+            "fast authenticity screen",
         ):
             self.assertIn(required, readme, f"README.md missing: {required}")
         self.assertNotIn("v2.0-alpha", readme.lower())
@@ -31,6 +32,7 @@ class CitationExternalDocsTest(unittest.TestCase):
             "Semantic Scholar",
             "external_verification",
             "## v2.0.0 有哪些更新",
+            "快速真实性筛查",
         ):
             self.assertIn(required, readme_zh, f"README.zh-CN.md missing: {required}")
         self.assertNotIn("v2.0-alpha", readme_zh.lower())

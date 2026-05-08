@@ -13,7 +13,7 @@
 
 **中文文档** · [English](README.md) · [展示页面](https://quzhiii.github.io/thesis-skills)
 
-[快速开始](#快速开始) · [输出](#输出) · [使用场景](#使用场景) · [如何同步后续更新](#如何同步后续更新) · [规则包](#规则包) · [创建自己的规则包](#创建你自己的学校规则包) · [边界](#边界)
+[v2.0.0 亮点](#v200-有哪些更新) · [快速开始](#快速开始) · [输出](#输出) · [使用场景](#使用场景) · [如何同步后续更新](#如何同步后续更新) · [规则包](#规则包) · [创建自己的规则包](#创建你自己的学校规则包) · [边界](#边界)
 
 </div>
 
@@ -50,6 +50,15 @@ LaTeX 项目 ───────┤                                           
 | 答辩前清单整理 | 2-4 小时 | 10-15 分钟 | **约 15 倍** |
 
 > 时间节省是对重复性格式和交接工作的保守估算。Thesis Skills 不替代写作、思考、导师判断或学校/期刊规则的最终人工确认。
+
+---
+
+## v2.0.0 有哪些更新
+
+- 本地优先的 Citation Integrity 仍然负责确定性引用风险检查：缺 key、重复条目、DOI/year 警告、undefined citation 等。
+- 外部引用验证现在会为每条参考文献增加 **CrossRef**、**OpenAlex**、**Semantic Scholar** 证据，并输出 `reports/external-verification-report.json`。
+- readiness gate 现在会额外显示 `external_verification` advisory 维度，但不会改写本地 `references` 的阻断逻辑。
+- 如果你会用 AI 起草或补全文献列表，这一层可以作为“可疑引用 / 幻觉引用”的快速真实性筛查入口，但不是最终判决。
 
 ---
 
@@ -134,7 +143,7 @@ Word/LaTeX       格式结构           显式确认修改         阻断       
 
 ### Citation Integrity 预览
 
-当前 `v1.2.0` 版本线已经包含本地优先的 Citation Integrity 工作流，用于提交前的引用风险检查：
+当前 `v2.0.0` 版本线把本地优先的 Citation Integrity 作为提交前引用检查的第一层：
 
 ```text
 References: BLOCK
@@ -149,6 +158,8 @@ References: BLOCK
 ### 外部引用验证（v2.0.0）
 
 可选的外部元数据验证层，对每条参考文献查询 **CrossRef**、**OpenAlex** 和 **Semantic Scholar**，输出 `reports/external-verification-report.json`。
+
+适合在你想快速筛查 AI 生成、来源不明、或看起来可疑的参考文献时使用，作为人工终审前的一层真实性检查。
 
 ```bash
 python 18-verify-references/verify_external_references.py \
@@ -172,16 +183,8 @@ V2.0 边界：
 - `external_verification` 只是 advisory 维度。
 - 暂不包含幻觉风险评分。
 - 不自动改写引用。
+- 适合做“可疑引用 / AI 幻觉引用”的快速筛查，但不是最终造假判定。
 - 网络故障降级为 `UNAVAILABLE`，不会崩溃。
-
-## v2.0.0 有哪些更新
-
-- 外部元数据验证现在已经是公开工作流的一部分，但保持为 advisory 层。
-- 一次运行可以额外生成 `reports/external-verification-report.json`，方便人工核验和服务交付。
-- 仓库同时提供 Citation Integrity 和外部验证的稳定行为：网络不可用时不会崩溃，仍会输出可读报告。
-- readiness gate 的 `external_verification` 维度会暴露外部证据，但不会改变本地 `references` 的判定。
-
----
 
 ## 使用场景
 
@@ -244,6 +247,21 @@ python 17-defense-pack/generate_figure_inventory.py \
   --project-root thesis \
   --ruleset university-generic
 ```
+
+### 6. 我想筛查 AI 生成或可疑的参考文献
+
+```bash
+python 18-verify-references/verify_external_references.py \
+  --project-root thesis \
+  --ruleset university-generic
+
+python 10-check-references/check_references.py \
+  --project-root thesis \
+  --ruleset university-generic \
+  --with-external-verification
+```
+
+适合在你怀疑部分参考文献是 AI 生成、来源不清、或 metadata 不可靠时使用。它会把可疑、弱匹配、无法联网核验的条目标出来，但不会自动改写 bibliography。
 
 更多场景见 [`docs/examples.md`](docs/examples.md)。
 
