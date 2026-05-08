@@ -1,0 +1,2 @@
+citation_key,risk_label,hallucination_risk_score,title,year,doi,evidence_summary,recommended_action
+zimmermann2025quantum,HIGH_RISK,0.75,Quantum Neural Networks for Large-Scale Language Translation,2025,10.1234/fake-conference-2025,"providers checked: 3, not found: 0","No credible match was found in the enabled external databases. Manually verify DOI, journal website, database record, or source PDF."

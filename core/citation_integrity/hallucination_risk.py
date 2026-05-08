@@ -105,12 +105,12 @@ def _check_doi_mismatch(local_doi: str, candidates: list[dict[str, object]]) -> 
 
 
 def _best_title_similarity(candidates: list[dict[str, object]]) -> float:
-    best = 1.0
+    best = 0.0
     for candidate in candidates:
         sim = candidate.get("title_similarity")
         if isinstance(sim, (int, float)):
             best = max(best, float(sim))
-    return best
+    return best if candidates else 1.0
 
 
 def _check_year_mismatch(local_year: str, candidates: list[dict[str, object]]) -> bool:
