@@ -1,4 +1,4 @@
-# Thesis Skills v2.0.0
+# Thesis Skills v3.0.0
 
 <div align="center">
 
@@ -13,7 +13,7 @@ Spend your time thinking, not fixing formatting.
 
 [中文文档](README.zh-CN.md) · **English** · [Showcase](https://quzhiii.github.io/thesis-skills)
 
-[What's New](#whats-new-in-v200) · [Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
+[What's New](#whats-new-in-v300) · [Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
 
 </div>
 
@@ -53,11 +53,16 @@ For repetitive finishing work, the expected time savings are concrete:
 
 ---
 
-## What's new in v2.0.0
+## What's new in v3.0.0
 
+- **Hallucination risk scoring** (`hallucination_risk_score`) for each bibliography entry based on local metadata and V2.0 external verification evidence.
+- New CLI: `19-check-hallucination-risk/check_hallucination_risk.py` writes `reports/hallucination-risk-report.json` and `reports/high-risk-references.csv`.
+- Risk labels: `PASS`, `WARN`, `REVIEW`, `HIGH_RISK`, `UNSUPPORTED`. Chinese-language references are marked `UNSUPPORTED`, not `HIGH_RISK`.
+- No LLM usage, no automatic citation rewriting. HIGH_RISK means "manual verification strongly recommended," not "fake."
+- Three new demo projects: field mismatch, fabricated reference, and Chinese-language unsupported case.
 - Local Citation Integrity still handles deterministic reference risks such as missing keys, duplicate entries, DOI/year warnings, and undefined citations.
-- External verification now adds **CrossRef**, **OpenAlex**, and **Semantic Scholar** evidence per bibliography entry and writes `reports/external-verification-report.json`.
-- The readiness gate now surfaces `external_verification` as an advisory dimension without changing the local `references` blocker logic.
+- External verification adds **CrossRef**, **OpenAlex**, and **Semantic Scholar** evidence per bibliography entry and writes `reports/external-verification-report.json`.
+- The readiness gate surfaces `external_verification` as an advisory dimension without changing the local `references` blocker logic.
 - If you use AI to draft or expand references, this gives you a fast authenticity screen for suspicious citations while staying inside a bounded, report-first workflow.
 
 ---
@@ -133,6 +138,9 @@ A real run writes machine-readable artifacts such as:
 - `reports/citation-integrity-report.json`
 - `reports/citation-integrity-report.md`
 - `reports/citation-issues.csv`
+- `reports/external-verification-report.json`
+- `reports/hallucination-risk-report.json`
+- `reports/high-risk-references.csv`
 - `reports/check_language-report.json`
 - `reports/check_format-report.json`
 - `reports/check_content-report.json`
@@ -143,7 +151,7 @@ Example JSON snippets and demo walkthroughs: [`docs/examples.md`](docs/examples.
 
 ### Citation Integrity preview
 
-The current v2.0.0 release line keeps local Citation Integrity as the first layer of pre-submission reference checking:
+The current v3.0.0 release line keeps local Citation Integrity as the first layer of pre-submission reference checking:
 
 ```text
 References: BLOCK
@@ -153,7 +161,7 @@ References: BLOCK
 - LaTeX undefined-citation warnings from local compile logs
 ```
 
-Boundary: the current Citation Integrity workflow only checks local citation integrity. It does not query external databases, does not detect hallucinated references yet, and never auto-inserts or rewrites citations.
+Boundary: the current Citation Integrity workflow only checks local citation integrity. It does not query external databases and never auto-inserts or rewrites citations. Use the external verification and hallucination risk layers for evidence-based screening.
 
 ### External Verification (v2.0.0)
 
@@ -181,10 +189,36 @@ V2.0 boundaries:
 - Providers: CrossRef, OpenAlex, and Semantic Scholar.
 - No readiness gate blocking from the local References dimension.
 - `external_verification` is advisory only.
-- No hallucination-risk score yet.
 - No automatic citation rewriting.
-- Helpful for screening suspicious or AI-drafted references, but not a final verdict on whether a citation is fabricated.
 - Network failures degrade to `UNAVAILABLE`, never crash.
+
+### Hallucination Risk (v3.0.0)
+
+Score each bibliography entry for hallucination risk using local metadata and optional external verification evidence. The hallucination risk scorer reads `reports/external-verification-report.json` if present and writes `reports/hallucination-risk-report.json` plus `reports/high-risk-references.csv`.
+
+```bash
+python 19-check-hallucination-risk/check_hallucination_risk.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+Risk labels:
+
+| Label | Meaning |
+|---|---|
+| `PASS` | Multi-source match with consistent metadata |
+| `WARN` | Entry exists but fields differ noticeably |
+| `REVIEW` | Possible match but evidence is weak |
+| `HIGH_RISK` | No credible match found in enabled databases |
+| `UNSUPPORTED` | Chinese-language or non-standard entry that cannot be auto-verified |
+
+V3.0 boundaries:
+
+- No LLM usage. Scoring is deterministic based on local metadata and external verification evidence.
+- No automatic citation or bibliography rewriting.
+- No live network calls. Reads `external-verification-report.json` if present.
+- `UNSUPPORTED` means "cannot be automatically judged by enabled evidence," not "safe."
+- `HIGH_RISK` means "manual verification strongly recommended," not "fake."
 
 ## Scenarios
 
@@ -255,13 +289,12 @@ python 18-verify-references/verify_external_references.py \
   --project-root thesis \
   --ruleset university-generic
 
-python 10-check-references/check_references.py \
+python 19-check-hallucination-risk/check_hallucination_risk.py \
   --project-root thesis \
-  --ruleset university-generic \
-  --with-external-verification
+  --ruleset university-generic
 ```
 
-Use this when you want a fast authenticity screen for references drafted by AI or copied from sources you do not fully trust. It highlights suspicious, weak, or unavailable entries without rewriting the bibliography.
+Use this when you want a fast authenticity screen for references drafted by AI or copied from sources you do not fully trust. It produces a `hallucination_risk_score` per entry and a `high-risk-references.csv` for manual review, without rewriting the bibliography. Chinese-language references are marked `UNSUPPORTED` since external databases do not cover them.
 
 More scenarios: [`docs/examples.md`](docs/examples.md).
 
@@ -436,6 +469,7 @@ Tweak → re-run → review reports. Most packs converge in 1–2 calibration ro
 
 ## Release history
 
+- `v3.0.0`: added hallucination risk scoring, `hallucination-risk-report.json`, `high-risk-references.csv`, Chinese-language `UNSUPPORTED` handling, and three demo projects.
 - `v2.0.0`: added CrossRef / OpenAlex / Semantic Scholar external verification, consensus candidates, and an `external_verification` readiness advisory.
 - `v1.0.0`: stabilized the public workflow story across README, roadmap, site, examples, and code paths.
 - `v1.1.0`: added the local-first Citation Integrity engine and readiness integration.

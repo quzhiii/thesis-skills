@@ -81,6 +81,63 @@ This report combines CrossRef / OpenAlex / Semantic Scholar candidates and surfa
 
 Run the same command against `examples/citation-integrity-clean/` to see the clean case with the same external verification envelope and fewer review items.
 
+## Hallucination risk demos
+
+The hallucination risk scorer adds a V3.0 evidence layer on top of the V2.0 external verification:
+
+```text
+examples/citation-hallucination-field-mismatch/
+examples/citation-hallucination-fabricated/
+examples/citation-hallucination-chinese-unsupported/
+```
+
+### Field mismatch demo
+
+```bash
+python 19-check-hallucination-risk/check_hallucination_risk.py \
+  --project-root examples/citation-hallucination-field-mismatch \
+  --ruleset university-generic
+```
+
+Expected outputs:
+
+- `reports/hallucination-risk-report.json`
+- `reports/high-risk-references.csv`
+
+This demo produces `REVIEW` entries where the external metadata partially matches but fields differ.
+
+### Fabricated demo
+
+```bash
+python 19-check-hallucination-risk/check_hallucination_risk.py \
+  --project-root examples/citation-hallucination-fabricated \
+  --ruleset university-generic
+```
+
+Expected outputs:
+
+- `reports/hallucination-risk-report.json` with `HIGH_RISK` status
+- `reports/high-risk-references.csv`
+
+This demo exits with code `1` because at least one entry has no credible external match.
+
+### Chinese unsupported demo
+
+```bash
+python 19-check-hallucination-risk/check_hallucination_risk.py \
+  --project-root examples/citation-hallucination-chinese-unsupported \
+  --ruleset university-generic
+```
+
+Expected outputs:
+
+- `reports/hallucination-risk-report.json` with `UNSUPPORTED` entries
+- `reports/high-risk-references.csv`
+
+Chinese-language references are marked `UNSUPPORTED` because external databases do not cover them. This is not a failure; it means the reference needs manual verification.
+
+Boundary: the hallucination risk scorer does not use LLMs, does not make live network calls, and never auto-rewrites citations or bibliography entries.
+
 ## Readiness gate preview
 
 ```json

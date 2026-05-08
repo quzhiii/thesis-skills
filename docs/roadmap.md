@@ -4,7 +4,7 @@
 
 `v1.0.0` was the public-story stabilization milestone for `thesis-skills`.
 
-`v2.0.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, and the V2.0 external metadata verification layer.
+`v2.0.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, the V2.0 external metadata verification layer, and the V3.0 hallucination risk scoring layer.
 
 The repository now presents one coherent, bounded workflow system:
 
@@ -68,6 +68,7 @@ All listed workflow families remain part of the current `v2.0.0` public contract
 | Feedback normalization | Stable | `04-word-review-ingest/feedback_ingest.py` |
 | Reference checking | Stable | `10-check-references/check_references.py` |
 | External reference verification | Stable advisory | `18-verify-references/verify_external_references.py` |
+| Hallucination risk scoring | Stable | `19-check-hallucination-risk/check_hallucination_risk.py` |
 | Baseline language lint | Stable | `11-check-language/check_language.py` |
 | Format checking | Stable | `12-check-format/check_format.py` |
 | Content checking | Stable | `13-check-content/check_content.py` |
@@ -118,20 +119,23 @@ All listed workflow families remain part of the current `v2.0.0` public contract
 | v1.1.0 | Local-first Citation Integrity engine and readiness integration |
 | v1.2.0 | Citation Integrity Markdown/CSV reports, clean demo, and public-example expansion |
 | v2.0.0 | CrossRef / OpenAlex / Semantic Scholar external verification, consensus candidates, and `external_verification` readiness advisory |
+| v3.0.0 | Hallucination risk scoring, `hallucination-risk-report.json`, `high-risk-references.csv`, Chinese `UNSUPPORTED` handling, and three demo projects |
 
 ## Current release-line focus
 
-The current public alignment work should target `v2.0.0` consistency:
+The current public alignment work should target `v3.0.0` consistency:
 
-1. README, Chinese README, roadmap, examples, and site pages should present external verification as a bounded advisory workflow.
-2. Citation Integrity and external verification outputs must be described consistently across docs and examples:
+1. README, Chinese README, roadmap, examples, and site pages should present hallucination risk scoring as a bounded deterministic workflow.
+2. Citation Integrity, external verification, and hallucination risk outputs must be described consistently across docs and examples:
    - `reports/check_references-report.json`
    - `reports/citation-integrity-report.json`
    - `reports/citation-integrity-report.md`
    - `reports/citation-issues.csv`
    - `reports/external-verification-report.json`
-3. Public docs should distinguish local deterministic References blockers from external metadata evidence.
-4. V3.0 should build on this evidence layer with hallucination risk scoring, not LLM-based citation rewriting.
+   - `reports/hallucination-risk-report.json`
+   - `reports/high-risk-references.csv`
+3. Public docs should distinguish local deterministic References blockers from external metadata evidence and hallucination risk scores.
+4. V4.0 should build on this evidence layer with claim-citation support triage, not LLM-based citation rewriting.
 
 ## V1.0 Stabilization Scope
 

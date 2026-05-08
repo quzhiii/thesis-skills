@@ -1,4 +1,4 @@
-# Thesis Skills v2.0.0
+# Thesis Skills v3.0.0
 
 <div align="center">
 
@@ -13,7 +13,7 @@
 
 **中文文档** · [English](README.md) · [展示页面](https://quzhiii.github.io/thesis-skills)
 
-[v2.0.0 亮点](#v200-有哪些更新) · [快速开始](#快速开始) · [输出](#输出) · [使用场景](#使用场景) · [如何同步后续更新](#如何同步后续更新) · [规则包](#规则包) · [创建自己的规则包](#创建你自己的学校规则包) · [边界](#边界)
+[v3.0.0 亮点](#v300-有哪些更新) · [快速开始](#快速开始) · [输出](#输出) · [使用场景](#使用场景) · [如何同步后续更新](#如何同步后续更新) · [规则包](#规则包) · [创建自己的规则包](#创建你自己的学校规则包) · [边界](#边界)
 
 </div>
 
@@ -53,12 +53,17 @@ LaTeX 项目 ───────┤                                           
 
 ---
 
-## v2.0.0 有哪些更新
+## v3.0.0 有哪些更新
 
-- 本地优先的 Citation Integrity 仍然负责确定性引用风险检查：缺 key、重复条目、DOI/year 警告、undefined citation 等。
-- 外部引用验证现在会为每条参考文献增加 **CrossRef**、**OpenAlex**、**Semantic Scholar** 证据，并输出 `reports/external-verification-report.json`。
-- readiness gate 现在会额外显示 `external_verification` advisory 维度，但不会改写本地 `references` 的阻断逻辑。
-- 如果你会用 AI 起草或补全文献列表，这一层可以作为“可疑引用 / 幻觉引用”的快速真实性筛查入口，但不是最终判决。
+- **幻觉风险评分**（`hallucination_risk_score`）基于本地元数据和 V2.0 外部验证证据，对每条参考文献输出确定性风险分数。
+- 新增 CLI：`19-check-hallucination-risk/check_hallucination_risk.py`，输出 `reports/hallucination-risk-report.json` 和 `reports/high-risk-references.csv`。
+- 风险标签：`PASS`、`WARN`、`REVIEW`、`HIGH_RISK`、`UNSUPPORTED`。中文文献标记为 `UNSUPPORTED`，而不是 `HIGH_RISK`。
+- 不使用 LLM，不自动改写引用。`HIGH_RISK` 表示“强烈建议人工核验”，而非“假文献”。
+- 三个新 demo 项目：字段错误、AI 编造文献、中文文献无法自动判定。
+- 本地 Citation Integrity 仍负责确定性引用风险检查：缺 key、重复条目、DOI/year 警告、undefined citation 等。
+- 外部验证为每条参考文献增加 **CrossRef**、**OpenAlex**、**Semantic Scholar** 证据，输出 `reports/external-verification-report.json`。
+- readiness gate 会额外显示 `external_verification` advisory 维度，但不会改写本地 `references` 的阻断逻辑。
+- 如果你会用 AI 起草或补全文献列表，幻觉风险评分可以作为“可疑引用 / AI 编造引用”的快速筛查入口，但不是最终判决。
 
 ---
 
@@ -133,6 +138,9 @@ Word/LaTeX       格式结构           显式确认修改         阻断       
 - `reports/citation-integrity-report.json`
 - `reports/citation-integrity-report.md`
 - `reports/citation-issues.csv`
+- `reports/external-verification-report.json`
+- `reports/hallucination-risk-report.json`
+- `reports/high-risk-references.csv`
 - `reports/check_language-report.json`
 - `reports/check_format-report.json`
 - `reports/check_content-report.json`
@@ -143,7 +151,7 @@ Word/LaTeX       格式结构           显式确认修改         阻断       
 
 ### Citation Integrity 预览
 
-当前 `v2.0.0` 版本线把本地优先的 Citation Integrity 作为提交前引用检查的第一层：
+当前 `v3.0.0` 版本线把本地优先的 Citation Integrity 作为提交前引用检查的第一层：
 
 ```text
 References: BLOCK
@@ -436,6 +444,7 @@ python run_check_once.py \
 
 ## 历史迭代记录
 
+- `v3.0.0`：加入幻觉风险评分、`hallucination-risk-report.json`、`high-risk-references.csv`、中文文献 `UNSUPPORTED` 处理，以及三个 demo 项目。
 - `v2.0.0`：加入 CrossRef / OpenAlex / Semantic Scholar 外部验证、候选合并，以及 `external_verification` advisory。
 - `v1.0.0`：把公开工作流叙事稳定下来，让 README、roadmap、站点、示例和代码路径一致。
 - `v1.1.0`：加入本地优先的 Citation Integrity 引擎，并接入 readiness gate。

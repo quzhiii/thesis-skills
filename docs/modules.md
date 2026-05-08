@@ -38,6 +38,9 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 6. External verification (alpha)
     · CrossRef / OpenAlex lookup        18-verify-references/
 
+6.5 Hallucination risk (v3.0)
+    · Deterministic risk scoring        19-check-hallucination-risk/
+
 7. Defense preparation
     · Outline, figure inventory, notes  17-defense-pack/
 
@@ -65,6 +68,7 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Check | `15-check-compile/` | `check_compile.py` | Parse existing LaTeX compile logs into structured diagnostics |
 | Gate | `16-check-readiness/` | `check_readiness.py` | Aggregate reports into `PASS / WARN / BLOCK` readiness artifact |
 | Verify (alpha) | `18-verify-references/` | `verify_external_references.py` | Query CrossRef and OpenAlex for each bibliography entry; write `external-verification-report.json` |
+| Risk (v3.0) | `19-check-hallucination-risk/` | `check_hallucination_risk.py` | Score bibliography entries for hallucination risk; write `hallucination-risk-report.json` and `high-risk-references.csv` |
 | Defense | `17-defense-pack/` | `generate_outline.py` | Generate thesis outline for defense preparation |
 | Defense | `17-defense-pack/` | `generate_figure_inventory.py` | Inventory figures and visual evidence |
 | Defense | `17-defense-pack/` | `generate_talk_prep_notes.py` | Generate editable talk-prep notes |
@@ -84,3 +88,4 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 - Start with `00-bib-zotero/` or `00-bib-endnote/` if citation metadata is unstable.
 - Start with `02-latex-to-word/` when the advisor review format is Word but the source of truth is LaTeX.
 - Start with `16-check-readiness/` after reports exist and you need a one-page handoff verdict.
+- Start with `19-check-hallucination-risk/` when you want a fast screen for AI-drafted or suspicious references.

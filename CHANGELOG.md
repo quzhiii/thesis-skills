@@ -2,6 +2,16 @@
 
 All notable changes to Thesis Skills are summarized here.
 
+## v3.0.0
+
+- Added deterministic hallucination risk scoring per bibliography entry based on local metadata and V2.0 external verification evidence.
+- New CLI: `19-check-hallucination-risk/check_hallucination_risk.py` writes `reports/hallucination-risk-report.json` and `reports/high-risk-references.csv`.
+- Risk labels: `PASS`, `WARN`, `REVIEW`, `HIGH_RISK`, `UNSUPPORTED`.
+- Chinese-language references are marked `UNSUPPORTED` rather than `HIGH_RISK`.
+- No LLM usage, no automatic citation rewriting, no live network calls.
+- Three new demo projects: field mismatch, fabricated reference, Chinese unsupported.
+- Updated README, Chinese README, roadmap, modules, examples, and manifest for V3.0.
+
 ## v2.0.0-alpha
 
 - Added external metadata verification for bibliography entries via CrossRef and OpenAlex.
