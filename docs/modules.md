@@ -41,6 +41,9 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 6.5 Hallucination risk (v3.0)
     · Deterministic risk scoring        19-check-hallucination-risk/
 
+6.6 Claim-citation support triage (v3.1)
+    · Deterministic triage scoring      20-check-claim-citation/
+
 7. Defense preparation
     · Outline, figure inventory, notes  17-defense-pack/
 
@@ -69,6 +72,7 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Gate | `16-check-readiness/` | `check_readiness.py` | Aggregate reports into `PASS / WARN / BLOCK` readiness artifact |
 | Verify (alpha) | `18-verify-references/` | `verify_external_references.py` | Query CrossRef and OpenAlex for each bibliography entry; write `external-verification-report.json` |
 | Risk (v3.0) | `19-check-hallucination-risk/` | `check_hallucination_risk.py` | Score bibliography entries for hallucination risk; write `hallucination-risk-report.json` and `high-risk-references.csv` |
+| Triage (v3.1) | `20-check-claim-citation/` | `check_claim_citation.py` | Extract citation contexts and triage claim-citation pairs by structural support signals |
 | Defense | `17-defense-pack/` | `generate_outline.py` | Generate thesis outline for defense preparation |
 | Defense | `17-defense-pack/` | `generate_figure_inventory.py` | Inventory figures and visual evidence |
 | Defense | `17-defense-pack/` | `generate_talk_prep_notes.py` | Generate editable talk-prep notes |

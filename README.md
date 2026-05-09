@@ -1,4 +1,4 @@
-# Thesis Skills v3.0.0
+# Thesis Skills v3.1.0
 
 <div align="center">
 
@@ -53,7 +53,7 @@ For repetitive finishing work, the expected time savings are concrete:
 
 ---
 
-## What's new in v3.0.0
+## What's new in v3.1.0
 
 - **Hallucination risk scoring** (`hallucination_risk_score`) for each bibliography entry based on local metadata and V2.0 external verification evidence.
 - New CLI: `19-check-hallucination-risk/check_hallucination_risk.py` writes `reports/hallucination-risk-report.json` and `reports/high-risk-references.csv`.
@@ -219,6 +219,34 @@ V3.0 boundaries:
 - No live network calls. Reads `external-verification-report.json` if present.
 - `UNSUPPORTED` means "cannot be automatically judged by enabled evidence," not "safe."
 - `HIGH_RISK` means "manual verification strongly recommended," not "fake."
+
+### Claim-Citation Support Triage (v3.1.0)
+
+Extract the sentence surrounding each `\cite{}` command from `.tex` files and pair it with cited bibliography metadata and V3.0 hallucination risk data. Produce deterministic triage labels that help identify claim-citation pairs that may lack credible structural support — without LLM.
+
+```bash
+python 20-check-claim-citation/check_claim_citation.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+Triage labels:
+
+| Label | Meaning |
+|---|---|
+| `WELL_SUPPORTED` | Cited reference PASS in V3.0, complete metadata, substantive context |
+| `SUPPORTED` | Reference PASS/WARN in V3.0, minor risk signals |
+| `WEAK` | Reference REVIEW in V3.0, or vague context, or incomplete metadata |
+| `ORPHANED` | Citation key not found in bibliography files |
+| `UNVERIFIABLE` | Cited reference UNSUPPORTED in V3.0 (CJK, thesis type) |
+
+V3.1 boundaries:
+
+- No LLM usage. Scoring is deterministic based on V3.0 risk labels, metadata, context quality, grouping, and citation frequency.
+- No semantic similarity between claim text and reference content.
+- No automatic citation rewrite or suggestion.
+- Reads `reports/hallucination-risk-report.json` if present; treats missing it conservatively.
+- Exit code 1 when any pair is `ORPHANED`.
 
 ## Scenarios
 
@@ -469,6 +497,7 @@ Tweak → re-run → review reports. Most packs converge in 1–2 calibration ro
 
 ## Release history
 
+- `v3.1.0`: added claim-citation support triage, `claim-citation-triage-report.json`, deterministic triage scoring, and three demo projects.
 - `v3.0.0`: added hallucination risk scoring, `hallucination-risk-report.json`, `high-risk-references.csv`, Chinese-language `UNSUPPORTED` handling, and three demo projects.
 - `v2.0.0`: added CrossRef / OpenAlex / Semantic Scholar external verification, consensus candidates, and an `external_verification` readiness advisory.
 - `v1.0.0`: stabilized the public workflow story across README, roadmap, site, examples, and code paths.

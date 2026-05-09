@@ -2,6 +2,15 @@
 
 All notable changes to Thesis Skills are summarized here.
 
+## v3.1.0
+
+- Added claim-citation support triage that extracts citation context from LaTeX source text, pairs each `\cite{}` with its surrounding sentence, and produces triage labels (`WELL_SUPPORTED`, `SUPPORTED`, `WEAK`, `ORPHANED`, `UNVERIFIABLE`) based on deterministic scoring.
+- New CLI: `20-check-claim-citation/check_claim_citation.py` writes `reports/claim-citation-triage-report.json`, `reports/claim-citation-triage.md`, and `reports/claim-citation-triage.csv`.
+- Scoring integrates V3.0 hallucination risk labels, bibliography metadata completeness, citation context quality, grouping analysis, and citation frequency — all without LLM.
+- Exit code 1 when any claim-citation pair is `ORPHANED` (cited key has no bib entry).
+- Three new demo projects: mixed claim-citation patterns, orphaned keys, Chinese references.
+- Updated README, Chinese README, roadmap, modules, examples, manifest, and pyproject.toml for v3.1.
+
 ## v3.0.0
 
 - Added deterministic hallucination risk scoring per bibliography entry based on local metadata and V2.0 external verification evidence.

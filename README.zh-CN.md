@@ -1,4 +1,4 @@
-# Thesis Skills v3.0.0
+# Thesis Skills v3.1.0
 
 <div align="center">
 
@@ -53,9 +53,21 @@ LaTeX 项目 ───────┤                                           
 
 ---
 
-## v3.0.0 有哪些更新
+## v3.1.0 有哪些更新
 
-- **幻觉风险评分**（`hallucination_risk_score`）基于本地元数据和 V2.0 外部验证证据，对每条参考文献输出确定性风险分数。
+- **声明-引用支撑分级**（Claim-Citation Support Triage）：从 `.tex` 源文件提取每处 `\cite{}` 的上下文句子，结合 V3.0 幻觉风险评分和文献元数据，输出确定性的支撑分级标签。
+- 新增 CLI：`20-check-claim-citation/check_claim_citation.py`，输出 `reports/claim-citation-triage-report.json`、`reports/claim-citation-triage.md`、`reports/claim-citation-triage.csv`。
+- 分级标签：`WELL_SUPPORTED`、`SUPPORTED`、`WEAK`、`ORPHANED`、`UNVERIFIABLE`。不使用 LLM，不判断语义相似度，不自动改写引用。
+- 三个新 demo 项目：混合声明-引用模式、孤立引用（缺 bib 条目）、中文文献。
+- **V3.0 功能回顾**：幻觉风险评分（`hallucination_risk_score`）基于本地元数据和 V2.0 外部验证证据，对每条参考文献输出确定性风险分数。
+- 新增 CLI：`19-check-hallucination-risk/check_hallucination_risk.py`，输出 `reports/hallucination-risk-report.json` 和 `reports/high-risk-references.csv`。
+- 风险标签：`PASS`、`WARN`、`REVIEW`、`HIGH_RISK`、`UNSUPPORTED`。中文文献标记为 `UNSUPPORTED`，而不是 `HIGH_RISK`。
+- 不使用 LLM，不自动改写引用。`HIGH_RISK` 表示"强烈建议人工核验"，而非"假文献"。
+- 三个新 demo 项目：字段错误、AI 编造文献、中文文献无法自动判定。
+- 本地 Citation Integrity 仍负责确定性引用风险检查：缺 key、重复条目、DOI/year 警告、undefined citation 等。
+- 外部验证为每条参考文献增加 **CrossRef**、**OpenAlex**、**Semantic Scholar** 证据，输出 `reports/external-verification-report.json`。
+- readiness gate 会额外显示 `external_verification` advisory 维度，但不会改写本地 `references` 的阻断逻辑。
+- 如果你会用 AI 起草或补全文献列表，幻觉风险评分可以作为"可疑引用 / AI 编造引用"的快速筛查入口，但不是最终判决。
 - 新增 CLI：`19-check-hallucination-risk/check_hallucination_risk.py`，输出 `reports/hallucination-risk-report.json` 和 `reports/high-risk-references.csv`。
 - 风险标签：`PASS`、`WARN`、`REVIEW`、`HIGH_RISK`、`UNSUPPORTED`。中文文献标记为 `UNSUPPORTED`，而不是 `HIGH_RISK`。
 - 不使用 LLM，不自动改写引用。`HIGH_RISK` 表示“强烈建议人工核验”，而非“假文献”。
@@ -444,6 +456,7 @@ python run_check_once.py \
 
 ## 历史迭代记录
 
+- `v3.1.0`：加入声明-引用支撑分级、`claim-citation-triage-report.json`、确定性分级评分，以及三个 demo 项目。
 - `v3.0.0`：加入幻觉风险评分、`hallucination-risk-report.json`、`high-risk-references.csv`、中文文献 `UNSUPPORTED` 处理，以及三个 demo 项目。
 - `v2.0.0`：加入 CrossRef / OpenAlex / Semantic Scholar 外部验证、候选合并，以及 `external_verification` advisory。
 - `v1.0.0`：把公开工作流叙事稳定下来，让 README、roadmap、站点、示例和代码路径一致。

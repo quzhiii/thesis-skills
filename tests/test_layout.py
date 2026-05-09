@@ -23,6 +23,7 @@ class LayoutTest(unittest.TestCase):
             ROOT / "13-check-content",
             ROOT / "18-verify-references",
             ROOT / "19-check-hallucination-risk",
+            ROOT / "20-check-claim-citation",
             ROOT / "20-fix-references",
             ROOT / "21-fix-language-style",
             ROOT / "22-fix-format-structure",

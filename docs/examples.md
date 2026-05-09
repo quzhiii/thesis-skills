@@ -138,6 +138,54 @@ Chinese-language references are marked `UNSUPPORTED` because external databases 
 
 Boundary: the hallucination risk scorer does not use LLMs, does not make live network calls, and never auto-rewrites citations or bibliography entries.
 
+## Claim-citation support triage demos (v3.1.0)
+
+The claim-citation triage runner adds a V3.1 evidence layer on top of the V3.0 hallucination risk scoring:
+
+```text
+examples/claim-citation-mixed/
+examples/claim-citation-orphaned/
+examples/claim-citation-chinese/
+```
+
+### Mixed demo
+
+```bash
+python 20-check-claim-citation/check_claim_citation.py \
+  --project-root examples/claim-citation-mixed \
+  --ruleset university-generic
+```
+
+Expected outputs:
+
+- `reports/claim-citation-triage-report.json`
+- `reports/claim-citation-triage.md`
+- `reports/claim-citation-triage.csv`
+
+This demo produces all five triage labels (`WELL_SUPPORTED`, `SUPPORTED`, `WEAK`, `ORPHANED`, `UNVERIFIABLE`) and exits with code 1 because at least one pair is `ORPHANED`.
+
+### Orphaned demo
+
+```bash
+python 20-check-claim-citation/check_claim_citation.py \
+  --project-root examples/claim-citation-orphaned \
+  --ruleset university-generic
+```
+
+This demo has citation keys with no corresponding bib entries. It produces `ORPHANED` triage entries and exits with code 1.
+
+### Chinese reference demo
+
+```bash
+python 20-check-claim-citation/check_claim_citation.py \
+  --project-root examples/claim-citation-chinese \
+  --ruleset university-generic
+```
+
+All references in this demo are Chinese-language and marked `UNSUPPORTED` by V3.0. The triage labels them all as `UNVERIFIABLE`. The exit code is 0 because `UNVERIFIABLE` is not a blocking signal.
+
+Boundary: the claim-citation triage runner does not use LLMs, does not judge semantic similarity between claims and references, and never auto-rewrites citations.
+
 ## Readiness gate preview
 
 ```json
