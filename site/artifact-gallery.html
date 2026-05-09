@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>输出样例 | Thesis Skills v1.2</title>
-    <meta name="description" content="Thesis Skills 6类核心输出样例展示，并额外展开 Citation Integrity 的 JSON、Markdown、CSV 报告。从文献接入到答辩准备，每个阶段都有对应的输出文件。">
+    <title>输出样例 | Thesis Skills v3.0</title>
+    <meta name="description" content="Thesis Skills 核心输出样例展示，并额外展开 Citation Integrity、外部验证和幻觉风险评分的 JSON / Markdown / CSV 报告。从文献接入到答辩准备，每个阶段都有对应的输出文件。">
     <link rel="stylesheet" href="editorial-theme.css">
 </head>
 <body>
@@ -23,7 +23,7 @@
                 </div>
                 <div class="issue-title">
                     <span class="issue-kicker">Thesis Skills</span>
-                    <span class="issue-note">v1.2 / 输出样例</span>
+                    <span class="issue-note">v3.0 / 输出样例</span>
                 </div>
                 <div class="issue-meta">
                     <span>showcase / cn</span>
@@ -59,14 +59,14 @@
                                 <span class="title-line">每一步都留下</span>
                                 <span class="title-line title-strong">可检查的输出</span>
                             </h1>
-                            <p class="hero-subtitle">从文献接入到答辩准备，每个阶段都有对应的输出文件。这里展示 6 类核心输出长什么样、怎么用，并额外展开 Citation Integrity 与外部 metadata verification 的 JSON / Markdown / CSV 报告。</p>
+                            <p class="hero-subtitle">从文献接入到答辩准备，每个阶段都有对应的输出文件。这里展示 7 类核心输出长什么样、怎么用，并额外展开 Citation Integrity、外部验证和幻觉风险评分的 JSON / Markdown / CSV 报告。</p>
                             <div class="hero-actions">
-                                <a class="btn btn-primary" href="#artifacts">查看6类输出</a>
+                                <a class="btn btn-primary" href="#artifacts">查看7类输出</a>
                                 <a class="btn btn-secondary" href="scenario-entry.html">去场景入口</a>
                             </div>
                             <div class="metric-row">
                                 <div class="metric-card">
-                                    <span class="metric-value">6 类</span>
+                                    <span class="metric-value">7 类</span>
                                     <span class="metric-label">核心输出</span>
                                 </div>
                                 <div class="metric-card">
@@ -98,9 +98,9 @@
                     <div class="section-head">
                         <div class="section-heading">
                             <div class="section-code">01 / artifacts</div>
-                            <h2 class="section-title">6类输出，按流程顺序排列</h2>
+                            <h2 class="section-title">7类输出，按流程顺序排列</h2>
                         </div>
-                            <p class="section-intro">每个卡片包含输入、命令、输出路径、使用时机、边界说明和一段样例。检查报告卡片额外展示 Citation Integrity 的 compatibility JSON、rich JSON、Markdown、CSV，以及 CrossRef / OpenAlex / Semantic Scholar 外部核验报告。</p>
+                            <p class="section-intro">每个卡片包含输入、命令、输出路径、使用时机、边界说明和一段样例。检查报告卡片额外展示 Citation Integrity 的 compatibility JSON、rich JSON、Markdown、CSV，CrossRef / OpenAlex / Semantic Scholar 外部核验报告，以及幻觉风险评分报告。</p>
                     </div>
 
                     <div class="module-list">
@@ -397,7 +397,62 @@
 - Key figure: Fig.3 — accuracy vs. latency tradeoff
 
 ### 4. Conclusion (2 min)
-- Takeaway: 15% MAE reduction at 30% lower latency</pre>
+ - Takeaway: 15% MAE reduction at 30% lower latency</pre>
+                        </article>
+
+                        <!-- 07 Hallucination Risk -->
+                        <article class="artifact-card">
+                            <div class="artifact-header">
+                                <span class="artifact-number">07</span>
+                                <h3 class="artifact-title">幻觉风险评分 / Hallucination Risk</h3>
+                            </div>
+                            <div class="artifact-meta">
+                                <div class="artifact-meta-row">
+                                    <span class="artifact-meta-label">输入</span>
+                                    <span class="artifact-meta-value">LaTeX 项目（含 bib 文件）+ 可选的外部验证报告</span>
+                                </div>
+                                <div class="artifact-meta-row">
+                                    <span class="artifact-meta-label">命令</span>
+                                    <span class="artifact-meta-value"><code>python 19-check-hallucination-risk/check_hallucination_risk.py --project-root thesis --ruleset university-generic</code></span>
+                                </div>
+                                <div class="artifact-meta-row">
+                                    <span class="artifact-meta-label">输出</span>
+                                    <span class="artifact-meta-value"><code>hallucination-risk-report.json</code> + <code>high-risk-references.csv</code></span>
+                                </div>
+                                <div class="artifact-meta-row">
+                                    <span class="artifact-meta-label">示例</span>
+                                    <span class="artifact-meta-value"><code>examples/citation-hallucination-fabricated/</code>, <code>examples/citation-hallucination-field-mismatch/</code>, <code>examples/citation-hallucination-chinese-unsupported/</code></span>
+                                </div>
+                                <div class="artifact-meta-row">
+                                    <span class="artifact-meta-label">使用时机</span>
+                                    <span class="artifact-meta-value">怀疑 AI 编造引用或 metadata 不可靠</span>
+                                </div>
+                                <div class="artifact-meta-row">
+                                    <span class="artifact-meta-label">边界</span>
+                                    <span class="artifact-meta-value">不使用 LLM，不自动改写引用。HIGH_RISK 是"建议人工核验"而非最终判定。中文文献标记 UNSUPPORTED。</span>
+                                </div>
+                            </div>
+                            <pre class="artifact-sample">{
+  "module": "citation_hallucination_risk",
+  "version": "3.0",
+  "status": "HIGH_RISK",
+  "summary": {
+    "entries_considered": 6,
+    "pass_entries": 3,
+    "review_entries": 1,
+    "high_risk_entries": 1,
+    "unsupported_entries": 1
+  },
+  "entries": [
+    {
+      "citation_key": "zimmermann2025fake",
+      "risk_label": "HIGH_RISK",
+      "hallucination_risk_score": 0.75,
+      "external_match_status": "NO_CANDIDATE",
+      "recommended_action": "No credible match was found."
+    }
+  ]
+}</pre>
                         </article>
                     </div>
                 </section>
@@ -453,8 +508,8 @@
             </main>
 
             <footer class="page-footer">
-                <span>Thesis Skills / v1.2 / output samples</span>
-                <span>6 outputs / one bounded chain</span>
+                <span>Thesis Skills / v3.0 / output samples</span>
+                <span>7 outputs / one bounded chain</span>
             </footer>
         </div>
     </div>

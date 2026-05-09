@@ -112,7 +112,7 @@ class CitationIntegrityDocsTest(unittest.TestCase):
             "site/scenario-entry.html",
         ]:
             with self.subTest(path=relative_path):
-                self._assert_contains_all(relative_path, ["v1.2.0"])
+                self._assert_contains_all(relative_path, ["v3.0.0"])
 
     def test_current_supporting_docs_reference_v12_not_v10_as_current(self) -> None:
         checks = {

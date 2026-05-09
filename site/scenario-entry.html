@@ -22,7 +22,7 @@
                 </div>
                 <div class="issue-title">
                     <span class="issue-kicker">Thesis Skills</span>
-                    <span class="issue-note">v1.2.0</span>
+                    <span class="issue-note">v3.0.0</span>
                 </div>
                 <div class="issue-meta">
                     <span>workflow map / cn</span>
@@ -59,12 +59,12 @@
                             </h1>
                             <p class="hero-subtitle">从文献整理到答辩前自查，每一段都有对应输出。</p>
                             <div class="hero-actions">
-                                <a class="btn btn-primary" href="#stages">查看五个阶段</a>
+                                <a class="btn btn-primary" href="#stages">查看六个阶段</a>
                                 <a class="btn btn-secondary" href="artifact-gallery.html">先看输出样例</a>
                             </div>
                             <div class="metric-row">
                                 <div class="metric-card">
-                                    <span class="metric-value">5 个</span>
+                                    <span class="metric-value">6 个</span>
                                     <span class="metric-label">论文阶段入口</span>
                                 </div>
                                 <div class="metric-card">
@@ -256,6 +256,38 @@
                                         <div class="io-row">
                                             <span class="io-label">输出</span>
                                             <span class="io-value"><code>defense-outline.md</code>, <code>chapter-highlights.md</code>, <code>figure-inventory.md</code></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="module-card">
+                            <div class="module-layout">
+                                <div class="module-meta">
+                                    <div class="module-key">stage 06</div>
+                                    <h3 class="module-title">筛查 AI 编造或可疑的参考文献</h3>
+                                    <p class="module-short">用幻觉风险评分快速定位可疑引用。</p>
+                                </div>
+                                <div class="module-copy">
+                                    <p class="module-desc">基于本地元数据和 V2.0 外部验证证据，对每条参考文献输出确定性风险分数。不使用 LLM，不自动改写引用。</p>
+                                    <div class="note-grid">
+                                        <div class="note-box"><strong>适合时机</strong>怀疑部分参考文献是 AI 生成、来源不清、或 metadata 不可靠。</div>
+                                        <div class="note-box"><strong>你会得到</strong><code>hallucination-risk-report.json</code> 和 <code>high-risk-references.csv</code>，标记 PASS / WARN / REVIEW / HIGH_RISK / UNSUPPORTED。</div>
+                                        <div class="note-box"><strong>不要误用</strong>HIGH_RISK 表示"强烈建议人工核验"，不是"假文献"的最终判定。中文文献标记为 UNSUPPORTED。</div>
+                                    </div>
+                                    <div class="io-block">
+                                        <div class="io-row">
+                                            <span class="io-label">输入</span>
+                                            <span class="io-value">LaTeX项目（含 bib 文件）</span>
+                                        </div>
+                                        <div class="io-row">
+                                            <span class="io-label">运行</span>
+                                            <code class="io-value">python 19-check-hallucination-risk/check_hallucination_risk.py --project-root thesis --ruleset university-generic</code>
+                                        </div>
+                                        <div class="io-row">
+                                            <span class="io-label">输出</span>
+                                            <span class="io-value"><code>reports/hallucination-risk-report.json</code> + <code>reports/high-risk-references.csv</code></span>
                                         </div>
                                     </div>
                                 </div>
