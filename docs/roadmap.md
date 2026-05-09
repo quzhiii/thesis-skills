@@ -4,7 +4,7 @@
 
 `v1.0.0` was the public-story stabilization milestone for `thesis-skills`.
 
-`v2.0.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, the V2.0 external metadata verification layer, and the V3.0 hallucination risk scoring layer.
+`v3.0.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, the V2.0 external metadata verification layer, and the V3.0 hallucination risk scoring layer.
 
 The repository now presents one coherent, bounded workflow system:
 
@@ -54,7 +54,7 @@ Design rules that stay in effect:
 
 ## Current Workflow Status
 
-All listed workflow families remain part of the current `v2.0.0` public contract:
+All listed workflow families remain part of the current `v3.0.0` public contract:
 
 | Workflow | Status | Entrypoint |
 |---|---|---|

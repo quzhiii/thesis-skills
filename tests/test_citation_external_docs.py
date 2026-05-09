@@ -10,13 +10,13 @@ class CitationExternalDocsTest(unittest.TestCase):
     def test_readme_mentions_external_verification_stable(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         for required in (
-            "# Thesis Skills v2.0.0",
+            "# Thesis Skills v3.0.0",
             "external-verification-report.json",
             "CrossRef",
             "OpenAlex",
             "Semantic Scholar",
             "external_verification",
-            "## What's new in v2.0.0",
+            "## What's new in v3.0.0",
             "fast authenticity screen",
         ):
             self.assertIn(required, readme, f"README.md missing: {required}")
@@ -25,14 +25,14 @@ class CitationExternalDocsTest(unittest.TestCase):
     def test_readme_zh_mentions_external_verification_stable(self) -> None:
         readme_zh = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
         for required in (
-            "# Thesis Skills v2.0.0",
+            "# Thesis Skills v3.0.0",
             "external-verification-report.json",
             "CrossRef",
             "OpenAlex",
             "Semantic Scholar",
             "external_verification",
-            "## v2.0.0 有哪些更新",
-            "快速真实性筛查",
+            "## v3.0.0 有哪些更新",
+            "真实性检查",
         ):
             self.assertIn(required, readme_zh, f"README.zh-CN.md missing: {required}")
         self.assertNotIn("v2.0-alpha", readme_zh.lower())
@@ -64,6 +64,7 @@ class CitationExternalDocsTest(unittest.TestCase):
             "CrossRef / OpenAlex / Semantic Scholar",
             "external_verification",
             "V3.0",
+            "v3.0.0",
         ):
             self.assertIn(required, roadmap)
 

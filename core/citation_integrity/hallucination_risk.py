@@ -14,6 +14,7 @@ CJK_CJK_COMPAT_FIELDS = ("title", "journal", "booktitle", "publisher")
 UNSUPPORTED_ENTRY_TYPES = ("mastersthesis", "phdthesis", "misc", "unpublished")
 MATCH_STATUS_SCORES: dict[str, float] = {
     "MATCH": 0.0,
+    "PASS": 0.0,
     "UNAVAILABLE": 0.25,
     "REVIEW": 0.35,
     "NO_CANDIDATE": 0.75,
