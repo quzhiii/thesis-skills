@@ -1,4 +1,4 @@
-# Thesis Skills v3.1.0
+# Thesis Skills v3.2.0
 
 <div align="center">
 
@@ -53,9 +53,11 @@ LaTeX 项目 ───────┤                                           
 
 ---
 
-## v3.1.0 有哪些更新
+## v3.2.0 有哪些更新
 
-- **声明-引用支撑分级**（Claim-Citation Support Triage）：从 `.tex` 源文件提取每处 `\cite{}` 的上下文句子，结合 V3.0 幻觉风险评分和文献元数据，输出确定性的支撑分级标签。
+- **Readiness Gate 集成**：V3.0 幻觉风险评分和 V3.1 声明-引用分级已接入 readiness gate，作为 `hallucination_risk`（advisory）和 `claim_citation`（advisory，ORPHANED 时 BLOCK）两个新维度。
+- 新增统一 runner：`run_evidence_pipeline.py`，一键跑完四层引用证据流水线（引用检查 → 外部验证 → 幻觉风险 → 声明-引用分级）。
+- **V3.1 回顾**：声明-引用支撑分级、确定性分级标签、三个 demo 项目。
 - 新增 CLI：`20-check-claim-citation/check_claim_citation.py`，输出 `reports/claim-citation-triage-report.json`、`reports/claim-citation-triage.md`、`reports/claim-citation-triage.csv`。
 - 分级标签：`WELL_SUPPORTED`、`SUPPORTED`、`WEAK`、`ORPHANED`、`UNVERIFIABLE`。不使用 LLM，不判断语义相似度，不自动改写引用。
 - 三个新 demo 项目：混合声明-引用模式、孤立引用（缺 bib 条目）、中文文献。
@@ -456,6 +458,7 @@ python run_check_once.py \
 
 ## 历史迭代记录
 
+- `v3.2.0`：将幻觉风险评分和声明-引用分级接入 readiness gate，新增统一证据流水线 runner。
 - `v3.1.0`：加入声明-引用支撑分级、`claim-citation-triage-report.json`、确定性分级评分，以及三个 demo 项目。
 - `v3.0.0`：加入幻觉风险评分、`hallucination-risk-report.json`、`high-risk-references.csv`、中文文献 `UNSUPPORTED` 处理，以及三个 demo 项目。
 - `v2.0.0`：加入 CrossRef / OpenAlex / Semantic Scholar 外部验证、候选合并，以及 `external_verification` advisory。

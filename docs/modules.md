@@ -84,6 +84,7 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Rules | `90-rules/` | `lint_pack.py` | Validate rule-pack structure |
 | Rules | `90-rules/` | `scorecard.py` | Summarize rule-pack completeness |
 | Runner | repository root | `run_check_once.py` | Run the deterministic check pipeline once |
+| Runner | repository root | `run_evidence_pipeline.py` | Orchestrate all four citation evidence layers in sequence |
 | Runner | repository root | `run_fix_cycle.py` | Preview or apply report-driven fix cycles |
 
 ## How to choose a module

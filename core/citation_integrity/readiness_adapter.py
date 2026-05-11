@@ -92,3 +92,113 @@ def external_verification_dimension(project_root: str | Path) -> dict[str, objec
         "review_entries": review_entries if isinstance(review_entries, int) else 0,
         "network_failures": network_failures if isinstance(network_failures, int) else 0,
     }
+
+
+def hallucination_risk_dimension(project_root: str | Path) -> dict[str, object] | None:
+    path = Path(project_root) / "reports" / "hallucination-risk-report.json"
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {
+            "verdict": "WARN",
+            "evidence_status": "present",
+            "reason": "hallucination-risk-report.json is unreadable",
+            "source": "hallucination-risk-report.json",
+        }
+    if not isinstance(payload, dict):
+        return None
+
+    status = payload.get("status")
+    summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
+    pass_entries = summary.get("pass_entries", 0)
+    warn_entries = summary.get("warn_entries", 0)
+    review_entries = summary.get("review_entries", 0)
+    high_risk_entries = summary.get("high_risk_entries", 0)
+    unsupported_entries = summary.get("unsupported_entries", 0)
+
+    if status == "PASS":
+        verdict = "PASS"
+        reason = "hallucination risk scoring reported no concerns"
+    elif status == "UNSUPPORTED":
+        verdict = "PASS"
+        reason = "hallucination risk scoring found unsupported entries that cannot be auto-verified; manual review may be needed"
+    elif status == "HIGH_RISK":
+        verdict = "WARN"
+        reason = "hallucination risk scoring flagged high-risk entries; manual verification strongly recommended"
+    elif status in {"WARN", "REVIEW"}:
+        verdict = "WARN"
+        if status == "REVIEW":
+            reason = "hallucination risk scoring reported entries needing manual review"
+        else:
+            reason = "hallucination risk scoring reported warnings"
+    else:
+        verdict = "WARN"
+        reason = "hallucination risk report has unknown status"
+
+    return {
+        "verdict": verdict,
+        "evidence_status": "present",
+        "reason": reason,
+        "source": "hallucination-risk-report.json",
+        "pass_entries": pass_entries if isinstance(pass_entries, int) else 0,
+        "warn_entries": warn_entries if isinstance(warn_entries, int) else 0,
+        "review_entries": review_entries if isinstance(review_entries, int) else 0,
+        "high_risk_entries": high_risk_entries if isinstance(high_risk_entries, int) else 0,
+        "unsupported_entries": unsupported_entries if isinstance(unsupported_entries, int) else 0,
+    }
+
+
+def claim_citation_dimension(project_root: str | Path) -> dict[str, object] | None:
+    path = Path(project_root) / "reports" / "claim-citation-triage-report.json"
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {
+            "verdict": "WARN",
+            "evidence_status": "present",
+            "reason": "claim-citation-triage-report.json is unreadable",
+            "source": "claim-citation-triage-report.json",
+        }
+    if not isinstance(payload, dict):
+        return None
+
+    status = payload.get("status")
+    summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
+    claim_citation_pairs = summary.get("claim_citation_pairs", 0)
+    orphaned_pairs = summary.get("orphaned_pairs", 0)
+    weak_pairs = summary.get("weak_pairs", 0)
+    unverifiable_pairs = summary.get("unverifiable_pairs", 0)
+
+    if status == "ORPHANED":
+        verdict = "BLOCK"
+        reason = "claim-citation triage found orphaned citation keys with no bibliography entry"
+    elif status in {"WELL_SUPPORTED", "SUPPORTED"}:
+        verdict = "PASS"
+        if status == "WELL_SUPPORTED":
+            reason = "claim-citation triage reported all pairs well-supported"
+        else:
+            reason = "claim-citation triage reported minor risk signals"
+    elif status in {"WEAK", "UNVERIFIABLE"}:
+        verdict = "WARN"
+        if status == "WEAK":
+            reason = "claim-citation triage reported weakly-supported pairs"
+        else:
+            reason = "claim-citation triage found unverifiable pairs that cannot be auto-verified"
+    else:
+        verdict = "WARN"
+        reason = "claim-citation triage report has unknown status"
+
+    return {
+        "verdict": verdict,
+        "evidence_status": "present",
+        "reason": reason,
+        "source": "claim-citation-triage-report.json",
+        "claim_citation_pairs": claim_citation_pairs if isinstance(claim_citation_pairs, int) else 0,
+        "orphaned_pairs": orphaned_pairs if isinstance(orphaned_pairs, int) else 0,
+        "weak_pairs": weak_pairs if isinstance(weak_pairs, int) else 0,
+        "unverifiable_pairs": unverifiable_pairs if isinstance(unverifiable_pairs, int) else 0,
+    }

@@ -4,7 +4,7 @@
 
 `v1.0.0` was the public-story stabilization milestone for `thesis-skills`.
 
-`v3.1.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, the V2.0 external metadata verification layer, and the V3.0 hallucination risk scoring layer.
+`v3.2.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, the V2.0 external metadata verification layer, the V3.0 hallucination risk scoring layer, and the V3.1 claim-citation support triage layer.
 
 ```text
 bibliography intake
@@ -52,7 +52,7 @@ Design rules that stay in effect:
 
 ## Current Workflow Status
 
-All listed workflow families remain part of the current `v3.1.0` public contract:
+All listed workflow families remain part of the current `v3.2.0` public contract:
 
 | Workflow | Status | Entrypoint |
 |---|---|---|
@@ -120,13 +120,14 @@ All listed workflow families remain part of the current `v3.1.0` public contract
 | v2.0.0 | CrossRef / OpenAlex / Semantic Scholar external verification, consensus candidates, and `external_verification` readiness advisory |
 | v3.0.0 | Hallucination risk scoring, `hallucination-risk-report.json`, `high-risk-references.csv`, Chinese `UNSUPPORTED` handling, and three demo projects |
 | v3.1.0 | Claim-citation support triage, `claim-citation-triage-report.json`, context extraction, deterministic triage scoring, and three demo projects |
+| v3.2.0 | Readiness gate integration (hallucination risk + claim-citation dimensions), unified evidence pipeline runner `run_evidence_pipeline.py` |
 
 ## Current release-line focus
 
-The current public alignment work should target `v3.1.0` consistency:
+The current public alignment work should target `v3.2.0` consistency:
 
-1. README, Chinese README, roadmap, examples, and site pages should present hallucination risk scoring and claim-citation triage as bounded deterministic workflows.
-2. Citation Integrity, external verification, hallucination risk, and claim-citation triage outputs must be described consistently across docs and examples:
+1. README, Chinese README, roadmap, examples, and site pages should present hallucination risk scoring, claim-citation triage, and readiness gate integration as bounded deterministic workflows.
+2. Citation Integrity, external verification, hallucination risk, claim-citation triage, and readiness gate outputs must be described consistently across docs and examples:
    - `reports/check_references-report.json`
    - `reports/citation-integrity-report.json`
    - `reports/citation-integrity-report.md`

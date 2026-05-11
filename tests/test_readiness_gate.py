@@ -633,6 +633,54 @@ class ReadinessGateTest(unittest.TestCase):
         self.assertIn("overall_verdict", payload)
         self.assertIn("dimensions", payload)
 
+    def test_gate_includes_hallucination_risk_and_claim_citation_dimensions(self) -> None:
+        with workspace_tempdir("gate-v3-") as base:
+            project = materialize_project(
+                base / "project",
+                {
+                    "reports/run-summary.json": json.dumps(
+                        {
+                            "ruleset": "university-generic",
+                            "steps": {
+                                "references": {
+                                    "exit_code": 0,
+                                    "report": "reports/check_references-report.json",
+                                },
+                            },
+                        },
+                        ensure_ascii=False,
+                    ),
+                    "reports/check_references-report.json": json.dumps(
+                        {"summary": {"checker": "check_references", "errors": 0, "warnings": 0, "status": "PASS"}, "findings": []},
+                        ensure_ascii=False,
+                    ),
+                    "reports/hallucination-risk-report.json": json.dumps(
+                        {
+                            "module": "citation_hallucination_risk",
+                            "status": "WARN",
+                            "summary": {"pass_entries": 3, "warn_entries": 2, "review_entries": 0, "high_risk_entries": 0, "unsupported_entries": 0},
+                        },
+                    ),
+                    "reports/claim-citation-triage-report.json": json.dumps(
+                        {
+                            "module": "claim_citation_triage",
+                            "status": "ORPHANED",
+                            "summary": {"claim_citation_pairs": 5, "orphaned_pairs": 1, "weak_pairs": 0, "unverifiable_pairs": 0},
+                        },
+                    ),
+                },
+            )
+            artifact = build_readiness_artifact(mode="advisor-handoff", project_root=str(project))
+            dimensions = artifact.get("dimensions")
+            self.assertIsInstance(dimensions, dict)
+            assert isinstance(dimensions, dict)
+            self.assertIn("hallucination_risk", dimensions)
+            self.assertIn("claim_citation", dimensions)
+            hr = dimensions["hallucination_risk"]
+            self.assertEqual(hr["verdict"], "WARN")
+            cc = dimensions["claim_citation"]
+            self.assertEqual(cc["verdict"], "BLOCK")
+
 
 if __name__ == "__main__":
     unittest.main()

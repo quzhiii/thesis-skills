@@ -7,6 +7,8 @@ from typing import Any, TypedDict
 from core.citation_integrity.readiness_adapter import (
     citation_integrity_dimension,
     external_verification_dimension,
+    hallucination_risk_dimension,
+    claim_citation_dimension,
 )
 
 
@@ -329,6 +331,12 @@ def _evaluate_dimensions(
         external_verification = external_verification_dimension(project_root)
         if external_verification is not None:
             dimensions["external_verification"] = external_verification
+        hallucination_risk = hallucination_risk_dimension(project_root)
+        if hallucination_risk is not None:
+            dimensions["hallucination_risk"] = hallucination_risk
+        claim_citation = claim_citation_dimension(project_root)
+        if claim_citation is not None:
+            dimensions["claim_citation"] = claim_citation
 
     compile_source = sources.get("compile", {})
     if compile_source.get("status") == "present":

@@ -78,9 +78,9 @@ class ClaimCitationDocsTest(unittest.TestCase):
             ],
         )
 
-    def test_pyproject_toml_is_3_1_0(self) -> None:
+    def test_pyproject_toml_is_3_2_0(self) -> None:
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-        self.assertIn('version = "3.1.0"', pyproject)
+        self.assertIn('version = "3.2.0"', pyproject)
 
     def test_manifest_has_claim_citation_module(self) -> None:
         import json
@@ -89,7 +89,7 @@ class ClaimCitationDocsTest(unittest.TestCase):
         self.assertIsInstance(modules, list)
         ids = [m["id"] for m in modules if isinstance(m, dict)]
         self.assertIn("20-check-claim-citation", ids)
-        self.assertEqual(manifest.get("version"), "3.1.0")
+        self.assertEqual(manifest.get("version"), "3.2.0")
 
 
 if __name__ == "__main__":

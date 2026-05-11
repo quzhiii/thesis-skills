@@ -2,6 +2,13 @@
 
 All notable changes to Thesis Skills are summarized here.
 
+## v3.2.0
+
+- Integrated V3.0 hallucination risk and V3.1 claim-citation triage into the readiness gate as advisory dimensions.
+- New dimensions in `readiness-report.json`: `hallucination_risk` (advisory) and `claim_citation` (advisory, BLOCK on ORPHANED).
+- New unified runner: `run_evidence_pipeline.py` orchestrates all four citation evidence layers in a single command.
+- Gate now surfaces up to 9 dimensions (was 7), including the full citation evidence stack.
+
 ## v3.1.0
 
 - Added claim-citation support triage that extracts citation context from LaTeX source text, pairs each `\cite{}` with its surrounding sentence, and produces triage labels (`WELL_SUPPORTED`, `SUPPORTED`, `WEAK`, `ORPHANED`, `UNVERIFIABLE`) based on deterministic scoring.

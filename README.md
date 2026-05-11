@@ -1,4 +1,4 @@
-# Thesis Skills v3.1.0
+# Thesis Skills v3.2.0
 
 <div align="center">
 
@@ -53,17 +53,12 @@ For repetitive finishing work, the expected time savings are concrete:
 
 ---
 
-## What's new in v3.1.0
+## What's new in v3.2.0
 
-- **Hallucination risk scoring** (`hallucination_risk_score`) for each bibliography entry based on local metadata and V2.0 external verification evidence.
-- New CLI: `19-check-hallucination-risk/check_hallucination_risk.py` writes `reports/hallucination-risk-report.json` and `reports/high-risk-references.csv`.
-- Risk labels: `PASS`, `WARN`, `REVIEW`, `HIGH_RISK`, `UNSUPPORTED`. Chinese-language references are marked `UNSUPPORTED`, not `HIGH_RISK`.
-- No LLM usage, no automatic citation rewriting. HIGH_RISK means "manual verification strongly recommended," not "fake."
-- Three new demo projects: field mismatch, fabricated reference, and Chinese-language unsupported case.
-- Local Citation Integrity still handles deterministic reference risks such as missing keys, duplicate entries, DOI/year warnings, and undefined citations.
-- External verification adds **CrossRef**, **OpenAlex**, and **Semantic Scholar** evidence per bibliography entry and writes `reports/external-verification-report.json`.
-- The readiness gate surfaces `external_verification` as an advisory dimension without changing the local `references` blocker logic.
-- If you use AI to draft or expand references, this gives you a fast authenticity screen for suspicious citations while staying inside a bounded, report-first workflow.
+- **Readiness Gate Integration**: Hallucination risk scoring (V3.0) and claim-citation triage (V3.1) are now surfaced as first-class readiness gate dimensions alongside external verification.
+- New dimensions in `readiness-report.json`: `hallucination_risk` (advisory) and `claim_citation` (advisory, BLOCK on ORPHANED).
+- New unified runner: `run_evidence_pipeline.py` runs all four citation evidence layers (`10-check-references` → `18-verify-references` → `19-check-hallucination-risk` → `20-check-claim-citation`) in a single command.
+- **V3.1 回顾**: Claim-citation support triage with deterministic triage labels.
 
 ---
 
@@ -497,6 +492,7 @@ Tweak → re-run → review reports. Most packs converge in 1–2 calibration ro
 
 ## Release history
 
+- `v3.2.0`: integrated hallucination risk and claim-citation triage into readiness gate, added unified evidence pipeline runner, `run_evidence_pipeline.py`.
 - `v3.1.0`: added claim-citation support triage, `claim-citation-triage-report.json`, deterministic triage scoring, and three demo projects.
 - `v3.0.0`: added hallucination risk scoring, `hallucination-risk-report.json`, `high-risk-references.csv`, Chinese-language `UNSUPPORTED` handling, and three demo projects.
 - `v2.0.0`: added CrossRef / OpenAlex / Semantic Scholar external verification, consensus candidates, and an `external_verification` readiness advisory.

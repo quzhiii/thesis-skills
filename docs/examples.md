@@ -186,6 +186,34 @@ All references in this demo are Chinese-language and marked `UNSUPPORTED` by V3.
 
 Boundary: the claim-citation triage runner does not use LLMs, does not judge semantic similarity between claims and references, and never auto-rewrites citations.
 
+## Unified Evidence Pipeline (v3.2.0)
+
+Run all four citation evidence layers in a single command:
+
+```bash
+python run_evidence_pipeline.py \
+  --project-root examples/claim-citation-mixed \
+  --ruleset university-generic \
+  --skip-external
+```
+
+Expected outputs:
+- `reports/check_references-report.json`
+- `reports/hallucination-risk-report.json`
+- `reports/claim-citation-triage-report.json`
+- `reports/claim-citation-triage.md`
+- `reports/claim-citation-triage.csv`
+
+After the pipeline completes, run the readiness gate to see all evidence dimensions:
+
+```bash
+python 16-check-readiness/check_readiness.py \
+  --project-root examples/claim-citation-mixed \
+  --ruleset university-generic
+```
+
+The `readiness-report.json` now includes `hallucination_risk` and `claim_citation` dimensions alongside `external_verification`, giving a complete citation health profile in a single artifact.
+
 ## Readiness gate preview
 
 ```json

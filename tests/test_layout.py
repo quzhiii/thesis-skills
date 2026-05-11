@@ -13,6 +13,7 @@ class LayoutTest(unittest.TestCase):
             ROOT / "README.md",
             ROOT / "README.zh-CN.md",
             ROOT / "skills-manifest.json",
+            ROOT / "run_evidence_pipeline.py",
             ROOT / "core",
             ROOT / "00-bib-zotero",
             ROOT / "00-bib-endnote",
