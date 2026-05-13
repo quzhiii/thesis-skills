@@ -176,7 +176,7 @@ def claim_citation_dimension(project_root: str | Path) -> dict[str, object] | No
     if status == "ORPHANED":
         verdict = "BLOCK"
         reason = "claim-citation triage found orphaned citation keys with no bibliography entry"
-    elif status in {"WELL_SUPPORTED", "SUPPORTED"}:
+    elif status in {"WELL_SUPPORTED", "SUPPORTED", "PASS"}:
         verdict = "PASS"
         if status == "WELL_SUPPORTED":
             reason = "claim-citation triage reported all pairs well-supported"
@@ -185,7 +185,7 @@ def claim_citation_dimension(project_root: str | Path) -> dict[str, object] | No
     elif status in {"WEAK", "UNVERIFIABLE"}:
         verdict = "WARN"
         if status == "WEAK":
-            reason = "claim-citation triage reported weakly-supported pairs"
+            reason = "claim-citation triage reported weakly-supported pairs; this reflects structural support strength, not citation key completeness"
         else:
             reason = "claim-citation triage found unverifiable pairs that cannot be auto-verified"
     else:

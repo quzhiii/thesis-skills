@@ -130,6 +130,16 @@ class ClaimCitationTriageTest(unittest.TestCase):
         self.assertEqual(result["triage_score"], 0.15)
         self.assertFalse(result["evidence"]["has_claim_context"])
 
+    def test_high_risk_with_existing_bib_entry_is_weak_not_orphaned(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        result = triage_claim_citation(self._context(), self._entry(), self._risk(label="HIGH_RISK"), 1)
+
+        self.assertEqual(result["triage_label"], "WEAK")
+        self.assertGreaterEqual(result["triage_score"], 0.5)
+        self.assertIn("HIGH_RISK", str(result["recommended_action"]))
+        self.assertNotIn("not found in bibliography", str(result["recommended_action"]))
+
     def test_build_report_counts_entries_and_uncited_references(self) -> None:
         from core.citation_integrity.claim_citation import build_claim_citation_report
 

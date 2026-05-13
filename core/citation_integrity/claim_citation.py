@@ -31,13 +31,15 @@ LABEL_THRESHOLDS: list[tuple[float, str]] = [
 ]
 
 
-def _label_for_score(score: float) -> str:
+def _label_for_score(score: float, bib_entry_exists: bool) -> str:
+    if not bib_entry_exists and score >= 0.50:
+        return "ORPHANED"
     for threshold, label in LABEL_THRESHOLDS:
         if score == 0.0:
             return "WELL_SUPPORTED"
         if score < threshold:
             return label
-    return "ORPHANED"
+    return "WEAK"
 
 
 def _recommended_action(triage_label: str, hallucination_risk_label: str | None) -> str:
@@ -46,7 +48,9 @@ def _recommended_action(triage_label: str, hallucination_risk_label: str | None)
     if triage_label == "ORPHANED":
         return "Citation key not found in bibliography. Add the missing entry or fix the citation key."
     if triage_label == "WEAK":
-        return f"Cited reference has {hallucination_risk_label} hallucination risk. Consider verifying the source manually."
+        if hallucination_risk_label == "HIGH_RISK":
+            return "Cited reference has HIGH_RISK hallucination risk. Manual verification strongly recommended."
+        return f"Cited reference has weak structural support (risk={hallucination_risk_label}). Consider verifying the source manually."
     if triage_label == "SUPPORTED":
         return "Reference appears structurally adequate but may have minor risks."
     return "Cited reference is well-supported with complete metadata and low hallucination risk."
@@ -102,7 +106,7 @@ def triage_claim_citation(
     if citation_frequency > OVER_CITATION_THRESHOLD:
         score += SCORE_OVER_CITATION
 
-    label = _label_for_score(score)
+    label = _label_for_score(score, bib_entry is not None)
 
     return _build_triage_result(
         context,
