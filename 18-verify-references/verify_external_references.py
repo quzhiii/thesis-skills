@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -32,23 +33,37 @@ def _collect_entries(project: ThesisProject) -> list[BibEntry]:
 
 
 def _verify_entries(
-    entries: list[BibEntry], cache_dir: Path
+    entries: list[BibEntry],
+    cache_dir: Path,
+    *,
+    limit: int | None = None,
+    timeout_per_entry: float = 15.0,
+    progress: bool = True,
 ) -> dict[str, list[ExternalProviderEvidence]]:
     evidence_by_key: dict[str, list[ExternalProviderEvidence]] = {}
-    for entry in entries:
+    verifiable = [
+        entry for entry in entries
+        if entry.fields.get("title") or entry.fields.get("doi")
+    ]
+    total = len(verifiable)
+    if limit is not None:
+        verifiable = verifiable[:limit]
+    for idx, entry in enumerate(verifiable, 1):
+        if progress:
+            print(f"[{idx}/{total}] {entry.key}", file=sys.stderr, flush=True)
         fields = entry.fields
         local_metadata: dict[str, object] = {}
         if fields.get("title"):
             local_metadata["title"] = fields["title"]
         if fields.get("doi"):
             local_metadata["doi"] = fields["doi"].strip().lower()
-        if not local_metadata.get("title") and not local_metadata.get("doi"):
-            continue
-        providers: list[ExternalProviderEvidence] = [
-            verify_with_crossref(local_metadata, cache_dir=cache_dir),
-            verify_with_openalex(local_metadata, cache_dir=cache_dir),
-            verify_with_semantic_scholar(local_metadata, cache_dir=cache_dir),
-        ]
+        start = time.time()
+        providers: list[ExternalProviderEvidence] = []
+        providers.append(verify_with_crossref(local_metadata, cache_dir=cache_dir))
+        if time.time() - start < timeout_per_entry:
+            providers.append(verify_with_openalex(local_metadata, cache_dir=cache_dir))
+        if time.time() - start < timeout_per_entry:
+            providers.append(verify_with_semantic_scholar(local_metadata, cache_dir=cache_dir))
         evidence_by_key[entry.key] = providers
     return evidence_by_key
 
@@ -59,6 +74,10 @@ def main() -> int:
     )
     parser.add_argument("--project-root", required=True)
     parser.add_argument("--ruleset", default="tsinghua-thesis")
+    parser.add_argument("--limit", type=int, default=None, help="Max entries to verify (for large projects)")
+    parser.add_argument("--timeout-per-entry", type=float, default=15.0, help="Seconds budget per entry")
+    parser.add_argument("--cache-dir", default=None, help="Override cache directory path")
+    parser.add_argument("--quiet", action="store_true", help="Suppress per-entry progress output")
     args = parser.parse_args()
     repo_root = Path(__file__).resolve().parents[1]
     pack = find_rule_pack(repo_root, args.ruleset)
@@ -68,9 +87,15 @@ def main() -> int:
         pack.rules["project"]["chapter_globs"],
         pack.rules["project"]["bibliography_files"],
     )
-    cache_dir = project.reports_dir / ".external-cache"
+    cache_dir = Path(args.cache_dir) if args.cache_dir else project.reports_dir / ".external-cache"
     entries = _collect_entries(project)
-    evidence_by_key = _verify_entries(entries, cache_dir)
+    evidence_by_key = _verify_entries(
+        entries,
+        cache_dir,
+        limit=args.limit,
+        timeout_per_entry=args.timeout_per_entry,
+        progress=not args.quiet,
+    )
     report = build_external_verification_report(entries, evidence_by_key=evidence_by_key)
     output = project.reports_dir / "external-verification-report.json"
     write_external_verification_report(report, output)
