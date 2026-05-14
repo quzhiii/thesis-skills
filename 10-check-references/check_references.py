@@ -41,8 +41,19 @@ def main() -> int:
             build_external_verification_report,
             write_external_verification_report,
         )
+        from core.citation_integrity.doi_candidates import (
+            build_doi_candidate_report,
+            write_doi_candidate_csv,
+            write_doi_candidate_json,
+        )
         from core.citation_integrity.openalex_verifier import verify_with_openalex
         from core.citation_integrity.semantic_scholar_verifier import verify_with_semantic_scholar
+        from core.citation_integrity.url_verifier import (
+            build_url_verification_report,
+            verify_bib_urls,
+            write_url_flagged_csv,
+            write_url_verification_json,
+        )
 
         cache_dir = project.reports_dir / ".external-cache"
         entries: list[object] = []
@@ -65,6 +76,12 @@ def main() -> int:
                 ]
         ext_report = build_external_verification_report(entries, evidence_by_key=evidence_by_key)
         write_external_verification_report(ext_report, project.reports_dir / "external-verification-report.json")
+        doi_report = build_doi_candidate_report(entries, ext_report)
+        write_doi_candidate_json(doi_report, project.reports_dir / "missing-doi-candidates.json")
+        write_doi_candidate_csv(doi_report, project.reports_dir / "missing-doi-candidates.csv")
+        url_report = build_url_verification_report(verify_bib_urls(entries))
+        write_url_verification_json(url_report, project.reports_dir / "url-verification-report.json")
+        write_url_flagged_csv(url_report, project.reports_dir / "url-verification-flagged.csv")
     return exit_code
 
 
