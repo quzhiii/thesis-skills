@@ -163,7 +163,55 @@ class HallucinationRiskScoreTest(unittest.TestCase):
         }
         result = score_hallucination_risk(entry, external_entry)
 
-        self.assertIn("year", result.get("evidence", {}).get("metadata_mismatches", []))
+        self.assertIn("year_mismatch", result.get("evidence", {}).get("metadata_mismatches", []))
+
+    def test_expanded_mismatch_types_increase_score_and_use_new_names(self) -> None:
+        from core.citation_integrity.hallucination_risk import score_hallucination_risk
+
+        entry = self._entry(
+            fields={
+                "title": "Main Title: Subtitle",
+                "author": "Smith, Jane and Doe, John",
+                "year": "2024",
+                "journal": "Local Journal",
+                "volume": "12",
+                "number": "2",
+                "pages": "10--20",
+            }
+        )
+        external_entry = {
+            "match_status": "LIKELY_MATCH_WITH_METADATA_DIFF",
+            "providers": [
+                {
+                    "source": "crossref",
+                    "success": True,
+                    "candidate_count": 1,
+                    "candidates": [
+                        {
+                            "title": "Main Title",
+                            "title_similarity": 0.92,
+                            "authors": ["Brown Alice"],
+                            "year": "2023",
+                            "venue": "Remote Journal",
+                            "volume": "13",
+                            "issue": "3",
+                            "pages": "21--30",
+                        }
+                    ],
+                }
+            ],
+        }
+
+        result = score_hallucination_risk(entry, external_entry)
+
+        mismatches = result.get("evidence", {}).get("metadata_mismatches", [])
+        self.assertIn("subtitle_missing", mismatches)
+        self.assertIn("author_count_mismatch", mismatches)
+        self.assertIn("author_order_mismatch", mismatches)
+        self.assertIn("year_mismatch", mismatches)
+        self.assertIn("venue_mismatch", mismatches)
+        self.assertIn("volume_issue_pages_mismatch", mismatches)
+        self.assertGreater(result["hallucination_risk_score"], 0.25)
 
 
 class HallucinationRiskReportTest(unittest.TestCase):
