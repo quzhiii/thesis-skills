@@ -1,4 +1,4 @@
-# Thesis Skills v3.2.0
+# Thesis Skills v3.3.0
 
 <div align="center">
 
@@ -13,7 +13,7 @@
 
 **中文文档** · [English](README.md) · [展示页面](https://quzhiii.github.io/thesis-skills)
 
-[v3.0.0 亮点](#v300-有哪些更新) · [快速开始](#快速开始) · [输出](#输出) · [使用场景](#使用场景) · [如何同步后续更新](#如何同步后续更新) · [规则包](#规则包) · [创建自己的规则包](#创建你自己的学校规则包) · [边界](#边界)
+[v3.3.0 亮点](#v330-有哪些更新) · [快速开始](#快速开始) · [输出](#输出) · [使用场景](#使用场景) · [如何同步后续更新](#如何同步后续更新) · [规则包](#规则包) · [创建自己的规则包](#创建你自己的学校规则包) · [边界](#边界)
 
 </div>
 
@@ -53,31 +53,14 @@ LaTeX 项目 ───────┤                                           
 
 ---
 
-## v3.2.0 有哪些更新
+## v3.3.0 有哪些更新
 
-- **Readiness Gate 集成**：V3.0 幻觉风险评分和 V3.1 声明-引用分级已接入 readiness gate，作为 `hallucination_risk`（advisory）和 `claim_citation`（advisory，ORPHANED 时 BLOCK）两个新维度。
-- 新增统一 runner：`run_evidence_pipeline.py`，一键跑完四层引用证据流水线（引用检查 → 外部验证 → 幻觉风险 → 声明-引用分级）。
-- **V3.1 回顾**：声明-引用支撑分级、确定性分级标签、三个 demo 项目。
-- 新增 CLI：`20-check-claim-citation/check_claim_citation.py`，输出 `reports/claim-citation-triage-report.json`、`reports/claim-citation-triage.md`、`reports/claim-citation-triage.csv`。
-- 分级标签：`WELL_SUPPORTED`、`SUPPORTED`、`WEAK`、`ORPHANED`、`UNVERIFIABLE`。不使用 LLM，不判断语义相似度，不自动改写引用。
-- 三个新 demo 项目：混合声明-引用模式、孤立引用（缺 bib 条目）、中文文献。
-- **V3.0 功能回顾**：幻觉风险评分（`hallucination_risk_score`）基于本地元数据和 V2.0 外部验证证据，对每条参考文献输出确定性风险分数。
-- 新增 CLI：`19-check-hallucination-risk/check_hallucination_risk.py`，输出 `reports/hallucination-risk-report.json` 和 `reports/high-risk-references.csv`。
-- 风险标签：`PASS`、`WARN`、`REVIEW`、`HIGH_RISK`、`UNSUPPORTED`。中文文献标记为 `UNSUPPORTED`，而不是 `HIGH_RISK`。
-- 不使用 LLM，不自动改写引用。`HIGH_RISK` 表示"强烈建议人工核验"，而非"假文献"。
-- 三个新 demo 项目：字段错误、AI 编造文献、中文文献无法自动判定。
-- 本地 Citation Integrity 仍负责确定性引用风险检查：缺 key、重复条目、DOI/year 警告、undefined citation 等。
-- 外部验证为每条参考文献增加 **CrossRef**、**OpenAlex**、**Semantic Scholar** 证据，输出 `reports/external-verification-report.json`。
-- readiness gate 会额外显示 `external_verification` advisory 维度，但不会改写本地 `references` 的阻断逻辑。
-- 如果你会用 AI 起草或补全文献列表，幻觉风险评分可以作为"可疑引用 / AI 编造引用"的快速筛查入口，但不是最终判决。
-- 新增 CLI：`19-check-hallucination-risk/check_hallucination_risk.py`，输出 `reports/hallucination-risk-report.json` 和 `reports/high-risk-references.csv`。
-- 风险标签：`PASS`、`WARN`、`REVIEW`、`HIGH_RISK`、`UNSUPPORTED`。中文文献标记为 `UNSUPPORTED`，而不是 `HIGH_RISK`。
-- 不使用 LLM，不自动改写引用。`HIGH_RISK` 表示“强烈建议人工核验”，而非“假文献”。
-- 三个新 demo 项目：字段错误、AI 编造文献、中文文献无法自动判定。
-- 本地 Citation Integrity 仍负责确定性引用风险检查：缺 key、重复条目、DOI/year 警告、undefined citation 等。
-- 外部验证为每条参考文献增加 **CrossRef**、**OpenAlex**、**Semantic Scholar** 证据，输出 `reports/external-verification-report.json`。
-- readiness gate 会额外显示 `external_verification` advisory 维度，但不会改写本地 `references` 的阻断逻辑。
-- 如果你会用 AI 起草或补全文献列表，幻觉风险评分可以作为“可疑引用 / AI 编造引用”的快速筛查入口，但不是最终判决。
+- **Readiness Gate 集成** 的四层引用证据流水线继续保留，依然可以一键跑完四层引用证据流水线；V3.3 在其上新增 final reference set、DOI 候选和 URL 验证。
+- **引用验证加固**：新增 `.aux` / `.bbl` final reference set 解析，能区分“最终编译进参考文献表的条目”和“只是 bib 里存在但没有进入最终文档的条目”。
+- 新增报告：`reports/final-reference-set-report.json`、`reports/final-reference-set-report.csv`、`reports/missing-doi-candidates.json`、`reports/missing-doi-candidates.csv`、`reports/url-verification-report.json`、`reports/url-verification-flagged.csv`。
+- `18-verify-references/verify_external_references.py` 新增 `--scope final|cited|all`、`--resume`、`--only-key`，并支持 crash-safe partial report 写入。
+- 外部验证 mismatch taxonomy 扩展到 DOI、标题、subtitle、作者人数/顺序、年份、venue、volume/issue/pages。
+- `run_evidence_pipeline.py` 现在线性执行 final reference set → 外部验证 → 幻觉风险 → 声明-引用分级。
 
 ---
 
@@ -153,8 +136,14 @@ Word/LaTeX       格式结构           显式确认修改         阻断       
 - `reports/citation-integrity-report.md`
 - `reports/citation-issues.csv`
 - `reports/external-verification-report.json`
+- `reports/final-reference-set-report.json`
+- `reports/final-reference-set-report.csv`
 - `reports/hallucination-risk-report.json`
 - `reports/high-risk-references.csv`
+- `reports/missing-doi-candidates.json`
+- `reports/missing-doi-candidates.csv`
+- `reports/url-verification-report.json`
+- `reports/url-verification-flagged.csv`
 - `reports/check_language-report.json`
 - `reports/check_format-report.json`
 - `reports/check_content-report.json`
@@ -207,6 +196,41 @@ V2.0 边界：
 - 不自动改写引用。
 - 适合做“可疑引用 / AI 幻觉引用”的快速筛查，但不是最终造假判定。
 - 网络故障降级为 `UNAVAILABLE`，不会崩溃。
+
+### Final Reference Set + DOI / URL 检查（v3.3.0）
+
+V3.3 把引用验证范围拆成三层：
+
+- `final`：真正进入最终编译参考文献表的 key（来自 `.aux` / `.bbl`）
+- `cited`：TeX 源码里 `\cite{}` 出现过的 key
+- `all`：活动 `.bib` 文件里的全部条目
+
+final reference set 步骤会写出：
+
+- `reports/final-reference-set-report.json`
+- `reports/final-reference-set-report.csv`
+
+外部验证现在支持长项目断点续跑：
+
+```bash
+python 18-verify-references/verify_external_references.py \
+  --project-root thesis \
+  --ruleset university-generic \
+  --scope final \
+  --resume
+```
+
+V3.3 还新增两类 advisory 报告：
+
+- `reports/missing-doi-candidates.json` / `.csv`：缺 DOI 条目的候选 DOI 建议
+- `reports/url-verification-report.json` / `reports/url-verification-flagged.csv`：URL 可达性检查
+
+边界：
+
+- 不使用 LLM。
+- 不自动把 DOI 写回 `.bib`。
+- 不自动替换 URL。
+- URL 检查只判断链接是否能解析，不判断文档真伪。
 
 ## 使用场景
 
@@ -284,6 +308,18 @@ python 10-check-references/check_references.py \
 ```
 
 适合在你怀疑部分参考文献是 AI 生成、来源不清、或 metadata 不可靠时使用。它会把可疑、弱匹配、无法联网核验的条目标出来，但不会自动改写 bibliography。
+
+如果你还要继续做声明-引用支撑分级，可以进一步运行：
+
+```bash
+python 20-check-claim-citation/check_claim_citation.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+它会输出 `reports/claim-citation-triage-report.json`，对声明-引用支撑分级做确定性分层。
+
+如果你想先看外部元数据层面的风险分值，可先运行 `19-check-hallucination-risk/check_hallucination_risk.py`，查看每条文献的 `hallucination_risk_score`。
 
 更多场景见 [`docs/examples.md`](docs/examples.md)。
 
@@ -458,6 +494,7 @@ python run_check_once.py \
 
 ## 历史迭代记录
 
+- `v3.3.0`：加入 final reference set、可续跑外部验证、DOI 候选建议和 URL 验证。
 - `v3.2.0`：将幻觉风险评分和声明-引用分级接入 readiness gate，新增统一证据流水线 runner。
 - `v3.1.0`：加入声明-引用支撑分级、`claim-citation-triage-report.json`、确定性分级评分，以及三个 demo 项目。
 - `v3.0.0`：加入幻觉风险评分、`hallucination-risk-report.json`、`high-risk-references.csv`、中文文献 `UNSUPPORTED` 处理，以及三个 demo 项目。

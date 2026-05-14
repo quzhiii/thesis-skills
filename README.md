@@ -1,4 +1,4 @@
-# Thesis Skills v3.2.0
+# Thesis Skills v3.3.0
 
 <div align="center">
 
@@ -13,7 +13,7 @@ Spend your time thinking, not fixing formatting.
 
 [中文文档](README.zh-CN.md) · **English** · [Showcase](https://quzhiii.github.io/thesis-skills)
 
-[What's New](#whats-new-in-v300) · [Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
+[What's New](#whats-new-in-v330) · [Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
 
 </div>
 
@@ -53,12 +53,14 @@ For repetitive finishing work, the expected time savings are concrete:
 
 ---
 
-## What's new in v3.2.0
+## What's new in v3.3.0
 
-- **Readiness Gate Integration**: Hallucination risk scoring (V3.0) and claim-citation triage (V3.1) are now surfaced as first-class readiness gate dimensions alongside external verification.
-- New dimensions in `readiness-report.json`: `hallucination_risk` (advisory) and `claim_citation` (advisory, BLOCK on ORPHANED).
-- New unified runner: `run_evidence_pipeline.py` runs all four citation evidence layers (`10-check-references` → `18-verify-references` → `19-check-hallucination-risk` → `20-check-claim-citation`) in a single command.
-- **V3.1 回顾**: Claim-citation support triage with deterministic triage labels.
+- **Readiness Gate Integration** remains in place from V3.2, and V3.3 extends that evidence stack with harder reference verification.
+- **Reference verification hardening**: new final reference set parsing from `.aux` / `.bbl`, with fallback to TeX citation parsing when compile artifacts are unavailable.
+- New reports: `reports/final-reference-set-report.json`, `reports/final-reference-set-report.csv`, `reports/missing-doi-candidates.json`, `reports/missing-doi-candidates.csv`, `reports/url-verification-report.json`, and `reports/url-verification-flagged.csv`.
+- `18-verify-references/verify_external_references.py` now supports `--scope final|cited|all`, `--resume`, `--only-key`, and crash-safe partial report writing.
+- Expanded external mismatch taxonomy: DOI, title, subtitle, author count/order, year, venue, and volume/issue/pages mismatches.
+- `run_evidence_pipeline.py` now runs the final reference set step before external verification and downstream citation evidence steps.
 
 ---
 
@@ -134,8 +136,14 @@ A real run writes machine-readable artifacts such as:
 - `reports/citation-integrity-report.md`
 - `reports/citation-issues.csv`
 - `reports/external-verification-report.json`
+- `reports/final-reference-set-report.json`
+- `reports/final-reference-set-report.csv`
 - `reports/hallucination-risk-report.json`
 - `reports/high-risk-references.csv`
+- `reports/missing-doi-candidates.json`
+- `reports/missing-doi-candidates.csv`
+- `reports/url-verification-report.json`
+- `reports/url-verification-flagged.csv`
 - `reports/check_language-report.json`
 - `reports/check_format-report.json`
 - `reports/check_content-report.json`
@@ -186,6 +194,41 @@ V2.0 boundaries:
 - `external_verification` is advisory only.
 - No automatic citation rewriting.
 - Network failures degrade to `UNAVAILABLE`, never crash.
+
+### Final Reference Set + DOI / URL checks (v3.3.0)
+
+V3.3 hardens citation evidence by separating three scopes:
+
+- `final`: references that actually entered the compiled bibliography via `.aux` / `.bbl`
+- `cited`: citation keys extracted from TeX source `\cite{}` commands
+- `all`: every entry in active `.bib` files
+
+The final reference set builder writes:
+
+- `reports/final-reference-set-report.json`
+- `reports/final-reference-set-report.csv`
+
+The external verification layer can now resume long runs and write partial results safely:
+
+```bash
+python 18-verify-references/verify_external_references.py \
+  --project-root thesis \
+  --ruleset university-generic \
+  --scope final \
+  --resume
+```
+
+V3.3 also adds advisory follow-up reports:
+
+- `reports/missing-doi-candidates.json` and `.csv` for likely DOI additions
+- `reports/url-verification-report.json` and `reports/url-verification-flagged.csv` for URL resolution checks
+
+Boundaries:
+
+- No LLM usage.
+- No automatic DOI write-back to `.bib` files.
+- No automatic URL replacement.
+- URL verification checks whether a URL resolves; it does not judge document authenticity.
 
 ### Hallucination Risk (v3.0.0)
 
@@ -492,6 +535,7 @@ Tweak → re-run → review reports. Most packs converge in 1–2 calibration ro
 
 ## Release history
 
+- `v3.3.0`: hardened reference verification with final reference set parsing, resumeable external verification, DOI candidate suggestions, and URL verification.
 - `v3.2.0`: integrated hallucination risk and claim-citation triage into readiness gate, added unified evidence pipeline runner, `run_evidence_pipeline.py`.
 - `v3.1.0`: added claim-citation support triage, `claim-citation-triage-report.json`, deterministic triage scoring, and three demo projects.
 - `v3.0.0`: added hallucination risk scoring, `hallucination-risk-report.json`, `high-risk-references.csv`, Chinese-language `UNSUPPORTED` handling, and three demo projects.

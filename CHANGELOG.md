@@ -2,6 +2,15 @@
 
 All notable changes to Thesis Skills are summarized here.
 
+## v3.3.0
+
+- Added a final reference set layer that parses `.aux` and `.bbl` artifacts, reports unused bib entries vs actually rendered bibliography entries, and falls back to TeX citation parsing when compile artifacts are missing.
+- New artifacts: `reports/final-reference-set-report.json`, `reports/final-reference-set-report.csv`, `reports/missing-doi-candidates.json`, `reports/missing-doi-candidates.csv`, `reports/url-verification-report.json`, and `reports/url-verification-flagged.csv`.
+- Hardened `18-verify-references/verify_external_references.py` with `--scope final|cited|all`, `--resume`, `--only-key`, and crash-safe partial report writes.
+- Expanded external mismatch taxonomy with subtitle, author count/order, year, venue, and volume/issue/pages mismatches; added `CONFIRMED_MATCH` and `LIKELY_MATCH_WITH_METADATA_DIFF` statuses.
+- Added deterministic DOI candidate extraction and URL resolution verification for policy / web references.
+- Updated the unified evidence pipeline, public docs, manifest, and package metadata for v3.3.0.
+
 ## v3.2.0
 
 - Integrated V3.0 hallucination risk and V3.1 claim-citation triage into the readiness gate as advisory dimensions.
