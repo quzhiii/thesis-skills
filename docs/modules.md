@@ -19,8 +19,9 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
    · Word feedback ingest              04-word-review-ingest/
 
 3. Check phase
-   · Reference integrity               10-check-references/
-   · Language baseline checks          11-check-language/
+    · Reference integrity               10-check-references/
+   · Final reference set               17-final-reference-set/
+    · Language baseline checks          11-check-language/
    · Format structure checks           12-check-format/
    · Content completeness checks       13-check-content/
    · Deep language screening           14-check-language-deep/
@@ -70,7 +71,8 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Check | `14-check-language-deep/` | `check_language_deep.py` | Flag higher-order language and consistency review items |
 | Check | `15-check-compile/` | `check_compile.py` | Parse existing LaTeX compile logs into structured diagnostics |
 | Gate | `16-check-readiness/` | `check_readiness.py` | Aggregate reports into `PASS / WARN / BLOCK` readiness artifact |
-| Verify (alpha) | `18-verify-references/` | `verify_external_references.py` | Query CrossRef and OpenAlex for each bibliography entry; write `external-verification-report.json` |
+| Check | `17-final-reference-set/` | `build_final_reference_set.py` | Parse `.aux` / `.bbl` or TeX fallback and write `final-reference-set-report.json` plus `final-reference-set-report.csv` |
+| Verify (alpha) | `18-verify-references/` | `verify_external_references.py` | Query CrossRef / OpenAlex / Semantic Scholar for selected bibliography entries; write `external-verification-report.json`, `missing-doi-candidates.json`, and `url-verification-report.json` |
 | Risk (v3.0) | `19-check-hallucination-risk/` | `check_hallucination_risk.py` | Score bibliography entries for hallucination risk; write `hallucination-risk-report.json` and `high-risk-references.csv` |
 | Triage (v3.1) | `20-check-claim-citation/` | `check_claim_citation.py` | Extract citation contexts and triage claim-citation pairs by structural support signals |
 | Defense | `17-defense-pack/` | `generate_outline.py` | Generate thesis outline for defense preparation |
@@ -84,7 +86,7 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Rules | `90-rules/` | `lint_pack.py` | Validate rule-pack structure |
 | Rules | `90-rules/` | `scorecard.py` | Summarize rule-pack completeness |
 | Runner | repository root | `run_check_once.py` | Run the deterministic check pipeline once |
-| Runner | repository root | `run_evidence_pipeline.py` | Orchestrate all four citation evidence layers in sequence |
+| Runner | repository root | `run_evidence_pipeline.py` | Orchestrate final reference set plus all citation evidence layers in sequence |
 | Runner | repository root | `run_fix_cycle.py` | Preview or apply report-driven fix cycles |
 
 ## How to choose a module

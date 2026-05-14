@@ -81,6 +81,40 @@ This report combines CrossRef / OpenAlex / Semantic Scholar candidates and surfa
 
 Run the same command against `examples/citation-integrity-clean/` to see the clean case with the same external verification envelope and fewer review items.
 
+### Final reference set, DOI candidates, and URL verification (v3.3.0)
+
+When `.aux` and `.bbl` files are present, Thesis Skills can determine the final reference set that actually entered the compiled bibliography:
+
+```bash
+python 17-final-reference-set/build_final_reference_set.py \
+  --project-root examples/citation-integrity-broken \
+  --ruleset university-generic
+```
+
+Expected outputs:
+
+- `reports/final-reference-set-report.json`
+- `reports/final-reference-set-report.csv`
+
+Then run external verification in `final` scope:
+
+```bash
+python 18-verify-references/verify_external_references.py \
+  --project-root examples/citation-integrity-broken \
+  --ruleset university-generic \
+  --scope final \
+  --resume
+```
+
+Additional advisory outputs:
+
+- `reports/missing-doi-candidates.json`
+- `reports/missing-doi-candidates.csv`
+- `reports/url-verification-report.json`
+- `reports/url-verification-flagged.csv`
+
+These reports never rewrite `.bib` files. DOI candidates are suggestions only, and URL verification checks reachability, not document authenticity.
+
 ## Hallucination risk demos
 
 The hallucination risk scorer adds a V3.0 evidence layer on top of the V2.0 external verification:
@@ -186,9 +220,9 @@ All references in this demo are Chinese-language and marked `UNSUPPORTED` by V3.
 
 Boundary: the claim-citation triage runner does not use LLMs, does not judge semantic similarity between claims and references, and never auto-rewrites citations.
 
-## Unified Evidence Pipeline (v3.2.0)
+## Unified Evidence Pipeline (v3.3.0)
 
-Run all four citation evidence layers in a single command:
+Run final reference set plus all four citation evidence layers in a single command:
 
 ```bash
 python run_evidence_pipeline.py \
@@ -199,6 +233,7 @@ python run_evidence_pipeline.py \
 
 Expected outputs:
 - `reports/check_references-report.json`
+- `reports/final-reference-set-report.json`
 - `reports/hallucination-risk-report.json`
 - `reports/claim-citation-triage-report.json`
 - `reports/claim-citation-triage.md`
