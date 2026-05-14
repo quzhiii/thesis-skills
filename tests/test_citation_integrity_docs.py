@@ -64,12 +64,12 @@ class CitationIntegrityDocsTest(unittest.TestCase):
         self._assert_contains_all(
             "README.md",
             [
-            "# Thesis Skills v3.2.0",
+            "# Thesis Skills v3.3.0",
             "citation-integrity-report.json",
             "citation-integrity-report.md",
             "citation-issues.csv",
             "Citation Integrity preview",
-            "## What's new in v3.2.0",
+            "## What's new in v3.3.0",
                 "I want to screen AI-generated or suspicious references",
                 "## Release history",
                 "## Updating your local copy",
@@ -80,12 +80,12 @@ class CitationIntegrityDocsTest(unittest.TestCase):
         self._assert_contains_all(
             "README.zh-CN.md",
             [
-            "# Thesis Skills v3.2.0",
+            "# Thesis Skills v3.3.0",
             "citation-integrity-report.json",
             "citation-integrity-report.md",
             "citation-issues.csv",
             "Citation Integrity 预览",
-            "## v3.2.0 有哪些更新",
+            "## v3.3.0 有哪些更新",
                 "我想筛查 AI 生成或可疑的参考文献",
                 "## 历史迭代记录",
                 "## 如何同步后续更新",
@@ -94,12 +94,12 @@ class CitationIntegrityDocsTest(unittest.TestCase):
             ],
         )
 
-    def test_roadmap_positions_v20_as_current_release_line(self) -> None:
+    def test_roadmap_positions_v33_as_current_release_line(self) -> None:
         self._assert_contains_all(
             "docs/roadmap.md",
             [
                 "`v1.0.0` was the public-story stabilization milestone",
-                "`v3.2.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, the V2.0 external metadata verification layer, the V3.0 hallucination risk scoring layer, and the V3.1 claim-citation support triage layer.",
+                "`v3.3.0` is the current documented public release line",
                 "| v1.2.0 | Citation Integrity Markdown/CSV reports, clean demo, and public-example expansion |",
                 "| v2.0.0 | CrossRef / OpenAlex / Semantic Scholar external verification",
             ],
