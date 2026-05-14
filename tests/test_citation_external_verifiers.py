@@ -31,6 +31,10 @@ class CitationExternalVerifierTest(unittest.TestCase):
                 "DOI": "10.1000/example",
                 "published-print": {"date-parts": [[2024]]},
                 "container-title": ["Journal Name"],
+                "volume": "12",
+                "issue": "2",
+                "page": "10-20",
+                "author": [{"given": "Jane", "family": "Smith"}],
             }
         }
         with workspace_tempdir("crossref-cache-") as cache_dir:
@@ -45,6 +49,10 @@ class CitationExternalVerifierTest(unittest.TestCase):
         self.assertEqual(evidence.candidate_count, 1)
         self.assertEqual(evidence.top_candidate["title"], "Example Title")
         self.assertEqual(evidence.top_candidate["year"], 2024)
+        self.assertEqual(evidence.top_candidate["authors"], ["Jane Smith"])
+        self.assertEqual(evidence.top_candidate["volume"], "12")
+        self.assertEqual(evidence.top_candidate["issue"], "2")
+        self.assertEqual(evidence.top_candidate["pages"], "10-20")
         self.assertLessEqual(urlopen.call_args.kwargs["timeout"], 3.0)
 
     def test_crossref_non_json_response_returns_unavailable_evidence(self) -> None:
@@ -114,6 +122,8 @@ class CitationExternalVerifierTest(unittest.TestCase):
             "doi": "https://doi.org/10.1000/openalex",
             "publication_year": 2024,
             "primary_location": {"source": {"display_name": "Open Journal"}},
+            "biblio": {"volume": "8", "issue": "1", "first_page": "4", "last_page": "9"},
+            "authorships": [{"author": {"display_name": "Jane Smith"}}],
         }
         with workspace_tempdir("openalex-cache-") as cache_dir:
             with patch("urllib.request.urlopen", return_value=_response(payload)):
@@ -126,6 +136,10 @@ class CitationExternalVerifierTest(unittest.TestCase):
         self.assertEqual(evidence.query_type, "doi")
         self.assertEqual(evidence.top_candidate["doi"], "10.1000/openalex")
         self.assertEqual(evidence.top_candidate["venue"], "Open Journal")
+        self.assertEqual(evidence.top_candidate["authors"], ["Jane Smith"])
+        self.assertEqual(evidence.top_candidate["volume"], "8")
+        self.assertEqual(evidence.top_candidate["issue"], "1")
+        self.assertEqual(evidence.top_candidate["pages"], "4--9")
 
     def test_openalex_non_json_response_returns_unavailable_evidence(self) -> None:
         with workspace_tempdir("openalex-invalid-cache-") as cache_dir:
@@ -194,6 +208,7 @@ class CitationExternalVerifierTest(unittest.TestCase):
         self.assertEqual(evidence.query_type, "doi")
         self.assertEqual(evidence.top_candidate["doi"], "10.1000/semantic")
         self.assertEqual(evidence.top_candidate["venue"], "Semantic Venue")
+        self.assertEqual(evidence.top_candidate["authors"], ["Jane Smith"])
 
     def test_semantic_scholar_title_lookup_success_when_doi_absent(self) -> None:
         payload = {

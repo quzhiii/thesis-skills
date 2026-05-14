@@ -52,6 +52,12 @@ def _candidate(item: dict[str, object]) -> dict[str, object]:
         candidate["year"] = year
     if venue:
         candidate["venue"] = venue
+    if isinstance(item.get("volume"), str) and item.get("volume"):
+        candidate["volume"] = item["volume"]
+    if isinstance(item.get("issue"), str) and item.get("issue"):
+        candidate["issue"] = item["issue"]
+    if isinstance(item.get("page"), str) and item.get("page"):
+        candidate["pages"] = item["page"]
     authors = item.get("author")
     if isinstance(authors, list):
         names = []

@@ -49,6 +49,20 @@ def _candidate(item: dict[str, object]) -> dict[str, object]:
         candidate["year"] = year
     if venue:
         candidate["venue"] = venue
+    biblio = item.get("biblio")
+    if isinstance(biblio, dict):
+        volume = biblio.get("volume")
+        issue = biblio.get("issue")
+        first_page = biblio.get("first_page")
+        last_page = biblio.get("last_page")
+        if isinstance(volume, str) and volume:
+            candidate["volume"] = volume
+        if isinstance(issue, str) and issue:
+            candidate["issue"] = issue
+        if isinstance(first_page, str) and isinstance(last_page, str) and first_page and last_page:
+            candidate["pages"] = f"{first_page}--{last_page}"
+        elif isinstance(first_page, str) and first_page:
+            candidate["pages"] = first_page
     authorships = item.get("authorships")
     if isinstance(authorships, list):
         names = []
