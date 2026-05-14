@@ -45,6 +45,7 @@ def main() -> int:
     project_root = Path(args.project_root).resolve()
     steps: list[tuple[str, Path]] = [
         ("references", REPO_ROOT / "10-check-references" / "check_references.py"),
+        ("final_reference_set", REPO_ROOT / "17-final-reference-set" / "build_final_reference_set.py"),
     ]
     if not args.skip_external:
         steps.append(

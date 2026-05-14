@@ -18,6 +18,8 @@ class EvidencePipelineTest(unittest.TestCase):
                 base / "project",
                 {
                     "main.tex": "\\documentclass{article}\n\\begin{document}\nA claim \\cite{smith2024}.\n\\end{document}\n",
+                    "main.aux": "\\citation{smith2024}\n\\bibdata{ref/refs}\n\\bibcite{smith2024}{1}\n",
+                    "main.bbl": "\\bibitem{smith2024} Test\n",
                     "ref/refs.bib": "@article{smith2024, title={Test Title}, author={Author}, year={2024}, journal={J}, doi={10.1000/test}}\n",
                     "reports/external-verification-report.json": json.dumps({
                         "module": "citation_external_verification",
@@ -39,11 +41,13 @@ class EvidencePipelineTest(unittest.TestCase):
                 text=True,
             )
             ref_exists = (project / "reports" / "check_references-report.json").exists()
+            final_ref_exists = (project / "reports" / "final-reference-set-report.json").exists()
             risk_exists = (project / "reports" / "hallucination-risk-report.json").exists()
             cc_exists = (project / "reports" / "claim-citation-triage-report.json").exists()
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertTrue(ref_exists)
+        self.assertTrue(final_ref_exists)
         self.assertTrue(risk_exists)
         self.assertTrue(cc_exists)
 
@@ -106,6 +110,7 @@ class EvidencePipelineTest(unittest.TestCase):
             summary = json.loads(result.stdout)
 
         self.assertIn("references", summary)
+        self.assertIn("final_reference_set", summary)
         self.assertIn("hallucination_risk", summary)
         self.assertIn("claim_citation", summary)
 
