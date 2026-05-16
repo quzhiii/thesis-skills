@@ -7,6 +7,7 @@ import re
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.parse import urlparse
 import urllib.request
 
@@ -53,10 +54,13 @@ def _classify_status(http_status: int, original_url: str, final_url: str) -> str
 
 def _request(url: str, method: str, timeout: float) -> tuple[int, str]:
     request = urllib.request.Request(url, method=method, headers={"User-Agent": "thesis-skills/3.3.0"})
-    with urllib.request.urlopen(request, timeout=timeout) as response:
-        status = getattr(response, "status", None)
-        final_url = getattr(response, "url", url)
-        return int(status or 0), str(final_url)
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            status = getattr(response, "status", None)
+            final_url = getattr(response, "url", url)
+            return int(status or 0), str(final_url)
+    except HTTPError as error:
+        return int(getattr(error, "code", 0) or 0), str(getattr(error, "url", url))
 
 
 def verify_url(url: str, timeout: float = 10.0) -> UrlCheckResult:

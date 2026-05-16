@@ -5,6 +5,9 @@ import io
 import json
 import socket
 import unittest
+from email.message import Message
+from urllib.error import HTTPError
+from urllib.request import Request
 from unittest.mock import patch
 
 from core.citation_integrity.models import BibEntry
@@ -30,6 +33,10 @@ class _MockHttpResponse:
         return None
 
 
+def _http_error(url: str, code: int, message: str) -> HTTPError:
+    return HTTPError(url, code, message, Message(), None)
+
+
 class UrlVerifierTest(unittest.TestCase):
     def test_verify_url_ok(self) -> None:
         with patch("urllib.request.urlopen", return_value=_MockHttpResponse("https://example.com/doc", 200)):
@@ -45,6 +52,22 @@ class UrlVerifierTest(unittest.TestCase):
         self.assertEqual(result.status, "URL_NOT_FOUND")
         self.assertEqual(result.http_status, 404)
 
+    def test_verify_url_classifies_http_error_not_found(self) -> None:
+        error = _http_error("https://example.com/missing", 404, "Not Found")
+        with patch("urllib.request.urlopen", side_effect=error):
+            result = verify_url("https://example.com/missing")
+
+        self.assertEqual(result.status, "URL_NOT_FOUND")
+        self.assertEqual(result.http_status, 404)
+
+    def test_verify_url_classifies_http_error_forbidden(self) -> None:
+        error = _http_error("https://example.com/private", 403, "Forbidden")
+        with patch("urllib.request.urlopen", side_effect=error):
+            result = verify_url("https://example.com/private")
+
+        self.assertEqual(result.status, "URL_FORBIDDEN")
+        self.assertEqual(result.http_status, 403)
+
     def test_verify_url_redirected(self) -> None:
         with patch("urllib.request.urlopen", return_value=_MockHttpResponse("https://final.example.com/doc", 200)):
             result = verify_url("https://example.com/doc")
@@ -55,11 +78,27 @@ class UrlVerifierTest(unittest.TestCase):
     def test_verify_url_head_405_falls_back_to_get(self) -> None:
         calls: list[str] = []
 
-        def fake_urlopen(request: object, timeout: float = 10.0) -> _MockHttpResponse:
+        def fake_urlopen(request: Request, timeout: float = 10.0) -> _MockHttpResponse:
             method = request.get_method()
             calls.append(method)
             if method == "HEAD":
                 return _MockHttpResponse("https://example.com/doc", 405)
+            return _MockHttpResponse("https://example.com/doc", 200)
+
+        with patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            result = verify_url("https://example.com/doc")
+
+        self.assertEqual(calls, ["HEAD", "GET"])
+        self.assertEqual(result.status, "URL_OK")
+
+    def test_verify_url_http_error_405_head_falls_back_to_get(self) -> None:
+        calls: list[str] = []
+
+        def fake_urlopen(request: Request, timeout: float = 10.0) -> _MockHttpResponse:
+            method = request.get_method()
+            calls.append(method)
+            if method == "HEAD":
+                raise _http_error("https://example.com/doc", 405, "Method Not Allowed")
             return _MockHttpResponse("https://example.com/doc", 200)
 
         with patch("urllib.request.urlopen", side_effect=fake_urlopen):
