@@ -5,7 +5,7 @@ import json
 import re
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from core.citation_integrity.bib_parser import parse_bib_entries_from_text
@@ -129,7 +129,7 @@ def build_final_reference_set_report(project: ThesisProject) -> dict[str, object
     return {
         "module": "final_reference_set",
         "version": "3.3",
-        "generated_at": datetime.now(UTC).isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "source": source,
         "final_reference_count": len(final_keys),
         "active_bib_sources": sorted(active_bib_sources),

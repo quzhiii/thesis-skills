@@ -3,7 +3,7 @@ from __future__ import annotations
 import csv
 import json
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from core.citation_integrity.models import BibEntry
@@ -104,7 +104,7 @@ def build_doi_candidate_report(
     return {
         "module": "missing_doi_candidates",
         "version": "3.3",
-        "generated_at": datetime.now(UTC).isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "summary": {"candidate_count": len(candidates)},
         "entries": candidates,
     }

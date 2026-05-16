@@ -5,7 +5,7 @@ import json
 import re
 
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.parse import urlparse
@@ -140,7 +140,7 @@ def build_url_verification_report(results: list[UrlCheckResult]) -> dict[str, ob
     return {
         "module": "url_verification",
         "version": "3.3",
-        "generated_at": datetime.now(UTC).isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "summary": summary,
         "entries": [result.to_dict() for result in results],
     }
