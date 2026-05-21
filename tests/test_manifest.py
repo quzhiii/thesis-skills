@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 import json
-import tomllib
+import sys
 import unittest
 from pathlib import Path
+
+if sys.version_info >= (3, 11):
+    import tomllib  # pragma: no cover
+else:
+    tomllib = None  # type: ignore[assignment]
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class ManifestTest(unittest.TestCase):
     def test_manifest_entries_exist_and_versions_match(self) -> None:
+        if tomllib is None:
+            self.skipTest("tomllib requires Python 3.11+")
         manifest = json.loads((ROOT / "skills-manifest.json").read_text(encoding="utf-8"))
         pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
 
