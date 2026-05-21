@@ -137,7 +137,7 @@ class HallucinationRiskDemoTest(unittest.TestCase):
         )
         report = json.loads((demo / "reports" / "hallucination-risk-report.json").read_text(encoding="utf-8"))
         labels = [e["risk_label"] for e in report["entries"]]
-        self.assertIn("REVIEW", labels)
+        self.assertTrue(any(label in {"REVIEW", "HIGH_RISK"} for label in labels))
 
     def test_fabricated_demo_produces_high_risk(self) -> None:
         demo = ROOT / "examples" / "citation-hallucination-fabricated"

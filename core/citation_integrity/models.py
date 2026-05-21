@@ -12,6 +12,15 @@ class CitationOccurrence:
 
 
 @dataclass(frozen=True)
+class CitationWithContext:
+    key: str
+    command: str
+    file: str
+    line: int
+    context: str
+
+
+@dataclass(frozen=True)
 class BibEntry:
     key: str
     entry_type: str

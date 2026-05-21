@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from core.citation_integrity.models import CitationOccurrence
+from core.citation_integrity.models import CitationOccurrence, CitationWithContext
 
 
 _CITATION_COMMANDS = (
@@ -35,3 +35,86 @@ def collect_citations_from_text(text: str, file: str) -> list[CitationOccurrence
         for key in keys:
             occurrences.append(CitationOccurrence(key=key, command=command, file=file, line=line))
     return occurrences
+
+
+def _line_bounds(text: str, pos: int) -> tuple[int, int]:
+    start = text.rfind("\n", 0, pos) + 1
+    end = text.find("\n", pos)
+    if end == -1:
+        end = len(text)
+    return start, end
+
+
+def _is_bare_citation_line(text: str, start: int, end: int) -> bool:
+    line_start, line_end = _line_bounds(text, start)
+    line = text[line_start:line_end].strip()
+    without_citation = (line[: start - line_start] + line[end - line_start :]).strip()
+    return not without_citation.strip(".;, ")
+
+
+def _context_bounds(text: str, start: int, end: int) -> tuple[int, int]:
+    paragraph_start = text.rfind("\n\n", 0, start)
+    if paragraph_start == -1:
+        paragraph_start = 0
+    else:
+        paragraph_start += 2
+
+    paragraph_end = text.find("\n\n", end)
+    if paragraph_end == -1:
+        paragraph_end = len(text)
+
+    sentence_start = paragraph_start
+    for index in range(start - 1, paragraph_start - 1, -1):
+        if text[index] in ".!?":
+            sentence_start = index + 1
+            break
+
+    sentence_end = paragraph_end
+    for index in range(end, paragraph_end):
+        if text[index] in ".!?":
+            sentence_end = index + 1
+            break
+
+    return sentence_start, sentence_end
+
+
+def _strip_latex_commands(text: str) -> str:
+    cleaned = _CITATION_RE.sub(" ", text)
+    cleaned = re.sub(r"\\(?:begin|end)\{[^}]+\}", " ", cleaned)
+    cleaned = re.sub(r"\$([^$]*)\$", r"\1", cleaned)
+    previous = None
+    while previous != cleaned:
+        previous = cleaned
+        cleaned = re.sub(r"\\[A-Za-z]+\*?(?:\[[^\]]*\])*\{([^{}]*)\}", r"\1", cleaned)
+    cleaned = re.sub(r"\\[A-Za-z]+\*?(?:\[[^\]]*\])*(?:\s+)?", " ", cleaned)
+    cleaned = cleaned.replace("{", "").replace("}", "")
+    cleaned = re.sub(r"\s+([.,!?;:])", r"\1", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned
+
+
+def _citation_context(text: str, start: int, end: int) -> str:
+    if _is_bare_citation_line(text, start, end):
+        return ""
+    context_start, context_end = _context_bounds(text, start, end)
+    return _strip_latex_commands(text[context_start:context_end])
+
+
+def extract_citation_contexts(text: str, file: str) -> list[CitationWithContext]:
+    contexts: list[CitationWithContext] = []
+    for match in _CITATION_RE.finditer(text):
+        command = match.group("command")
+        line = _line_of(text, match.start())
+        keys = [item.strip() for item in match.group("keys").split(",") if item.strip()]
+        context = _citation_context(text, match.start(), match.end())
+        for key in keys:
+            contexts.append(
+                CitationWithContext(
+                    key=key,
+                    command=command,
+                    file=file,
+                    line=line,
+                    context=context,
+                )
+            )
+    return contexts

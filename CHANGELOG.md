@@ -2,6 +2,31 @@
 
 All notable changes to Thesis Skills are summarized here.
 
+## v3.3.0
+
+- Added a final reference set layer that parses `.aux` and `.bbl` artifacts, reports unused bib entries vs actually rendered bibliography entries, and falls back to TeX citation parsing when compile artifacts are missing.
+- New artifacts: `reports/final-reference-set-report.json`, `reports/final-reference-set-report.csv`, `reports/missing-doi-candidates.json`, `reports/missing-doi-candidates.csv`, `reports/url-verification-report.json`, and `reports/url-verification-flagged.csv`.
+- Hardened `18-verify-references/verify_external_references.py` with `--scope final|cited|all`, `--resume`, `--only-key`, and crash-safe partial report writes.
+- Expanded external mismatch taxonomy with subtitle, author count/order, year, venue, and volume/issue/pages mismatches; added `CONFIRMED_MATCH` and `LIKELY_MATCH_WITH_METADATA_DIFF` statuses.
+- Added deterministic DOI candidate extraction and URL resolution verification for policy / web references.
+- Updated the unified evidence pipeline, public docs, manifest, and package metadata for v3.3.0.
+
+## v3.2.0
+
+- Integrated V3.0 hallucination risk and V3.1 claim-citation triage into the readiness gate as advisory dimensions.
+- New dimensions in `readiness-report.json`: `hallucination_risk` (advisory) and `claim_citation` (advisory, BLOCK on ORPHANED).
+- New unified runner: `run_evidence_pipeline.py` orchestrates all four citation evidence layers in a single command.
+- Gate now surfaces up to 9 dimensions (was 7), including the full citation evidence stack.
+
+## v3.1.0
+
+- Added claim-citation support triage that extracts citation context from LaTeX source text, pairs each `\cite{}` with its surrounding sentence, and produces triage labels (`WELL_SUPPORTED`, `SUPPORTED`, `WEAK`, `ORPHANED`, `UNVERIFIABLE`) based on deterministic scoring.
+- New CLI: `20-check-claim-citation/check_claim_citation.py` writes `reports/claim-citation-triage-report.json`, `reports/claim-citation-triage.md`, and `reports/claim-citation-triage.csv`.
+- Scoring integrates V3.0 hallucination risk labels, bibliography metadata completeness, citation context quality, grouping analysis, and citation frequency — all without LLM.
+- Exit code 1 when any claim-citation pair is `ORPHANED` (cited key has no bib entry).
+- Three new demo projects: mixed claim-citation patterns, orphaned keys, Chinese references.
+- Updated README, Chinese README, roadmap, modules, examples, manifest, and pyproject.toml for v3.1.
+
 ## v3.0.0
 
 - Added deterministic hallucination risk scoring per bibliography entry based on local metadata and V2.0 external verification evidence.

@@ -1,4 +1,4 @@
-# Thesis Skills v3.0.0
+# Thesis Skills v3.3.0
 
 <div align="center">
 
@@ -13,7 +13,7 @@ Spend your time thinking, not fixing formatting.
 
 [中文文档](README.zh-CN.md) · **English** · [Showcase](https://quzhiii.github.io/thesis-skills)
 
-[What's New](#whats-new-in-v300) · [Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
+[What's New](#whats-new-in-v330) · [Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
 
 </div>
 
@@ -53,17 +53,14 @@ For repetitive finishing work, the expected time savings are concrete:
 
 ---
 
-## What's new in v3.0.0
+## What's new in v3.3.0
 
-- **Hallucination risk scoring** (`hallucination_risk_score`) for each bibliography entry based on local metadata and V2.0 external verification evidence.
-- New CLI: `19-check-hallucination-risk/check_hallucination_risk.py` writes `reports/hallucination-risk-report.json` and `reports/high-risk-references.csv`.
-- Risk labels: `PASS`, `WARN`, `REVIEW`, `HIGH_RISK`, `UNSUPPORTED`. Chinese-language references are marked `UNSUPPORTED`, not `HIGH_RISK`.
-- No LLM usage, no automatic citation rewriting. HIGH_RISK means "manual verification strongly recommended," not "fake."
-- Three new demo projects: field mismatch, fabricated reference, and Chinese-language unsupported case.
-- Local Citation Integrity still handles deterministic reference risks such as missing keys, duplicate entries, DOI/year warnings, and undefined citations.
-- External verification adds **CrossRef**, **OpenAlex**, and **Semantic Scholar** evidence per bibliography entry and writes `reports/external-verification-report.json`.
-- The readiness gate surfaces `external_verification` as an advisory dimension without changing the local `references` blocker logic.
-- If you use AI to draft or expand references, this gives you a fast authenticity screen for suspicious citations while staying inside a bounded, report-first workflow.
+- **Readiness Gate Integration** remains in place from V3.2, and V3.3 extends that evidence stack with harder reference verification.
+- **Reference verification hardening**: new final reference set parsing from `.aux` / `.bbl`, with fallback to TeX citation parsing when compile artifacts are unavailable.
+- New reports: `reports/final-reference-set-report.json`, `reports/final-reference-set-report.csv`, `reports/missing-doi-candidates.json`, `reports/missing-doi-candidates.csv`, `reports/url-verification-report.json`, and `reports/url-verification-flagged.csv`.
+- `18-verify-references/verify_external_references.py` now supports `--scope final|cited|all`, `--resume`, `--only-key`, and crash-safe partial report writing.
+- Expanded external mismatch taxonomy: DOI, title, subtitle, author count/order, year, venue, and volume/issue/pages mismatches.
+- `run_evidence_pipeline.py` now runs the final reference set step before external verification and downstream citation evidence steps.
 
 ---
 
@@ -139,8 +136,14 @@ A real run writes machine-readable artifacts such as:
 - `reports/citation-integrity-report.md`
 - `reports/citation-issues.csv`
 - `reports/external-verification-report.json`
+- `reports/final-reference-set-report.json`
+- `reports/final-reference-set-report.csv`
 - `reports/hallucination-risk-report.json`
 - `reports/high-risk-references.csv`
+- `reports/missing-doi-candidates.json`
+- `reports/missing-doi-candidates.csv`
+- `reports/url-verification-report.json`
+- `reports/url-verification-flagged.csv`
 - `reports/check_language-report.json`
 - `reports/check_format-report.json`
 - `reports/check_content-report.json`
@@ -192,6 +195,41 @@ V2.0 boundaries:
 - No automatic citation rewriting.
 - Network failures degrade to `UNAVAILABLE`, never crash.
 
+### Final Reference Set + DOI / URL checks (v3.3.0)
+
+V3.3 hardens citation evidence by separating three scopes:
+
+- `final`: references that actually entered the compiled bibliography via `.aux` / `.bbl`
+- `cited`: citation keys extracted from TeX source `\cite{}` commands
+- `all`: every entry in active `.bib` files
+
+The final reference set builder writes:
+
+- `reports/final-reference-set-report.json`
+- `reports/final-reference-set-report.csv`
+
+The external verification layer can now resume long runs and write partial results safely:
+
+```bash
+python 18-verify-references/verify_external_references.py \
+  --project-root thesis \
+  --ruleset university-generic \
+  --scope final \
+  --resume
+```
+
+V3.3 also adds advisory follow-up reports:
+
+- `reports/missing-doi-candidates.json` and `.csv` for likely DOI additions
+- `reports/url-verification-report.json` and `reports/url-verification-flagged.csv` for URL resolution checks
+
+Boundaries:
+
+- No LLM usage.
+- No automatic DOI write-back to `.bib` files.
+- No automatic URL replacement.
+- URL verification checks whether a URL resolves; it does not judge document authenticity.
+
 ### Hallucination Risk (v3.0.0)
 
 Score each bibliography entry for hallucination risk using local metadata and optional external verification evidence. The hallucination risk scorer reads `reports/external-verification-report.json` if present and writes `reports/hallucination-risk-report.json` plus `reports/high-risk-references.csv`.
@@ -219,6 +257,34 @@ V3.0 boundaries:
 - No live network calls. Reads `external-verification-report.json` if present.
 - `UNSUPPORTED` means "cannot be automatically judged by enabled evidence," not "safe."
 - `HIGH_RISK` means "manual verification strongly recommended," not "fake."
+
+### Claim-Citation Support Triage (v3.1.0)
+
+Extract the sentence surrounding each `\cite{}` command from `.tex` files and pair it with cited bibliography metadata and V3.0 hallucination risk data. Produce deterministic triage labels that help identify claim-citation pairs that may lack credible structural support — without LLM.
+
+```bash
+python 20-check-claim-citation/check_claim_citation.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+Triage labels:
+
+| Label | Meaning |
+|---|---|
+| `WELL_SUPPORTED` | Cited reference PASS in V3.0, complete metadata, substantive context |
+| `SUPPORTED` | Reference PASS/WARN in V3.0, minor risk signals |
+| `WEAK` | Reference REVIEW in V3.0, or vague context, or incomplete metadata |
+| `ORPHANED` | Citation key not found in bibliography files |
+| `UNVERIFIABLE` | Cited reference UNSUPPORTED in V3.0 (CJK, thesis type) |
+
+V3.1 boundaries:
+
+- No LLM usage. Scoring is deterministic based on V3.0 risk labels, metadata, context quality, grouping, and citation frequency.
+- No semantic similarity between claim text and reference content.
+- No automatic citation rewrite or suggestion.
+- Reads `reports/hallucination-risk-report.json` if present; treats missing it conservatively.
+- Exit code 1 when any pair is `ORPHANED`.
 
 ## Scenarios
 
@@ -469,6 +535,9 @@ Tweak → re-run → review reports. Most packs converge in 1–2 calibration ro
 
 ## Release history
 
+- `v3.3.0`: hardened reference verification with final reference set parsing, resumeable external verification, DOI candidate suggestions, and URL verification.
+- `v3.2.0`: integrated hallucination risk and claim-citation triage into readiness gate, added unified evidence pipeline runner, `run_evidence_pipeline.py`.
+- `v3.1.0`: added claim-citation support triage, `claim-citation-triage-report.json`, deterministic triage scoring, and three demo projects.
 - `v3.0.0`: added hallucination risk scoring, `hallucination-risk-report.json`, `high-risk-references.csv`, Chinese-language `UNSUPPORTED` handling, and three demo projects.
 - `v2.0.0`: added CrossRef / OpenAlex / Semantic Scholar external verification, consensus candidates, and an `external_verification` readiness advisory.
 - `v1.0.0`: stabilized the public workflow story across README, roadmap, site, examples, and code paths.

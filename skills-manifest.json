@@ -1,6 +1,6 @@
 {
   "name": "thesis-skills",
-  "version": "3.0.0",
+  "version": "3.3.0",
   "default_ruleset": "tsinghua-thesis",
   "runner": {
     "check": "run_check_once.py",
@@ -21,13 +21,16 @@
     {"id": "15-check-compile", "entry": "15-check-compile/THESIS_CHECK_COMPILE.md", "type": "checker", "runner": "15-check-compile/check_compile.py"},
     {"id": "16-check-readiness", "entry": "16-check-readiness/THESIS_CHECK_READINESS.md", "type": "checker", "runner": "16-check-readiness/check_readiness.py"},
     {"id": "17-defense-pack", "entry": "17-defense-pack/README.md", "type": "workflow", "runners": ["17-defense-pack/generate_outline.py", "17-defense-pack/generate_chapter_highlights.py", "17-defense-pack/generate_figure_inventory.py", "17-defense-pack/generate_candidate_tables_diagrams.py", "17-defense-pack/generate_talk_prep_notes.py"]},
+    {"id": "17-final-reference-set", "entry": "17-final-reference-set/build_final_reference_set.py", "type": "checker", "runner": "17-final-reference-set/build_final_reference_set.py"},
     {"id": "18-verify-references", "entry": "18-verify-references/THESIS_VERIFY_EXTERNAL_REFERENCES.md", "type": "checker", "runner": "18-verify-references/verify_external_references.py"},
     {"id": "19-check-hallucination-risk", "entry": "19-check-hallucination-risk/THESIS_HALLUCINATION_RISK.md", "type": "checker", "runner": "19-check-hallucination-risk/check_hallucination_risk.py"},
+    {"id": "20-check-claim-citation", "entry": "20-check-claim-citation/THESIS_CLAIM_CITATION.md", "type": "checker", "runner": "20-check-claim-citation/check_claim_citation.py"},
     {"id": "20-fix-references", "entry": "20-fix-references/THESIS_FIX_REFERENCES.md", "type": "fixer"},
     {"id": "21-fix-language-style", "entry": "21-fix-language-style/THESIS_FIX_LANGUAGE_STYLE.md", "type": "fixer"},
     {"id": "22-fix-format-structure", "entry": "22-fix-format-structure/THESIS_FIX_FORMAT_STRUCTURE.md", "type": "fixer"},
     {"id": "24-fix-language-deep", "entry": "24-fix-language-deep/THESIS_FIX_LANGUAGE_DEEP.md", "type": "fixer"},
     {"id": "90-rules", "entry": "90-rules/THESIS_RULE_PACKS.md", "type": "ruleset", "runner": "90-rules/create_pack.py", "draft_runner": "90-rules/create_draft_pack.py", "lint_runner": "90-rules/lint_pack.py"},
+    {"id": "run-evidence-pipeline", "entry": "run_evidence_pipeline.py", "type": "runner"},
     {"id": "99-runner", "entry": "99-runner/README.md", "type": "runner"}
   ]
 }

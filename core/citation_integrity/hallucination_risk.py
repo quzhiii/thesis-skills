@@ -13,6 +13,8 @@ from core.citation_integrity.models import BibEntry
 CJK_CJK_COMPAT_FIELDS = ("title", "journal", "booktitle", "publisher")
 UNSUPPORTED_ENTRY_TYPES = ("mastersthesis", "phdthesis", "misc", "unpublished")
 MATCH_STATUS_SCORES: dict[str, float] = {
+    "CONFIRMED_MATCH": 0.0,
+    "LIKELY_MATCH_WITH_METADATA_DIFF": 0.20,
     "MATCH": 0.0,
     "PASS": 0.0,
     "UNAVAILABLE": 0.25,
@@ -26,6 +28,10 @@ LOW_TITLE_SIMILARITY_BONUS = 0.20
 TITLE_SIMILARITY_THRESHOLD = 0.70
 YEAR_MISMATCH_BONUS = 0.10
 VENUE_MISMATCH_BONUS = 0.10
+SUBTITLE_MISSING_BONUS = 0.05
+AUTHOR_COUNT_MISMATCH_BONUS = 0.10
+AUTHOR_ORDER_MISMATCH_BONUS = 0.10
+VOLUME_ISSUE_PAGES_MISMATCH_BONUS = 0.05
 
 LABEL_THRESHOLDS: list[tuple[float, str]] = [
     (0.25, "PASS"),
@@ -105,6 +111,23 @@ def _check_doi_mismatch(local_doi: str, candidates: list[dict[str, object]]) -> 
     return False
 
 
+def _normalize_text(value: object) -> str:
+    return " ".join(str(value or "").lower().split())
+
+
+def _author_names(value: str) -> list[str]:
+    return [item.strip() for item in re.split(r"\s+and\s+", value) if item.strip()]
+
+
+def _family_name(name: str) -> str:
+    name = name.strip()
+    if not name:
+        return ""
+    if "," in name:
+        return name.split(",", 1)[0].strip().lower()
+    return name.split()[-1].strip().lower()
+
+
 def _best_title_similarity(candidates: list[dict[str, object]]) -> float:
     best = 0.0
     for candidate in candidates:
@@ -130,6 +153,66 @@ def _check_venue_mismatch(local_venue: str, candidates: list[dict[str, object]])
     for candidate in candidates:
         candidate_venue = str(candidate.get("venue", "") or candidate.get("journal", "") or candidate.get("container_title", ""))
         if candidate_venue and candidate_venue.lower().strip() != local_venue.lower().strip():
+            return True
+    return False
+
+
+def _check_subtitle_missing(local_title: str, candidates: list[dict[str, object]]) -> bool:
+    if not local_title:
+        return False
+    local_has_subtitle = ":" in local_title or "—" in local_title
+    for candidate in candidates:
+        candidate_title = str(candidate.get("title", ""))
+        if not candidate_title:
+            continue
+        candidate_has_subtitle = ":" in candidate_title or "—" in candidate_title
+        if local_has_subtitle != candidate_has_subtitle:
+            return True
+    return False
+
+
+def _check_author_count_mismatch(local_author: str, candidates: list[dict[str, object]]) -> bool:
+    local_authors = _author_names(local_author)
+    if not local_authors:
+        return False
+    for candidate in candidates:
+        candidate_authors = candidate.get("authors")
+        if not isinstance(candidate_authors, list):
+            continue
+        names = [str(author) for author in candidate_authors if str(author).strip()]
+        if names and len(names) != len(local_authors):
+            return True
+    return False
+
+
+def _check_author_order_mismatch(local_author: str, candidates: list[dict[str, object]]) -> bool:
+    local_authors = _author_names(local_author)
+    if not local_authors:
+        return False
+    local_first = _family_name(local_authors[0])
+    for candidate in candidates:
+        candidate_authors = candidate.get("authors")
+        if not isinstance(candidate_authors, list):
+            continue
+        names = [str(author) for author in candidate_authors if str(author).strip()]
+        if names and _family_name(names[0]) != local_first:
+            return True
+    return False
+
+
+def _check_volume_issue_pages_mismatch(fields: dict[str, str], candidates: list[dict[str, object]]) -> bool:
+    local_volume = _normalize_text(fields.get("volume", ""))
+    local_issue = _normalize_text(fields.get("number", "") or fields.get("issue", ""))
+    local_pages = _normalize_text(fields.get("pages", ""))
+    for candidate in candidates:
+        candidate_volume = _normalize_text(candidate.get("volume", ""))
+        candidate_issue = _normalize_text(candidate.get("number", "") or candidate.get("issue", ""))
+        candidate_pages = _normalize_text(candidate.get("pages", ""))
+        if local_volume and candidate_volume and local_volume != candidate_volume:
+            return True
+        if local_issue and candidate_issue and local_issue != candidate_issue:
+            return True
+        if local_pages and candidate_pages and local_pages != candidate_pages:
             return True
     return False
 
@@ -224,21 +307,37 @@ def score_hallucination_risk(
 
     if _check_doi_mismatch(entry.fields.get("doi", ""), candidates):
         score += DOI_MISMATCH_BONUS
-        metadata_mismatches.append("doi")
+        metadata_mismatches.append("doi_mismatch")
 
     best_sim = _best_title_similarity(candidates) if candidates else 1.0
     if 0 < best_sim < TITLE_SIMILARITY_THRESHOLD:
         score += LOW_TITLE_SIMILARITY_BONUS
-        metadata_mismatches.append("title")
+        metadata_mismatches.append("title_mismatch")
+
+    if _check_subtitle_missing(entry.fields.get("title", ""), candidates):
+        score += SUBTITLE_MISSING_BONUS
+        metadata_mismatches.append("subtitle_missing")
+
+    if _check_author_count_mismatch(entry.fields.get("author", ""), candidates):
+        score += AUTHOR_COUNT_MISMATCH_BONUS
+        metadata_mismatches.append("author_count_mismatch")
+
+    if _check_author_order_mismatch(entry.fields.get("author", ""), candidates):
+        score += AUTHOR_ORDER_MISMATCH_BONUS
+        metadata_mismatches.append("author_order_mismatch")
 
     if _check_year_mismatch(entry.fields.get("year", ""), candidates):
         score += YEAR_MISMATCH_BONUS
-        metadata_mismatches.append("year")
+        metadata_mismatches.append("year_mismatch")
 
     local_venue = entry.fields.get("journal", "") or entry.fields.get("booktitle", "")
     if _check_venue_mismatch(local_venue, candidates):
         score += VENUE_MISMATCH_BONUS
-        metadata_mismatches.append("venue")
+        metadata_mismatches.append("venue_mismatch")
+
+    if _check_volume_issue_pages_mismatch(entry.fields, candidates):
+        score += VOLUME_ISSUE_PAGES_MISMATCH_BONUS
+        metadata_mismatches.append("volume_issue_pages_mismatch")
 
     score = min(score, 1.0)
     risk_label = risk_label_for_score(score)

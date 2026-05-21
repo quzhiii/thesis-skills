@@ -171,6 +171,81 @@ class CitationExternalReportTest(unittest.TestCase):
         self.assertEqual(report["entries"][0]["match_status"], "REVIEW")
         self.assertEqual(report["status"], "REVIEW")
 
+    def test_report_detects_expanded_metadata_mismatches(self) -> None:
+        entry = BibEntry(
+            key="diff2024",
+            entry_type="article",
+            file="ref/refs.bib",
+            line=1,
+            fields={
+                "title": "Main Title: Subtitle",
+                "author": "Smith, Jane and Doe, John",
+                "year": "2024",
+                "journal": "Local Journal",
+                "volume": "12",
+                "number": "2",
+                "pages": "10--20",
+            },
+            body="",
+        )
+        provider = ExternalProviderEvidence(
+            source="crossref",
+            query_type="title",
+            query="Main Title: Subtitle",
+            used_cache=False,
+            success=True,
+            candidate_count=1,
+            candidates=[
+                {
+                    "title": "Main Title",
+                    "title_similarity": 0.92,
+                    "authors": ["Brown Alice"],
+                    "year": "2023",
+                    "venue": "Remote Journal",
+                    "volume": "13",
+                    "issue": "3",
+                    "pages": "21--30",
+                }
+            ],
+            match_score=0.92,
+        )
+
+        report = build_external_verification_report([entry], evidence_by_key={"diff2024": [provider]})
+
+        top = report["entries"][0]["consensus"]["top_candidate"]
+        mismatches = top["metadata_mismatches"]
+        self.assertIn("subtitle_missing", mismatches)
+        self.assertIn("author_count_mismatch", mismatches)
+        self.assertIn("author_order_mismatch", mismatches)
+        self.assertIn("year_mismatch", mismatches)
+        self.assertIn("venue_mismatch", mismatches)
+        self.assertIn("volume_issue_pages_mismatch", mismatches)
+        self.assertEqual(report["entries"][0]["match_status"], "LIKELY_MATCH_WITH_METADATA_DIFF")
+
+    def test_confirmed_match_status_requires_doi_title_and_year(self) -> None:
+        entry = BibEntry(
+            key="confirmed2024",
+            entry_type="article",
+            file="ref/refs.bib",
+            line=1,
+            fields={"title": "Confirmed Paper", "doi": "10.1000/ok", "year": "2024"},
+            body="",
+        )
+        provider = ExternalProviderEvidence(
+            source="crossref",
+            query_type="doi",
+            query="10.1000/ok",
+            used_cache=False,
+            success=True,
+            candidate_count=1,
+            candidates=[{"title": "Confirmed Paper", "doi": "10.1000/ok", "year": "2024", "doi_exact_match": True, "title_similarity": 1.0}],
+            match_score=1.0,
+        )
+
+        report = build_external_verification_report([entry], evidence_by_key={"confirmed2024": [provider]})
+
+        self.assertEqual(report["entries"][0]["match_status"], "CONFIRMED_MATCH")
+
     def test_provider_failure_yields_unavailable_report_without_throwing(self) -> None:
         entry = BibEntry(
             key="offline2024",

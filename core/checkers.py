@@ -618,7 +618,7 @@ def run_content_check(project: ThesisProject, pack: RulePack, report_path: Path)
         titles.extend(re.findall(r"\\section\{([^}]+)\}", text))
         acronym_candidates |= set(re.findall(r"(?<!\\)\b[A-Z][A-Z0-9-]{1,}\b", text))
     for required in content.get("required_sections", []):
-        if required not in titles:
+        if not any(required in title for title in titles):
             findings.append(
                 Finding(
                     "error",

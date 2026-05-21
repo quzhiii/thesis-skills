@@ -81,6 +81,40 @@ This report combines CrossRef / OpenAlex / Semantic Scholar candidates and surfa
 
 Run the same command against `examples/citation-integrity-clean/` to see the clean case with the same external verification envelope and fewer review items.
 
+### Final reference set, DOI candidates, and URL verification (v3.3.0)
+
+When `.aux` and `.bbl` files are present, Thesis Skills can determine the final reference set that actually entered the compiled bibliography:
+
+```bash
+python 17-final-reference-set/build_final_reference_set.py \
+  --project-root examples/citation-integrity-broken \
+  --ruleset university-generic
+```
+
+Expected outputs:
+
+- `reports/final-reference-set-report.json`
+- `reports/final-reference-set-report.csv`
+
+Then run external verification in `final` scope:
+
+```bash
+python 18-verify-references/verify_external_references.py \
+  --project-root examples/citation-integrity-broken \
+  --ruleset university-generic \
+  --scope final \
+  --resume
+```
+
+Additional advisory outputs:
+
+- `reports/missing-doi-candidates.json`
+- `reports/missing-doi-candidates.csv`
+- `reports/url-verification-report.json`
+- `reports/url-verification-flagged.csv`
+
+These reports never rewrite `.bib` files. DOI candidates are suggestions only, and URL verification checks reachability, not document authenticity.
+
 ## Hallucination risk demos
 
 The hallucination risk scorer adds a V3.0 evidence layer on top of the V2.0 external verification:
@@ -137,6 +171,83 @@ Expected outputs:
 Chinese-language references are marked `UNSUPPORTED` because external databases do not cover them. This is not a failure; it means the reference needs manual verification.
 
 Boundary: the hallucination risk scorer does not use LLMs, does not make live network calls, and never auto-rewrites citations or bibliography entries.
+
+## Claim-citation support triage demos (v3.1.0)
+
+The claim-citation triage runner adds a V3.1 evidence layer on top of the V3.0 hallucination risk scoring:
+
+```text
+examples/claim-citation-mixed/
+examples/claim-citation-orphaned/
+examples/claim-citation-chinese/
+```
+
+### Mixed demo
+
+```bash
+python 20-check-claim-citation/check_claim_citation.py \
+  --project-root examples/claim-citation-mixed \
+  --ruleset university-generic
+```
+
+Expected outputs:
+
+- `reports/claim-citation-triage-report.json`
+- `reports/claim-citation-triage.md`
+- `reports/claim-citation-triage.csv`
+
+This demo produces all five triage labels (`WELL_SUPPORTED`, `SUPPORTED`, `WEAK`, `ORPHANED`, `UNVERIFIABLE`) and exits with code 1 because at least one pair is `ORPHANED`.
+
+### Orphaned demo
+
+```bash
+python 20-check-claim-citation/check_claim_citation.py \
+  --project-root examples/claim-citation-orphaned \
+  --ruleset university-generic
+```
+
+This demo has citation keys with no corresponding bib entries. It produces `ORPHANED` triage entries and exits with code 1.
+
+### Chinese reference demo
+
+```bash
+python 20-check-claim-citation/check_claim_citation.py \
+  --project-root examples/claim-citation-chinese \
+  --ruleset university-generic
+```
+
+All references in this demo are Chinese-language and marked `UNSUPPORTED` by V3.0. The triage labels them all as `UNVERIFIABLE`. The exit code is 0 because `UNVERIFIABLE` is not a blocking signal.
+
+Boundary: the claim-citation triage runner does not use LLMs, does not judge semantic similarity between claims and references, and never auto-rewrites citations.
+
+## Unified Evidence Pipeline (v3.3.0)
+
+Run final reference set plus all four citation evidence layers in a single command:
+
+```bash
+python run_evidence_pipeline.py \
+  --project-root examples/claim-citation-mixed \
+  --ruleset university-generic \
+  --skip-external
+```
+
+Expected outputs:
+- `reports/check_references-report.json`
+- `reports/final-reference-set-report.json`
+- `reports/hallucination-risk-report.json`
+- `reports/claim-citation-triage-report.json`
+- `reports/claim-citation-triage.md`
+- `reports/claim-citation-triage.csv`
+
+After the pipeline completes, run the readiness gate to see all evidence dimensions:
+
+```bash
+python 16-check-readiness/check_readiness.py \
+  --project-root examples/claim-citation-mixed \
+  --ruleset university-generic
+```
+
+The `readiness-report.json` now includes `hallucination_risk` and `claim_citation` dimensions alongside `external_verification`, giving a complete citation health profile in a single artifact.
 
 ## Readiness gate preview
 

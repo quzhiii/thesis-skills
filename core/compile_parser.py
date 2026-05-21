@@ -263,18 +263,32 @@ def parse_compile_log(
             continue
 
         if stripped.startswith("LaTeX Warning:") or stripped.startswith("Package "):
-            findings.append(
-                _make_finding(
-                    severity_map.get("compile_warning_unknown", "warning"),
-                    "COMPILE_WARNING_UNKNOWN",
-                    stripped,
-                    default_file,
-                    line_no,
-                    "Inspect the raw warning and decide whether it needs a source or package change",
-                    category="compile_warning_unknown",
-                    evidence=evidence,
+            if " Info" in stripped or " Info:" in stripped:
+                findings.append(
+                    _make_finding(
+                        "info",
+                        "COMPILE_PACKAGE_INFO",
+                        stripped,
+                        default_file,
+                        line_no,
+                        "Informational message from a package; usually safe to ignore",
+                        category="overfull_box",
+                        evidence=evidence,
+                    )
                 )
-            )
+            else:
+                findings.append(
+                    _make_finding(
+                        severity_map.get("compile_warning_unknown", "warning"),
+                        "COMPILE_WARNING_UNKNOWN",
+                        stripped,
+                        default_file,
+                        line_no,
+                        "Inspect the raw warning and decide whether it needs a source or package change",
+                        category="compile_warning_unknown",
+                        evidence=evidence,
+                    )
+                )
             i += 1
             continue
 

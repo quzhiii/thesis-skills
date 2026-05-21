@@ -1,2 +1,2 @@
 citation_key,risk_label,hallucination_risk_score,title,year,doi,evidence_summary,recommended_action
-lee2023deep,REVIEW,0.65,Deep Learning for Image Classification: A Comprehensive Survey,2023,10.1000/demo-field-mismatch,"mismatches: title, year",Weak or conflicting external evidence found. Manually review the metadata and verify against the original source.
+lee2023deep,REVIEW,0.65,Deep Learning for Image Classification: A Comprehensive Survey,2023,10.1000/demo-field-mismatch,"mismatches: title_mismatch, year_mismatch",Weak or conflicting external evidence found. Manually review the metadata and verify against the original source.
