@@ -10,6 +10,7 @@ from tests.helpers import materialize_project, workspace_tempdir
 
 ROOT = Path(__file__).resolve().parents[1]
 CLI_SCRIPT = ROOT / "20-check-claim-citation" / "check_claim_citation.py"
+HALLUCINATION_SCRIPT = ROOT / "19-check-hallucination-risk" / "check_hallucination_risk.py"
 
 
 class ClaimCitationCLITest(unittest.TestCase):
@@ -128,8 +129,18 @@ if __name__ == "__main__":
 
 
 class ClaimCitationDemoTest(unittest.TestCase):
+    def _run_hallucination_risk(self, demo: Path) -> None:
+        result = subprocess.run(
+            [sys.executable, str(HALLUCINATION_SCRIPT), "--project-root", str(demo), "--ruleset", "university-generic"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+        )
+        self.assertIn(result.returncode, (0, 1), result.stdout + result.stderr)
+
     def test_mixed_demo_produces_all_triage_labels(self) -> None:
         demo = ROOT / "examples" / "claim-citation-mixed"
+        self._run_hallucination_risk(demo)
         result = subprocess.run(
             [sys.executable, str(CLI_SCRIPT), "--project-root", str(demo), "--ruleset", "university-generic"],
             cwd=ROOT,
@@ -145,6 +156,7 @@ class ClaimCitationDemoTest(unittest.TestCase):
 
     def test_orphaned_demo_exits_1_and_has_orphaned_labels(self) -> None:
         demo = ROOT / "examples" / "claim-citation-orphaned"
+        self._run_hallucination_risk(demo)
         result = subprocess.run(
             [sys.executable, str(CLI_SCRIPT), "--project-root", str(demo), "--ruleset", "university-generic"],
             cwd=ROOT,
@@ -159,6 +171,7 @@ class ClaimCitationDemoTest(unittest.TestCase):
 
     def test_chinese_demo_exits_0_all_unverifiable(self) -> None:
         demo = ROOT / "examples" / "claim-citation-chinese"
+        self._run_hallucination_risk(demo)
         result = subprocess.run(
             [sys.executable, str(CLI_SCRIPT), "--project-root", str(demo), "--ruleset", "university-generic"],
             cwd=ROOT,
