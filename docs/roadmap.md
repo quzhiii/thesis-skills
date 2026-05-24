@@ -207,14 +207,13 @@ Showcase work must follow the same bounded philosophy as code: no marketing copy
 
 ## Suggested Execution Order
 
-Given the current repository state, the next work should proceed in this order:
+Given the current repository state at `v3.3.0`, the next work should proceed in this order:
 
-1. align roadmap and release positioning around `v1.2.0`
-2. align English README as the primary public contract
-3. align Chinese README with parity on workflows, commands, limitations, and Citation Integrity outputs
-4. align `site/` pages with the same version and capability story
-5. align `90-rules/` docs with current lint/completeness/schema/scorecard behavior
-6. run grep/link/test verification before treating the cleanup as complete
+1. **Public-surface alignment**: align README, roadmap, examples, and all `site/` pages to `v3.3.0` so version numbers, capability lists, and artifact descriptions match the shipped code
+2. **Evidence-layer documentation consistency**: unify descriptions of all evidence outputs (citation integrity, external verification, hallucination risk, claim-citation triage, final reference set, URL verification, DOI candidates) across README, examples, and site copy
+3. **Rule-pack ecosystem expansion**: add new school/journal rule packs, improve pack lint coverage, and extend scorecard dimensions where the current schema allows
+4. **V4.0 planning**: design the next release line that builds on the `v3.3.0` evidence layer (not LLM-based citation rewriting)
+5. **Cross-release verification**: run grep, link, and test verification before treating any cleanup as complete
 
 ## Cross-Release Acceptance Gates
 

@@ -105,14 +105,14 @@ class CitationIntegrityDocsTest(unittest.TestCase):
             ],
         )
 
-    def test_primary_site_pages_show_v12_version_line(self) -> None:
+    def test_primary_site_pages_show_v33_version_line(self) -> None:
         for relative_path in [
             "site/index.html",
             "site/quickstart.html",
             "site/scenario-entry.html",
         ]:
             with self.subTest(path=relative_path):
-                self._assert_contains_all(relative_path, ["v3.0.0"])
+                self._assert_contains_all(relative_path, ["v3.3.0"])
 
     def test_current_supporting_docs_reference_v12_not_v10_as_current(self) -> None:
         checks = {
@@ -136,8 +136,8 @@ class CitationIntegrityDocsTest(unittest.TestCase):
                 "current v1.2.0 first-class export promise",
             ],
             "site/index-product-redraft.html": [
-                "current v1.2.0 public story",
-                "当前 v1.2.0 公开入口请看正式首页",
+                "current v3.3.0 public story",
+                "当前 v3.3.0 公开入口请看正式首页",
                 "当前版本已包含",
             ],
         }
