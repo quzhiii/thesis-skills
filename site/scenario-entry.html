@@ -223,7 +223,7 @@
                                         </div>
                                         <div class="io-row">
                                             <span class="io-label">输出</span>
-                                            <span class="io-value"><code>reports/run-summary.json</code> + <code>citation-integrity-report.json</code> + <code>citation-integrity-report.md</code> + <code>citation-issues.csv</code> + 其他检查报告 + <code>reports/readiness-report.json</code></span>
+                                            <span class="io-value"><code>reports/run-summary.json</code> + <code>reports/citation-integrity-report.json</code> + <code>reports/citation-integrity-report.md</code> + <code>reports/citation-issues.csv</code> + 其他检查报告 + <code>reports/readiness-report.json</code></span>
                                         </div>
                                     </div>
                                 </div>
@@ -270,10 +270,10 @@
                                     <p class="module-short">用幻觉风险评分快速定位可疑引用。</p>
                                 </div>
                                 <div class="module-copy">
-                                    <p class="module-desc">基于本地元数据和 V2.0 外部验证证据，对每条参考文献输出确定性风险分数。不使用 LLM，不自动改写引用。</p>
+                                    <p class="module-desc">运行 v3.3 evidence pipeline 后，基于最终参考文献集、本地元数据和外部验证证据，对每条参考文献输出确定性风险分数，并生成声明-引用支撑分级。不使用 LLM，不自动改写引用。</p>
                                     <div class="note-grid">
                                         <div class="note-box"><strong>适合时机</strong>怀疑部分参考文献是 AI 生成、来源不清、或 metadata 不可靠。</div>
-                                        <div class="note-box"><strong>你会得到</strong><code>hallucination-risk-report.json</code> 和 <code>high-risk-references.csv</code>，标记 PASS / WARN / REVIEW / HIGH_RISK / UNSUPPORTED。</div>
+                                        <div class="note-box"><strong>你会得到</strong><code>hallucination-risk-report.json</code>、<code>high-risk-references.csv</code>、<code>claim-citation-triage-report.json</code> 和 final reference set / DOI / URL advisory 报告。</div>
                                         <div class="note-box"><strong>不要误用</strong>HIGH_RISK 表示"强烈建议人工核验"，不是"假文献"的最终判定。中文文献标记为 UNSUPPORTED。</div>
                                     </div>
                                     <div class="io-block">
@@ -283,11 +283,11 @@
                                         </div>
                                         <div class="io-row">
                                             <span class="io-label">运行</span>
-                                            <code class="io-value">python 19-check-hallucination-risk/check_hallucination_risk.py --project-root thesis --ruleset university-generic</code>
+                                            <code class="io-value">python run_evidence_pipeline.py --project-root thesis --ruleset university-generic</code>
                                         </div>
                                         <div class="io-row">
                                             <span class="io-label">输出</span>
-                                            <span class="io-value"><code>reports/hallucination-risk-report.json</code> + <code>reports/high-risk-references.csv</code></span>
+                                            <span class="io-value"><code>reports/final-reference-set-report.json</code> + <code>reports/external-verification-report.json</code> + <code>reports/hallucination-risk-report.json</code> + <code>reports/high-risk-references.csv</code> + <code>reports/claim-citation-triage-report.json</code></span>
                                         </div>
                                     </div>
                                 </div>

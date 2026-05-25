@@ -129,32 +129,40 @@ Next actions:
 3. Re-run without --skip-compile before final submission
 ```
 
-A real run writes machine-readable artifacts such as:
+The baseline `run_check_once.py` command writes machine-readable artifacts such as:
 
+- `reports/check_bib_quality-report.json`
 - `reports/check_references-report.json`
 - `reports/citation-integrity-report.json`
 - `reports/citation-integrity-report.md`
 - `reports/citation-issues.csv`
-- `reports/external-verification-report.json`
-- `reports/final-reference-set-report.json`
-- `reports/final-reference-set-report.csv`
-- `reports/hallucination-risk-report.json`
-- `reports/high-risk-references.csv`
-- `reports/missing-doi-candidates.json`
-- `reports/missing-doi-candidates.csv`
-- `reports/url-verification-report.json`
-- `reports/url-verification-flagged.csv`
 - `reports/check_language-report.json`
+- `reports/check_language_deep-report.json`
 - `reports/check_format-report.json`
 - `reports/check_content-report.json`
 - `reports/readiness-report.json`
 - `reports/run-summary.json`
 
+The optional v3.3 evidence pipeline writes the citation evidence artifacts:
+
+- `reports/final-reference-set-report.json`
+- `reports/final-reference-set-report.csv`
+- `reports/external-verification-report.json` when external verification is not skipped
+- `reports/missing-doi-candidates.json` when external verification is not skipped
+- `reports/missing-doi-candidates.csv` when external verification is not skipped
+- `reports/url-verification-report.json` when external verification is not skipped
+- `reports/url-verification-flagged.csv` when external verification is not skipped
+- `reports/hallucination-risk-report.json`
+- `reports/high-risk-references.csv`
+- `reports/claim-citation-triage-report.json`
+- `reports/claim-citation-triage.md`
+- `reports/claim-citation-triage.csv`
+
 Example JSON snippets and demo walkthroughs: [`docs/examples.md`](docs/examples.md).
 
 ### Citation Integrity preview
 
-The current v3.0.0 release line keeps local Citation Integrity as the first layer of pre-submission reference checking:
+The current v3.3.0 release line keeps local Citation Integrity as the first layer of pre-submission reference checking:
 
 ```text
 References: BLOCK

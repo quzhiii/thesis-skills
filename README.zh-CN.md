@@ -129,32 +129,40 @@ Word/LaTeX       格式结构           显式确认修改         阻断       
 3. 最终提交前，去掉 --skip-compile 重新运行
 ```
 
-一次真实运行会生成这些机器可读 artifacts：
+基础的 `run_check_once.py` 命令会生成这些机器可读 artifacts：
 
+- `reports/check_bib_quality-report.json`
 - `reports/check_references-report.json`
 - `reports/citation-integrity-report.json`
 - `reports/citation-integrity-report.md`
 - `reports/citation-issues.csv`
-- `reports/external-verification-report.json`
-- `reports/final-reference-set-report.json`
-- `reports/final-reference-set-report.csv`
-- `reports/hallucination-risk-report.json`
-- `reports/high-risk-references.csv`
-- `reports/missing-doi-candidates.json`
-- `reports/missing-doi-candidates.csv`
-- `reports/url-verification-report.json`
-- `reports/url-verification-flagged.csv`
 - `reports/check_language-report.json`
+- `reports/check_language_deep-report.json`
 - `reports/check_format-report.json`
 - `reports/check_content-report.json`
 - `reports/readiness-report.json`
 - `reports/run-summary.json`
 
+可选的 v3.3 evidence pipeline 会生成这些引用证据 artifacts：
+
+- `reports/final-reference-set-report.json`
+- `reports/final-reference-set-report.csv`
+- `reports/external-verification-report.json`（未跳过外部验证时）
+- `reports/missing-doi-candidates.json`（未跳过外部验证时）
+- `reports/missing-doi-candidates.csv`（未跳过外部验证时）
+- `reports/url-verification-report.json`（未跳过外部验证时）
+- `reports/url-verification-flagged.csv`（未跳过外部验证时）
+- `reports/hallucination-risk-report.json`
+- `reports/high-risk-references.csv`
+- `reports/claim-citation-triage-report.json`
+- `reports/claim-citation-triage.md`
+- `reports/claim-citation-triage.csv`
+
 输出示例和演示流程见 [`docs/examples.md`](docs/examples.md)。
 
 ### Citation Integrity 预览
 
-当前 `v3.0.0` 版本线把本地优先的 Citation Integrity 作为提交前引用检查的第一层：
+当前 `v3.3.0` 版本线把本地优先的 Citation Integrity 作为提交前引用检查的第一层：
 
 ```text
 References: BLOCK
@@ -164,7 +172,7 @@ References: BLOCK
 - 本地编译日志中的 undefined citation 警告
 ```
 
-边界：当前 Citation Integrity 只检查本地引用完整性，不会联网查询外部数据库，也还不能识别幻觉引用，更不会自动插入或重写参考文献。
+边界：当前 Citation Integrity 只检查本地引用完整性，不会联网查询外部数据库，也不会自动插入或重写参考文献。外部验证、幻觉风险评分和声明-引用支撑分级是后续独立证据层。
 
 ### 外部引用验证（v2.0.0）
 

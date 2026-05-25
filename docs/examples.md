@@ -170,7 +170,7 @@ Expected outputs:
 
 Chinese-language references are marked `UNSUPPORTED` because external databases do not cover them. This is not a failure; it means the reference needs manual verification.
 
-Boundary: the hallucination risk scorer does not use LLMs, does not make live network calls, and never auto-rewrites citations or bibliography entries.
+Boundary: the hallucination risk scorer does not use LLMs and never auto-rewrites citations or bibliography entries. It reads `reports/external-verification-report.json` if present; otherwise it scores from local metadata only.
 
 ## Claim-citation support triage demos (v3.1.0)
 
