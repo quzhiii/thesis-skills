@@ -127,30 +127,78 @@ All listed workflow families remain part of the current `v3.3.0` public contract
 | v3.2.0 | Readiness gate integration (hallucination risk + claim-citation dimensions), unified evidence pipeline runner `run_evidence_pipeline.py` |
 | v3.3.0 | Final reference set, resumeable external verification, DOI candidates, URL verification, and evidence pipeline hardening |
 
-## Current release-line focus
+## Post-v3.3 Product Roadmap
 
-The current public alignment work should target `v3.3.0` consistency:
+`v3.3.0` is the current product baseline, not a stepping stone that forces the next feature to become `v4.0.0` or `v5.0.0`.
 
-1. README, Chinese README, roadmap, examples, and site pages should present final reference set, hallucination risk scoring, claim-citation triage, and readiness gate integration as bounded deterministic workflows.
-2. Citation Integrity, final reference set, external verification, hallucination risk, claim-citation triage, and readiness gate outputs must be described consistently across docs and examples:
-   - `reports/check_references-report.json`
-   - `reports/citation-integrity-report.json`
-   - `reports/citation-integrity-report.md`
-   - `reports/citation-issues.csv`
-   - `reports/final-reference-set-report.json`
-   - `reports/final-reference-set-report.csv`
-   - `reports/external-verification-report.json`
-   - `reports/hallucination-risk-report.json`
-   - `reports/high-risk-references.csv`
-   - `reports/missing-doi-candidates.json`
-   - `reports/missing-doi-candidates.csv`
-   - `reports/url-verification-report.json`
-   - `reports/url-verification-flagged.csv`
-   - `reports/claim-citation-triage-report.json`
-   - `reports/claim-citation-triage.md`
-   - `reports/claim-citation-triage.csv`
-3. Public docs should distinguish local deterministic References blockers from final reference set evidence, external metadata evidence, hallucination risk scores, and claim-citation triage signals.
-4. V4.0 should build on this evidence layer, not LLM-based citation rewriting.
+Future work should be organized as product tracks. Reserve a new major version only when the public contract changes in a large way: a new user workflow, a new artifact family, a new distribution model, or a capability that materially changes user expectations. Smaller improvements should stay in the current release line or become minor/patch releases.
+
+### Track A: Citation Evidence Line
+
+The citation integrity line remains the highest-value product path. The shipped stack is:
+
+- local Citation Integrity: `reports/check_references-report.json`, `reports/citation-integrity-report.json`, `reports/citation-integrity-report.md`, `reports/citation-issues.csv`
+- final reference set: `reports/final-reference-set-report.json`, `reports/final-reference-set-report.csv`
+- external metadata evidence: `reports/external-verification-report.json`, `external_verification` readiness advisory, CrossRef / OpenAlex / Semantic Scholar evidence
+- DOI candidates: `reports/missing-doi-candidates.json`, `reports/missing-doi-candidates.csv`
+- URL verification: `reports/url-verification-report.json`, `reports/url-verification-flagged.csv`
+- V3.0 hallucination risk scoring: `reports/hallucination-risk-report.json`, `reports/high-risk-references.csv`
+- Claim-citation support triage: `20-check-claim-citation/check_claim_citation.py`, `reports/claim-citation-triage-report.json`, `reports/claim-citation-triage.md`, `reports/claim-citation-triage.csv`
+- unified orchestration: `run_evidence_pipeline.py`
+
+The next citation work should deepen **claim-citation support review** without claiming automatic truth judgment:
+
+- improve claim extraction and citation-cluster grouping
+- use bibliography metadata, hallucination risk labels, and optional abstract/keyword evidence as explicit signals
+- flag likely topic mismatch, overclaim, outdated support, weak support, orphaned citation, and citation-needed cases
+- keep every finding conservative: "needs manual review", not "this is false"
+- keep outputs report-first and human-confirmed; no automatic citation rewrite and no automatic bibliography insertion
+
+This is a major-version candidate only if it introduces a materially new public workflow or output contract. Otherwise it should be treated as the next incremental citation-evidence improvement.
+
+### Track B: Candidate Reference Support
+
+Candidate reference support is a later product track, not the immediate next release promise.
+
+The safe order is:
+
+1. recommend from the user's existing BibTeX / Zotero library first
+2. use seed papers and external scholarly databases second
+3. deduplicate candidates against the current bibliography
+4. explain why a candidate may support a claim
+5. require explicit user confirmation before anything enters `.tex` or `.bib`
+
+The repository must not generate fake references or treat LLM output as a source of bibliographic truth. If this track ships, its artifact should be candidate-oriented, for example `candidate-references.json`, not an automatic patch.
+
+### Track C: Rule-Pack And Packaging Ecosystem
+
+Rule packs are the distribution layer for schools, journals, and service workflows. The next improvements should make packs easier to trust and hand off:
+
+- add more concrete school/journal packs only when their assumptions are documented
+- improve pack lint coverage and completeness checks
+- extend scorecard dimensions where the existing schema allows
+- define a versioned export bundle for sharing rule packs outside a local checkout
+- keep policy in rule packs, not hard-coded into checkers
+
+### Track D: Productized Evidence Handoff
+
+The evidence layer is now broad enough to package as a review deliverable:
+
+- citation health packet for AI-generated or suspicious references
+- pre-submission evidence packet for advisor / lab / service handoff
+- clean/broken demos that non-technical users can inspect without reading module internals
+- static site examples that show real artifacts and boundaries, not marketing claims
+
+This track is commercializable before any candidate-reference feature exists. It should remain report-first and bounded.
+
+### Track E: Public Surface And Verification Discipline
+
+Every roadmap item must keep the public surface aligned with shipped behavior:
+
+- README, Chinese README, roadmap, examples, and site pages should describe the same workflows, artifact names, and boundaries
+- public docs should distinguish local deterministic References blockers from final reference set evidence, external metadata evidence, hallucination risk scores, and claim-citation triage signals
+- tests should cover the workflow boundary being described
+- links, commands, and version strings should be checked before any release is considered complete
 
 ## V1.0 Stabilization Scope
 
@@ -199,21 +247,22 @@ Showcase work must follow the same bounded philosophy as code: no marketing copy
 
 | Track | User Value | Strategic Value | Risk | Priority |
 |---|---|---|---|---|
-| Public-story consistency | High | High | Low-Medium | P0 |
-| Bilingual README parity | High | High | Low | P0 |
-| Site/README/roadmap alignment | High | High | Low | P0 |
-| Rule-pack docs present-tense cleanup | Medium | High | Low | P1 |
-| Link and command integrity sweep | Medium | High | Low | P1 |
+| Citation support review depth | High | High | Medium | P0 |
+| Productized evidence handoff | High | High | Low-Medium | P0 |
+| Public-surface / docs / examples consistency | High | High | Low | P0 |
+| Rule-pack and packaging ecosystem | Medium | High | Low-Medium | P1 |
+| Candidate reference support | High | Medium-High | High | P2 |
 
 ## Suggested Execution Order
 
 Given the current repository state at `v3.3.0`, the next work should proceed in this order:
 
-1. **Public-surface alignment**: align README, roadmap, examples, and all `site/` pages to `v3.3.0` so version numbers, capability lists, and artifact descriptions match the shipped code
-2. **Evidence-layer documentation consistency**: unify descriptions of all evidence outputs (citation integrity, external verification, hallucination risk, claim-citation triage, final reference set, URL verification, DOI candidates) across README, examples, and site copy
-3. **Rule-pack ecosystem expansion**: add new school/journal rule packs, improve pack lint coverage, and extend scorecard dimensions where the current schema allows
-4. **V4.0 planning**: design the next release line that builds on the `v3.3.0` evidence layer (not LLM-based citation rewriting)
-5. **Cross-release verification**: run grep, link, and test verification before treating any cleanup as complete
+1. **Lock the post-v3.3 roadmap**: keep `docs/roadmap.md` aligned with the product direction above and avoid assigning `v4.0` / `v5.0` labels until a true major iteration is chosen.
+2. **Deepen citation support review**: improve claim-citation support review using explicit evidence signals while preserving report-first, human-confirmed behavior.
+3. **Package evidence handoff**: turn existing outputs into clearer citation health packets and pre-submission evidence packets for advisor / lab / service workflows.
+4. **Harden rule-pack packaging**: improve pack lint, completeness, scorecard, and export-bundle workflows so packs can be shared safely.
+5. **Evaluate candidate reference support later**: only start recommendation work after the support-review and handoff tracks are stable.
+6. **Run cross-release verification**: grep, link, command, and test verification remain mandatory before treating any roadmap item as complete.
 
 ## Cross-Release Acceptance Gates
 
@@ -230,3 +279,4 @@ Every release is only complete when:
 
 - `docs/plans/2026-04-27-post-sync-next-stage-plan.md` — internal handoff that identified `v1.0.0` as the coherence/stabilization gate
 - `docs/plans/thesis-skills-roadmap-v2.md` — historical strategic roadmap after the public `v0.7.0` baseline
+- `docs/plans/thesis-skills-citation-integrity-roadmap.md` — historical citation-integrity product path; future work should absorb its support-review and candidate-reference ideas without assigning major-version labels prematurely
