@@ -126,6 +126,15 @@ def _metadata_overlap(context: str, bib_entry: BibEntry | None) -> dict[str, obj
     }
 
 
+def _append_unique(entry: dict[str, object], key: str, value: str) -> None:
+    existing = entry.get(key)
+    if not isinstance(existing, list):
+        existing = []
+        entry[key] = existing
+    if value not in existing:
+        existing.append(value)
+
+
 def _support_review(
     label: str,
     hallucination_label: str | None,
@@ -194,6 +203,7 @@ def triage_claim_citation(
     hallucination_entry: dict[str, object] | None,
     citation_frequency: int,
     group_size: int = 1,
+    cluster_keys: list[str] | None = None,
 ) -> dict[str, object]:
     hallucination_label = None
     hallucination_score_val = None
@@ -210,6 +220,7 @@ def triage_claim_citation(
             None,
             citation_frequency,
             group_size,
+            cluster_keys,
         )
 
     score = 0.0
@@ -249,6 +260,7 @@ def triage_claim_citation(
         hallucination_score_val,
         citation_frequency,
         group_size,
+        cluster_keys,
     )
 
 
@@ -261,6 +273,7 @@ def _build_triage_result(
     hallucination_score_val: float | None,
     citation_frequency: int,
     group_size: int,
+    cluster_keys: list[str] | None = None,
 ) -> dict[str, object]:
     reference_metadata: dict[str, str] = {}
     has_complete_metadata = False
@@ -272,6 +285,8 @@ def _build_triage_result(
 
     claim_type = _claim_type(context.context)
     metadata_overlap = _metadata_overlap(context.context, bib_entry)
+    normalized_cluster_keys = cluster_keys or [context.key]
+    cluster_size = len(normalized_cluster_keys)
     support_review_label, support_review_reason, support_signals, risk_signals, next_actions = _support_review(
         label,
         hallucination_label,
@@ -295,18 +310,96 @@ def _build_triage_result(
         "reference_metadata": reference_metadata,
         "hallucination_risk_label": hallucination_label,
         "citation_frequency": citation_frequency,
+        "cluster_size": cluster_size,
+        "cluster_keys": normalized_cluster_keys,
+        "cluster_risk_summary": [],
+        "cluster_review_reason": "",
+        "cluster_has_high_risk_reference": False,
+        "cluster_has_orphaned_reference": False,
+        "cluster_has_weak_reference": False,
         "support_signals": support_signals,
         "risk_signals": risk_signals,
         "evidence": {
             "has_complete_metadata": has_complete_metadata,
             "has_claim_context": bool(context.context.strip()),
-            "is_grouped_citation": group_size > 1,
+            "is_grouped_citation": cluster_size > 1,
             "group_size": group_size,
+            "cluster_size": cluster_size,
+            "cluster_keys": normalized_cluster_keys,
+            "cluster_risk_summary": [],
+            "cluster_has_high_risk_reference": False,
+            "cluster_has_orphaned_reference": False,
+            "cluster_has_weak_reference": False,
             **metadata_overlap,
         },
         "recommended_action": _recommended_action(label, hallucination_label),
         "next_actions": next_actions,
     }
+
+
+def _cluster_group_key(entry: dict[str, object]) -> tuple[str, str, int]:
+    return (
+        str(entry.get("file", "")),
+        str(entry.get("citation_command", "")),
+        int(entry.get("line") or 0),
+    )
+
+
+def _annotate_cluster_review(entries: list[dict[str, object]]) -> list[dict[str, object]]:
+    by_cluster: dict[tuple[str, str, int], list[dict[str, object]]] = {}
+    for entry in entries:
+        by_cluster.setdefault(_cluster_group_key(entry), []).append(entry)
+
+    for group in by_cluster.values():
+        cluster_keys = [str(entry.get("citation_key", "")) for entry in group]
+        is_cluster = len(cluster_keys) > 1
+        has_high_risk = any(entry.get("hallucination_risk_label") == "HIGH_RISK" for entry in group)
+        has_orphaned = any(entry.get("triage_label") == "ORPHANED" for entry in group)
+        has_weak = any(entry.get("triage_label") == "WEAK" for entry in group)
+
+        risk_summary: list[str] = []
+        if has_high_risk:
+            risk_summary.append("high_risk_reference")
+        if has_orphaned:
+            risk_summary.append("orphaned_reference")
+        if has_weak:
+            risk_summary.append("weak_reference")
+
+        if is_cluster and risk_summary:
+            reason = "This citation appears in a grouped cluster with risk signals; review the grouped citations together."
+        elif is_cluster:
+            reason = "This citation appears in a grouped cluster with no cluster-level risk flags."
+        else:
+            reason = ""
+
+        for entry in group:
+            entry["cluster_size"] = len(cluster_keys)
+            entry["cluster_keys"] = cluster_keys
+            entry["cluster_risk_summary"] = risk_summary
+            entry["cluster_review_reason"] = reason
+            entry["cluster_has_high_risk_reference"] = has_high_risk
+            entry["cluster_has_orphaned_reference"] = has_orphaned
+            entry["cluster_has_weak_reference"] = has_weak
+            evidence = entry.get("evidence")
+            if isinstance(evidence, dict):
+                evidence["is_grouped_citation"] = is_cluster
+                evidence["cluster_size"] = len(cluster_keys)
+                evidence["cluster_keys"] = cluster_keys
+                evidence["cluster_risk_summary"] = risk_summary
+                evidence["cluster_has_high_risk_reference"] = has_high_risk
+                evidence["cluster_has_orphaned_reference"] = has_orphaned
+                evidence["cluster_has_weak_reference"] = has_weak
+            if is_cluster:
+                _append_unique(entry, "support_signals", "grouped_citation_cluster")
+            if is_cluster and risk_summary:
+                _append_unique(entry, "risk_signals", "mixed_cluster_risk")
+                for risk in risk_summary:
+                    _append_unique(entry, "risk_signals", f"cluster_{risk}")
+                _append_unique(entry, "next_actions", "Review this citation cluster as a group because at least one grouped citation has risk signals.")
+                if entry.get("support_review_label") not in {"ORPHANED", "UNVERIFIABLE", "NEEDS_MANUAL_REVIEW"}:
+                    entry["support_review_label"] = "ADEQUATE_REVIEW"
+                    entry["support_review_reason"] = reason
+    return entries
 
 
 def _build_entries(
@@ -334,18 +427,21 @@ def _build_entries(
         freq[ctx.key] = freq.get(ctx.key, 0) + 1
 
     group_counts: dict[tuple[str, str, int], int] = {}
+    group_keys: dict[tuple[str, str, int], list[str]] = {}
     for ctx in contexts:
         key = (ctx.file, ctx.command, ctx.line)
         group_counts[key] = group_counts.get(key, 0) + 1
+        group_keys.setdefault(key, []).append(ctx.key)
 
     results: list[dict[str, object]] = []
     for ctx in contexts:
         bib_entry = bib_by_key.get(ctx.key)
         risk_entry = risk_by_key.get(ctx.key)
         f = freq.get(ctx.key, 0)
-        gs = group_counts.get((ctx.file, ctx.command, ctx.line), 1)
-        results.append(triage_claim_citation(ctx, bib_entry, risk_entry, f, gs))
-    return results
+        group_key = (ctx.file, ctx.command, ctx.line)
+        gs = group_counts.get(group_key, 1)
+        results.append(triage_claim_citation(ctx, bib_entry, risk_entry, f, gs, group_keys.get(group_key)))
+    return _annotate_cluster_review(results)
 
 
 def _compute_report_status(entries: list[dict[str, object]]) -> str:
@@ -482,10 +578,16 @@ def render_claim_citation_markdown(report: dict[str, object]) -> str:
             risk = entry.get("hallucination_risk_label", "")
             review = entry.get("support_review_label", "")
             reason = entry.get("support_review_reason", "")
+            cluster_keys = entry.get("cluster_keys")
+            cluster_reason = entry.get("cluster_review_reason", "")
             action = entry.get("recommended_action", "")
             lines.append(f"- `{key}` {file}:{line_num} (score={score}, risk={risk}, review={review})")
             if reason:
                 lines.append(f"  - {reason}")
+            if isinstance(cluster_keys, list) and len(cluster_keys) > 1:
+                lines.append(f"  - Cluster: {', '.join(str(k) for k in cluster_keys)}")
+            if cluster_reason:
+                lines.append(f"  - {cluster_reason}")
             if claim:
                 lines.append(f"  > {claim}")
             if action:
@@ -512,6 +614,10 @@ _CSV_FIELDNAMES = [
     "line",
     "hallucination_risk_label",
     "citation_frequency",
+    "cluster_size",
+    "cluster_keys",
+    "cluster_risk_summary",
+    "cluster_review_reason",
     "support_signals",
     "risk_signals",
     "recommended_action",
@@ -529,7 +635,7 @@ def write_claim_citation_report_csv(report: dict[str, object], output: str | Pat
         writer.writeheader()
         for entry in sorted(non_pass, key=lambda e: (str(e.get("file", "")), int(e.get("line") or 0))):
             row = {key: entry.get(key, "") for key in _CSV_FIELDNAMES}
-            for key in ("support_signals", "risk_signals", "next_actions"):
+            for key in ("cluster_keys", "cluster_risk_summary", "support_signals", "risk_signals", "next_actions"):
                 value = row.get(key)
                 if isinstance(value, list):
                     row[key] = "; ".join(str(item) for item in value)

@@ -325,7 +325,7 @@ python 20-check-claim-citation/check_claim_citation.py \
   --ruleset university-generic
 ```
 
-它会输出 `reports/claim-citation-triage-report.json`，对声明-引用支撑分级做确定性分层。报告保留原有 `triage_label`，并额外给出 `claim_type`、`support_review_label`、`support_review_reason`、`support_signals`、`risk_signals` 和 `next_actions`，帮助人工判断下一步该核验什么；这些字段不等同于最终真伪判断。
+它会输出 `reports/claim-citation-triage-report.json`，对声明-引用支撑分级做确定性分层。报告保留原有 `triage_label`，并额外给出 `claim_type`、`support_review_label`、`support_review_reason`、`support_signals`、`risk_signals`、`cluster_keys`、`cluster_risk_summary` 和 `next_actions`，帮助人工判断单条引用或成组引用下一步该核验什么；这些字段不等同于最终真伪判断。
 
 如果你想先看外部元数据层面的风险分值，可先运行 `19-check-hallucination-risk/check_hallucination_risk.py`，查看每条文献的 `hallucination_risk_score`。
 

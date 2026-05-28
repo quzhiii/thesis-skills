@@ -188,6 +188,31 @@ class ClaimCitationTriageTest(unittest.TestCase):
         self.assertEqual(report["summary"]["unique_references_never_cited"], 1)
         self.assertEqual(report["uncited_references"][0]["citation_key"], "unused2023")
 
+    def test_grouped_citation_reports_cluster_keys_and_mixed_risk(self) -> None:
+        from core.citation_integrity.claim_citation import build_claim_citation_report
+
+        contexts = [
+            self._context("supported2024", "Multiple studies provide evidence for this hypothesis."),
+            self._context("weak2024", "Multiple studies provide evidence for this hypothesis."),
+        ]
+        entries = [self._entry("supported2024"), self._entry("weak2024")]
+        hallucination_report = {
+            "entries": [
+                self._risk("supported2024", "PASS"),
+                self._risk("weak2024", "HIGH_RISK"),
+            ]
+        }
+
+        report = build_claim_citation_report(contexts, entries, hallucination_report)
+        by_key = {entry["citation_key"]: entry for entry in report["entries"]}
+
+        self.assertEqual(by_key["supported2024"]["cluster_size"], 2)
+        self.assertEqual(by_key["supported2024"]["cluster_keys"], ["supported2024", "weak2024"])
+        self.assertTrue(by_key["supported2024"]["cluster_has_high_risk_reference"])
+        self.assertIn("high_risk_reference", by_key["supported2024"]["cluster_risk_summary"])
+        self.assertIn("mixed_cluster_risk", by_key["supported2024"]["risk_signals"])
+        self.assertEqual(by_key["weak2024"]["support_review_label"], "NEEDS_MANUAL_REVIEW")
+
 
 class ClaimCitationReportWritersTest(unittest.TestCase):
     def _report(self) -> dict[str, object]:
@@ -235,6 +260,24 @@ class ClaimCitationReportWritersTest(unittest.TestCase):
         self.assertIn("WEAK", text)
         self.assertIn("review=", text)
 
+    def test_markdown_report_includes_cluster_explanation(self) -> None:
+        from core.citation_integrity.claim_citation import build_claim_citation_report, render_claim_citation_markdown
+
+        contexts = [
+            CitationWithContext(key="ok2024", command="cite", file="main.tex", line=1, context="Multiple studies provide evidence."),
+            CitationWithContext(key="weak2024", command="cite", file="main.tex", line=1, context="Multiple studies provide evidence."),
+        ]
+        entries = [
+            BibEntry(key="ok2024", entry_type="article", file="ref/refs.bib", line=1, fields={"title": "Evidence", "author": "A", "year": "2024"}, body=""),
+            BibEntry(key="weak2024", entry_type="article", file="ref/refs.bib", line=2, fields={"title": "Weak", "author": "B", "year": "2024"}, body=""),
+        ]
+        hallucination = {"entries": [{"citation_key": "ok2024", "risk_label": "PASS"}, {"citation_key": "weak2024", "risk_label": "HIGH_RISK"}]}
+
+        text = render_claim_citation_markdown(build_claim_citation_report(contexts, entries, hallucination))
+
+        self.assertIn("Cluster: ok2024, weak2024", text)
+        self.assertIn("review the grouped citations together", text)
+
     def test_write_csv_report_excludes_well_supported_by_default(self) -> None:
         from core.citation_integrity.claim_citation import write_claim_citation_report_csv
 
@@ -274,6 +317,10 @@ class ClaimCitationReportWritersTest(unittest.TestCase):
                 "line",
                 "hallucination_risk_label",
                 "citation_frequency",
+                "cluster_size",
+                "cluster_keys",
+                "cluster_risk_summary",
+                "cluster_review_reason",
                 "support_signals",
                 "risk_signals",
                 "recommended_action",
