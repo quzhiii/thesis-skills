@@ -198,7 +198,7 @@ Expected outputs:
 
 This demo produces all five triage labels (`WELL_SUPPORTED`, `SUPPORTED`, `WEAK`, `ORPHANED`, `UNVERIFIABLE`) and exits with code 1 because at least one pair is `ORPHANED`.
 
-The JSON report also includes support-review enrichment fields such as `claim_type`, `support_review_label`, `support_review_reason`, `support_signals`, `risk_signals`, `cluster_keys`, `cluster_risk_summary`, and `next_actions`. These fields are advisory explanations for manual review; the original `triage_label` remains backward-compatible. Reports may also include `citation_needed_candidates` for uncited high-assertion sentences; these candidates do not change the CLI exit code.
+The JSON report also includes support-review enrichment fields such as `claim_type`, `support_review_label`, `support_review_reason`, `support_signals`, `risk_signals`, `cluster_keys`, `cluster_risk_summary`, and `next_actions`. These fields are advisory explanations for manual review; the original `triage_label` remains backward-compatible. When available, `.bib` title, abstract, and keywords are used as weak local lexical evidence through token-overlap fields. Reports may also include `citation_needed_candidates` for uncited high-assertion sentences; these candidates do not change the CLI exit code.
 
 ### Orphaned demo
 

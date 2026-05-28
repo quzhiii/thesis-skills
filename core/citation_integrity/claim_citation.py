@@ -112,17 +112,54 @@ def _tokens(text: str) -> set[str]:
 
 
 def _metadata_overlap(context: str, bib_entry: BibEntry | None) -> dict[str, object]:
+    empty = {
+        "title_token_overlap": 0.0,
+        "abstract_token_overlap": 0.0,
+        "keyword_token_overlap": 0.0,
+        "overlap_tokens": [],
+        "metadata_overlap": {
+            "title_token_overlap": 0.0,
+            "abstract_token_overlap": 0.0,
+            "keyword_token_overlap": 0.0,
+            "overlap_tokens": {
+                "title": [],
+                "abstract": [],
+                "keywords": [],
+            },
+        },
+    }
     if bib_entry is None:
-        return {"title_token_overlap": 0.0, "overlap_tokens": []}
+        return empty
     context_tokens = _tokens(context)
-    title_tokens = _tokens(bib_entry.fields.get("title", ""))
-    if not context_tokens or not title_tokens:
-        return {"title_token_overlap": 0.0, "overlap_tokens": []}
-    overlap = sorted(context_tokens & title_tokens)
-    denominator = max(1, len(context_tokens | title_tokens))
+    if not context_tokens:
+        return empty
+
+    def overlap_for(field: str) -> tuple[float, list[str]]:
+        field_tokens = _tokens(bib_entry.fields.get(field, ""))
+        if not field_tokens:
+            return 0.0, []
+        overlap = sorted(context_tokens & field_tokens)
+        denominator = max(1, len(context_tokens | field_tokens))
+        return round(len(overlap) / denominator, 4), overlap
+
+    title_score, title_overlap = overlap_for("title")
+    abstract_score, abstract_overlap = overlap_for("abstract")
+    keyword_score, keyword_overlap = overlap_for("keywords")
     return {
-        "title_token_overlap": round(len(overlap) / denominator, 4),
-        "overlap_tokens": overlap,
+        "title_token_overlap": title_score,
+        "abstract_token_overlap": abstract_score,
+        "keyword_token_overlap": keyword_score,
+        "overlap_tokens": title_overlap,
+        "metadata_overlap": {
+            "title_token_overlap": title_score,
+            "abstract_token_overlap": abstract_score,
+            "keyword_token_overlap": keyword_score,
+            "overlap_tokens": {
+                "title": title_overlap,
+                "abstract": abstract_overlap,
+                "keywords": keyword_overlap,
+            },
+        },
     }
 
 
@@ -166,12 +203,18 @@ def _support_review(
     elif hallucination_label is None:
         risk_signals.append("missing_hallucination_evidence")
 
-    overlap_score = float(metadata_overlap.get("title_token_overlap") or 0.0)
-    if overlap_score > 0:
+    title_overlap_score = float(metadata_overlap.get("title_token_overlap") or 0.0)
+    abstract_overlap_score = float(metadata_overlap.get("abstract_token_overlap") or 0.0)
+    keyword_overlap_score = float(metadata_overlap.get("keyword_token_overlap") or 0.0)
+    if title_overlap_score > 0:
         support_signals.append("metadata_title_overlap")
+    if abstract_overlap_score > 0:
+        support_signals.append("metadata_abstract_overlap")
+    if keyword_overlap_score > 0:
+        support_signals.append("metadata_keyword_overlap")
 
-    if claim_type == "empirical_result" and overlap_score == 0.0:
-        risk_signals.append("empirical_claim_without_title_overlap")
+    if claim_type == "empirical_result" and max(title_overlap_score, abstract_overlap_score, keyword_overlap_score) == 0.0:
+        risk_signals.append("empirical_claim_without_metadata_overlap")
 
     if label == "ORPHANED":
         next_actions.append("Fix the citation key or add the missing bibliography entry after manual confirmation.")

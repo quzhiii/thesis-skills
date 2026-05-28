@@ -286,7 +286,7 @@ Triage labels:
 | `ORPHANED` | Citation key not found in bibliography files |
 | `UNVERIFIABLE` | Cited reference UNSUPPORTED in V3.0 (CJK, thesis type) |
 
-The report also includes a backward-compatible support-review layer: `claim_type`, `support_review_label`, `support_review_reason`, `support_signals`, `risk_signals`, `cluster_keys`, `cluster_risk_summary`, and `next_actions`. These fields explain why a pair or grouped citation cluster deserves manual review; they do not replace the original `triage_label` or make final truth claims. The JSON/Markdown reports may also include advisory `citation_needed_candidates` for uncited high-assertion sentences; these are manual review prompts, not blocking findings.
+The report also includes a backward-compatible support-review layer: `claim_type`, `support_review_label`, `support_review_reason`, `support_signals`, `risk_signals`, `cluster_keys`, `cluster_risk_summary`, and `next_actions`. These fields explain why a pair or grouped citation cluster deserves manual review; they do not replace the original `triage_label` or make final truth claims. Local lexical evidence can use title, abstract, and keyword token overlap when those `.bib` fields are present. The JSON/Markdown reports may also include advisory `citation_needed_candidates` for uncited high-assertion sentences; these are manual review prompts, not blocking findings.
 
 V3.1 boundaries:
 

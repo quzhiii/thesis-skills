@@ -182,6 +182,30 @@ class ClaimCitationTriageTest(unittest.TestCase):
         self.assertIn("metadata_title_overlap", result["support_signals"])
         self.assertGreater(result["evidence"]["title_token_overlap"], 0)
         self.assertIn("reliable", result["evidence"]["overlap_tokens"])
+        self.assertIn("reliable", result["evidence"]["metadata_overlap"]["overlap_tokens"]["title"])
+
+    def test_abstract_and_keyword_overlap_are_reported_as_weak_evidence(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        context = self._context(context="The method significantly improves benchmark accuracy.")
+        entry = self._entry(
+            fields={
+                "title": "A Study Of Model Training",
+                "author": "Smith, Jane",
+                "year": "2024",
+                "abstract": "We evaluate benchmark accuracy for multiple systems.",
+                "keywords": "benchmark; accuracy; evaluation",
+            }
+        )
+
+        result = triage_claim_citation(context, entry, self._risk(), 2)
+
+        self.assertEqual(result["evidence"]["title_token_overlap"], 0.0)
+        self.assertGreater(result["evidence"]["abstract_token_overlap"], 0)
+        self.assertGreater(result["evidence"]["keyword_token_overlap"], 0)
+        self.assertIn("metadata_abstract_overlap", result["support_signals"])
+        self.assertIn("metadata_keyword_overlap", result["support_signals"])
+        self.assertNotIn("empirical_claim_without_metadata_overlap", result["risk_signals"])
 
     def test_build_report_counts_entries_and_uncited_references(self) -> None:
         from core.citation_integrity.claim_citation import build_claim_citation_report
