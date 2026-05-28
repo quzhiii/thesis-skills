@@ -15,7 +15,7 @@ from core.citation_integrity.claim_citation import (
     write_claim_citation_report_md,
 )
 from core.citation_integrity.models import BibEntry
-from core.citation_integrity.tex_parser import extract_citation_contexts
+from core.citation_integrity.tex_parser import extract_citation_contexts, extract_citation_needed_candidates
 from core.project import ThesisProject
 from core.rules import find_rule_pack
 
@@ -53,6 +53,19 @@ def _collect_contexts(project: ThesisProject) -> list:
     return contexts
 
 
+def _collect_citation_needed_candidates(project: ThesisProject) -> list:
+    candidates = []
+    for tex_path in project.chapter_files:
+        if not tex_path.exists():
+            continue
+        text = tex_path.read_text(encoding="utf-8", errors="ignore")
+        candidates.extend(extract_citation_needed_candidates(text, project.rel(tex_path)))
+    if project.main_tex.exists():
+        text = project.main_tex.read_text(encoding="utf-8", errors="ignore")
+        candidates.extend(extract_citation_needed_candidates(text, project.rel(project.main_tex)))
+    return candidates
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Triage claim-citation pairs for structural support signals"
@@ -69,9 +82,10 @@ def main() -> int:
         pack.rules["project"]["bibliography_files"],
     )
     contexts = _collect_contexts(project)
+    citation_needed_candidates = _collect_citation_needed_candidates(project)
     bib_entries = _collect_bib_entries(project)
     hallucination_report = _load_hallucination_report(project.reports_dir)
-    report = build_claim_citation_report(contexts, bib_entries, hallucination_report)
+    report = build_claim_citation_report(contexts, bib_entries, hallucination_report, citation_needed_candidates)
 
     json_output = project.reports_dir / "claim-citation-triage-report.json"
     md_output = project.reports_dir / "claim-citation-triage.md"

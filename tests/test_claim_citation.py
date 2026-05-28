@@ -5,8 +5,8 @@ import io
 import json
 import unittest
 
-from core.citation_integrity.models import BibEntry, CitationWithContext
-from core.citation_integrity.tex_parser import extract_citation_contexts
+from core.citation_integrity.models import BibEntry, CitationNeededCandidate, CitationWithContext
+from core.citation_integrity.tex_parser import extract_citation_contexts, extract_citation_needed_candidates
 from tests.helpers import workspace_tempdir
 
 
@@ -60,6 +60,24 @@ class CitationContextExtractionTest(unittest.TestCase):
             [item.context for item in contexts],
             ["Several studies report stable effects."] * 3,
         )
+
+    def test_extracts_citation_needed_candidate_for_uncited_empirical_claim(self) -> None:
+        text = "Our method significantly improves accuracy on benchmark tasks. Prior work is cited \\cite{ok2024}."
+
+        candidates = extract_citation_needed_candidates(text, "main.tex")
+
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(candidates[0].file, "main.tex")
+        self.assertEqual(candidates[0].line, 1)
+        self.assertEqual(candidates[0].claim_type, "empirical_result")
+        self.assertEqual(candidates[0].risk_signal, "uncited_empirical_result")
+
+    def test_does_not_flag_cited_empirical_claim_as_citation_needed(self) -> None:
+        text = "Our method significantly improves accuracy on benchmark tasks \\cite{ok2024}."
+
+        candidates = extract_citation_needed_candidates(text, "main.tex")
+
+        self.assertEqual(candidates, [])
 
 
 class ClaimCitationTriageTest(unittest.TestCase):
@@ -188,6 +206,25 @@ class ClaimCitationTriageTest(unittest.TestCase):
         self.assertEqual(report["summary"]["unique_references_never_cited"], 1)
         self.assertEqual(report["uncited_references"][0]["citation_key"], "unused2023")
 
+    def test_report_includes_citation_needed_candidates(self) -> None:
+        from core.citation_integrity.claim_citation import build_claim_citation_report
+
+        candidates = [
+            CitationNeededCandidate(
+                file="main.tex",
+                line=4,
+                sentence="Our method significantly improves accuracy on benchmark tasks.",
+                claim_type="empirical_result",
+                risk_signal="uncited_empirical_result",
+            )
+        ]
+
+        report = build_claim_citation_report([], [], None, candidates)
+
+        self.assertEqual(report["summary"]["citation_needed_candidates"], 1)
+        self.assertEqual(report["citation_needed_candidates"][0]["claim_type"], "empirical_result")
+        self.assertIn("Add a citation", report["citation_needed_candidates"][0]["recommended_action"])
+
     def test_grouped_citation_reports_cluster_keys_and_mixed_risk(self) -> None:
         from core.citation_integrity.claim_citation import build_claim_citation_report
 
@@ -277,6 +314,24 @@ class ClaimCitationReportWritersTest(unittest.TestCase):
 
         self.assertIn("Cluster: ok2024, weak2024", text)
         self.assertIn("review the grouped citations together", text)
+
+    def test_markdown_report_includes_citation_needed_candidates(self) -> None:
+        from core.citation_integrity.claim_citation import build_claim_citation_report, render_claim_citation_markdown
+
+        candidates = [
+            CitationNeededCandidate(
+                file="main.tex",
+                line=7,
+                sentence="The approach significantly improves accuracy without tradeoffs.",
+                claim_type="empirical_result",
+                risk_signal="uncited_empirical_result",
+            )
+        ]
+
+        text = render_claim_citation_markdown(build_claim_citation_report([], [], None, candidates))
+
+        self.assertIn("## Citation-Needed Candidates", text)
+        self.assertIn("significantly improves accuracy", text)
 
     def test_write_csv_report_excludes_well_supported_by_default(self) -> None:
         from core.citation_integrity.claim_citation import write_claim_citation_report_csv

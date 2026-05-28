@@ -74,7 +74,7 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Check | `17-final-reference-set/` | `build_final_reference_set.py` | Parse `.aux` / `.bbl` or TeX fallback and write `final-reference-set-report.json` plus `final-reference-set-report.csv` |
 | Verify (alpha) | `18-verify-references/` | `verify_external_references.py` | Query CrossRef / OpenAlex / Semantic Scholar for selected bibliography entries; write `external-verification-report.json`, `missing-doi-candidates.json`, and `url-verification-report.json` |
 | Risk (v3.0) | `19-check-hallucination-risk/` | `check_hallucination_risk.py` | Score bibliography entries for hallucination risk; write `hallucination-risk-report.json` and `high-risk-references.csv` |
-| Triage (v3.1+) | `20-check-claim-citation/` | `check_claim_citation.py` | Extract citation contexts and triage claim-citation pairs by structural support and grouped-cluster signals; write `claim-citation-triage-report.json`, `claim-citation-triage.md`, and `claim-citation-triage.csv` with support-review enrichment fields |
+| Triage (v3.1+) | `20-check-claim-citation/` | `check_claim_citation.py` | Extract citation contexts and triage claim-citation pairs by structural support, grouped-cluster, and citation-needed advisory signals; write `claim-citation-triage-report.json`, `claim-citation-triage.md`, and `claim-citation-triage.csv` with support-review enrichment fields |
 | Defense | `17-defense-pack/` | `generate_outline.py` | Generate thesis outline for defense preparation |
 | Defense | `17-defense-pack/` | `generate_figure_inventory.py` | Inventory figures and visual evidence |
 | Defense | `17-defense-pack/` | `generate_talk_prep_notes.py` | Generate editable talk-prep notes |

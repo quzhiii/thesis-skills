@@ -21,6 +21,15 @@ class CitationWithContext:
 
 
 @dataclass(frozen=True)
+class CitationNeededCandidate:
+    file: str
+    line: int
+    sentence: str
+    claim_type: str
+    risk_signal: str
+
+
+@dataclass(frozen=True)
 class BibEntry:
     key: str
     entry_type: str

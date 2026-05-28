@@ -123,6 +123,30 @@ class ClaimCitationCLITest(unittest.TestCase):
         self.assertTrue(md_exists)
         self.assertTrue(csv_exists)
 
+    def test_cli_reports_citation_needed_candidates_without_changing_exit_code(self) -> None:
+        with workspace_tempdir("cc-cli-needed-") as base:
+            project = materialize_project(
+                base / "project",
+                {
+                    "main.tex": "\\documentclass{article}\n\\begin{document}\n\\input{chapters/chapter1}\n\\end{document}\n",
+                    "chapters/chapter1.tex": "Our method significantly improves accuracy on benchmark tasks. A cited claim follows \\cite{a2024}.\n",
+                    "ref/refs.bib": "@article{a2024, title={A}, author={B}, year={2024}, journal={J}}\n",
+                },
+            )
+            result = subprocess.run(
+                [sys.executable, str(CLI_SCRIPT), "--project-root", str(project), "--ruleset", "university-generic"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+            report = json.loads((project / "reports" / "claim-citation-triage-report.json").read_text(encoding="utf-8"))
+            markdown = (project / "reports" / "claim-citation-triage.md").read_text(encoding="utf-8")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(report["summary"]["citation_needed_candidates"], 1)
+        self.assertEqual(report["citation_needed_candidates"][0]["risk_signal"], "uncited_empirical_result")
+        self.assertIn("Citation-Needed Candidates", markdown)
+
 
 if __name__ == "__main__":
     unittest.main()

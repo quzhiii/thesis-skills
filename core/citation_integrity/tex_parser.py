@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from core.citation_integrity.models import CitationOccurrence, CitationWithContext
+from core.citation_integrity.models import CitationNeededCandidate, CitationOccurrence, CitationWithContext
 
 
 _CITATION_COMMANDS = (
@@ -19,6 +19,12 @@ _CITATION_RE = re.compile(
     r"\s*(?:\[[^\]]*\]\s*){0,2}"
     r"\{(?P<keys>[^}]*)\}",
     re.S,
+)
+
+_SENTENCE_RE = re.compile(r"[^.!?。！？]+[.!?。！？]", re.S)
+_CITATION_NEEDED_PATTERNS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("empirical_result", ("significant", "significantly", "improve", "improves", "improved", "outperform", "outperforms", "achieve", "achieves", "increase", "decrease", "reduction", "accuracy")),
+    ("universal_claim", ("always", "never", "all ", "every ", "must ", "clearly", "obviously")),
 )
 
 
@@ -91,6 +97,43 @@ def _strip_latex_commands(text: str) -> str:
     cleaned = re.sub(r"\s+([.,!?;:])", r"\1", cleaned)
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
     return cleaned
+
+
+def _citation_needed_claim_type(sentence: str) -> tuple[str, str] | None:
+    lowered = sentence.lower()
+    for claim_type, patterns in _CITATION_NEEDED_PATTERNS:
+        for pattern in patterns:
+            if pattern in lowered:
+                return claim_type, f"uncited_{claim_type}"
+    return None
+
+
+def extract_citation_needed_candidates(text: str, file: str) -> list[CitationNeededCandidate]:
+    candidates: list[CitationNeededCandidate] = []
+    for match in _SENTENCE_RE.finditer(text):
+        raw_sentence = match.group(0)
+        if _CITATION_RE.search(raw_sentence):
+            continue
+        stripped = raw_sentence.strip()
+        if not stripped or stripped.startswith(("%", "\\")):
+            continue
+        cleaned = _strip_latex_commands(raw_sentence)
+        if len(cleaned.split()) < 6:
+            continue
+        claim = _citation_needed_claim_type(cleaned)
+        if claim is None:
+            continue
+        claim_type, risk_signal = claim
+        candidates.append(
+            CitationNeededCandidate(
+                file=file,
+                line=_line_of(text, match.start()),
+                sentence=cleaned,
+                claim_type=claim_type,
+                risk_signal=risk_signal,
+            )
+        )
+    return candidates
 
 
 def _citation_context(text: str, start: int, end: int) -> str:

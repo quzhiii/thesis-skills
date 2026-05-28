@@ -6,7 +6,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-from core.citation_integrity.models import BibEntry, CitationWithContext
+from core.citation_integrity.models import BibEntry, CitationNeededCandidate, CitationWithContext
 
 
 HALLUCINATION_RISK_BASE: dict[str, float] = {
@@ -478,6 +478,20 @@ def _compute_claim_summary(triage_entries: list[dict[str, object]], contexts: li
     }
 
 
+def _citation_needed_candidate_payload(candidates: list[CitationNeededCandidate]) -> list[dict[str, object]]:
+    return [
+        {
+            "file": candidate.file,
+            "line": candidate.line,
+            "sentence": candidate.sentence,
+            "claim_type": candidate.claim_type,
+            "risk_signal": candidate.risk_signal,
+            "recommended_action": "Add a citation, soften the claim, or document why this claim does not require citation.",
+        }
+        for candidate in candidates
+    ]
+
+
 def _uncited_references(
     triage_entries: list[dict[str, object]],
     contexts: list[CitationWithContext],
@@ -513,15 +527,20 @@ def build_claim_citation_report(
     contexts: list[CitationWithContext],
     bib_entries: list[BibEntry],
     hallucination_report: dict[str, object] | None = None,
+    citation_needed_candidates: list[CitationNeededCandidate] | None = None,
 ) -> dict[str, object]:
     triage_entries = _build_entries(contexts, bib_entries, hallucination_report)
+    citation_needed = _citation_needed_candidate_payload(citation_needed_candidates or [])
+    summary = _compute_claim_summary(triage_entries, contexts, bib_entries)
+    summary["citation_needed_candidates"] = len(citation_needed)
     return {
         "module": "claim_citation_triage",
         "version": "3.1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": _compute_report_status(triage_entries),
-        "summary": _compute_claim_summary(triage_entries, contexts, bib_entries),
+        "summary": summary,
         "entries": triage_entries,
+        "citation_needed_candidates": citation_needed,
         "uncited_references": _uncited_references(triage_entries, contexts, bib_entries, hallucination_report),
     }
 
@@ -544,6 +563,7 @@ _LABEL_GROUP_ORDER: list[str] = [
 def render_claim_citation_markdown(report: dict[str, object]) -> str:
     summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
     entries: list[dict[str, object]] = report.get("entries") if isinstance(report.get("entries"), list) else []
+    citation_needed: list[dict[str, object]] = report.get("citation_needed_candidates") if isinstance(report.get("citation_needed_candidates"), list) else []
     by_label: dict[str, list[dict[str, object]]] = {}
     for e in entries:
         if not isinstance(e, dict):
@@ -562,6 +582,23 @@ def render_claim_citation_markdown(report: dict[str, object]) -> str:
     for key in sorted(summary):
         lines.append(f"- `{key}`: {summary[key]}")
     lines.append("")
+
+    if citation_needed:
+        lines.append("## Citation-Needed Candidates")
+        lines.append("")
+        for item in sorted(citation_needed, key=lambda e: (str(e.get("file", "")), int(e.get("line") or 0))):
+            file = item.get("file", "")
+            line_num = item.get("line", "")
+            claim_type = item.get("claim_type", "")
+            risk_signal = item.get("risk_signal", "")
+            sentence = item.get("sentence", "")
+            action = item.get("recommended_action", "")
+            lines.append(f"- {file}:{line_num} (claim_type={claim_type}, risk={risk_signal})")
+            if sentence:
+                lines.append(f"  > {sentence}")
+            if action:
+                lines.append(f"  *{action}*")
+            lines.append("")
 
     for label in _LABEL_GROUP_ORDER:
         group = by_label.get(label, [])
