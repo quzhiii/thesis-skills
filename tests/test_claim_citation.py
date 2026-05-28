@@ -92,6 +92,10 @@ class ClaimCitationTriageTest(unittest.TestCase):
 
         self.assertEqual(result["triage_label"], "WELL_SUPPORTED")
         self.assertEqual(result["triage_score"], 0.0)
+        self.assertEqual(result["claim_type"], "empirical_result")
+        self.assertEqual(result["support_review_label"], "ADEQUATE_REVIEW")
+        self.assertIn("complete_metadata", result["support_signals"])
+        self.assertIn("low_hallucination_risk", result["support_signals"])
         self.assertEqual(result["reference_metadata"]["title"], "Reliable Study")
         self.assertTrue(result["evidence"]["has_complete_metadata"])
 
@@ -102,6 +106,7 @@ class ClaimCitationTriageTest(unittest.TestCase):
 
         self.assertEqual(result["triage_label"], "WEAK")
         self.assertEqual(result["triage_score"], 0.25)
+        self.assertEqual(result["support_review_label"], "WEAK_REVIEW")
         self.assertEqual(result["hallucination_risk_label"], "REVIEW")
 
     def test_missing_bib_entry_is_orphaned(self) -> None:
@@ -110,6 +115,7 @@ class ClaimCitationTriageTest(unittest.TestCase):
         result = triage_claim_citation(self._context("missing2024"), None, None, 1)
 
         self.assertEqual(result["triage_label"], "ORPHANED")
+        self.assertEqual(result["support_review_label"], "ORPHANED")
         self.assertGreaterEqual(result["triage_score"], 0.5)
         self.assertEqual(result["reference_metadata"], {})
 
@@ -119,6 +125,7 @@ class ClaimCitationTriageTest(unittest.TestCase):
         result = triage_claim_citation(self._context(), self._entry(), self._risk(label="UNSUPPORTED"), 1)
 
         self.assertEqual(result["triage_label"], "UNVERIFIABLE")
+        self.assertEqual(result["support_review_label"], "UNVERIFIABLE")
         self.assertIsNone(result["triage_score"])
 
     def test_bare_citation_gets_context_score_boost(self) -> None:
@@ -127,8 +134,10 @@ class ClaimCitationTriageTest(unittest.TestCase):
         result = triage_claim_citation(self._context(context=""), self._entry(), self._risk(), 2)
 
         self.assertEqual(result["triage_label"], "SUPPORTED")
+        self.assertEqual(result["support_review_label"], "ADEQUATE_REVIEW")
         self.assertEqual(result["triage_score"], 0.15)
         self.assertFalse(result["evidence"]["has_claim_context"])
+        self.assertIn("bare_context", result["risk_signals"])
 
     def test_high_risk_with_existing_bib_entry_is_weak_not_orphaned(self) -> None:
         from core.citation_integrity.claim_citation import triage_claim_citation
@@ -136,9 +145,25 @@ class ClaimCitationTriageTest(unittest.TestCase):
         result = triage_claim_citation(self._context(), self._entry(), self._risk(label="HIGH_RISK"), 1)
 
         self.assertEqual(result["triage_label"], "WEAK")
+        self.assertEqual(result["support_review_label"], "NEEDS_MANUAL_REVIEW")
         self.assertGreaterEqual(result["triage_score"], 0.5)
+        self.assertIn("high_risk_reference", result["risk_signals"])
         self.assertIn("HIGH_RISK", str(result["recommended_action"]))
         self.assertNotIn("not found in bibliography", str(result["recommended_action"]))
+
+    def test_background_claim_type_and_metadata_overlap_are_reported(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        context = self._context(context="Prior work explored reliable study architectures.")
+        entry = self._entry(fields={"title": "Reliable Study Architectures", "author": "Smith, Jane", "year": "2024"})
+
+        result = triage_claim_citation(context, entry, self._risk(), 2)
+
+        self.assertEqual(result["claim_type"], "background")
+        self.assertEqual(result["support_review_label"], "STRONG_REVIEW")
+        self.assertIn("metadata_title_overlap", result["support_signals"])
+        self.assertGreater(result["evidence"]["title_token_overlap"], 0)
+        self.assertIn("reliable", result["evidence"]["overlap_tokens"])
 
     def test_build_report_counts_entries_and_uncited_references(self) -> None:
         from core.citation_integrity.claim_citation import build_claim_citation_report
@@ -208,6 +233,7 @@ class ClaimCitationReportWritersTest(unittest.TestCase):
         self.assertIn("## Summary", text)
         self.assertIn("SUPPORTED", text)
         self.assertIn("WEAK", text)
+        self.assertIn("review=", text)
 
     def test_write_csv_report_excludes_well_supported_by_default(self) -> None:
         from core.citation_integrity.claim_citation import write_claim_citation_report_csv
@@ -236,7 +262,23 @@ class ClaimCitationReportWritersTest(unittest.TestCase):
         reader = csv.DictReader(io.StringIO(text))
         self.assertEqual(
             reader.fieldnames,
-            ["citation_key", "triage_label", "triage_score", "claim_context", "file", "line", "hallucination_risk_label", "citation_frequency", "recommended_action"],
+            [
+                "citation_key",
+                "triage_label",
+                "triage_score",
+                "claim_type",
+                "support_review_label",
+                "support_review_reason",
+                "claim_context",
+                "file",
+                "line",
+                "hallucination_risk_label",
+                "citation_frequency",
+                "support_signals",
+                "risk_signals",
+                "recommended_action",
+                "next_actions",
+            ],
         )
 
 

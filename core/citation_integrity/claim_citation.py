@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -23,6 +24,42 @@ SCORE_EXTRA_CITATION_KEY = 0.05
 SCORE_SINGLE_CITATION = 0.05
 SCORE_OVER_CITATION = 0.05
 OVER_CITATION_THRESHOLD = 10
+
+_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "by",
+    "for",
+    "from",
+    "has",
+    "have",
+    "in",
+    "is",
+    "it",
+    "of",
+    "on",
+    "or",
+    "that",
+    "the",
+    "their",
+    "this",
+    "to",
+    "was",
+    "were",
+    "with",
+}
+
+_CLAIM_TYPE_PATTERNS: list[tuple[str, tuple[str, ...]]] = [
+    ("empirical_result", ("improve", "increase", "decrease", "significant", "outperform", "achieve", "accuracy", "results")),
+    ("method_claim", ("propose", "introduce", "use", "based on", "framework", "method", "approach")),
+    ("background", ("prior work", "studies", "literature", "has explored", "have explored", "work explored")),
+    ("definition", ("defined as", "refers to", "means", "is defined")),
+]
 
 LABEL_THRESHOLDS: list[tuple[float, str]] = [
     (0.0, "WELL_SUPPORTED"),
@@ -54,6 +91,101 @@ def _recommended_action(triage_label: str, hallucination_risk_label: str | None)
     if triage_label == "SUPPORTED":
         return "Reference appears structurally adequate but may have minor risks."
     return "Cited reference is well-supported with complete metadata and low hallucination risk."
+
+
+def _claim_type(context: str) -> str:
+    text = context.lower()
+    if not text.strip():
+        return "unclear"
+    for label, patterns in _CLAIM_TYPE_PATTERNS:
+        if any(pattern in text for pattern in patterns):
+            return label
+    return "unclear"
+
+
+def _tokens(text: str) -> set[str]:
+    return {
+        token
+        for token in re.findall(r"[A-Za-z][A-Za-z0-9_-]+", text.lower())
+        if len(token) > 2 and token not in _STOPWORDS
+    }
+
+
+def _metadata_overlap(context: str, bib_entry: BibEntry | None) -> dict[str, object]:
+    if bib_entry is None:
+        return {"title_token_overlap": 0.0, "overlap_tokens": []}
+    context_tokens = _tokens(context)
+    title_tokens = _tokens(bib_entry.fields.get("title", ""))
+    if not context_tokens or not title_tokens:
+        return {"title_token_overlap": 0.0, "overlap_tokens": []}
+    overlap = sorted(context_tokens & title_tokens)
+    denominator = max(1, len(context_tokens | title_tokens))
+    return {
+        "title_token_overlap": round(len(overlap) / denominator, 4),
+        "overlap_tokens": overlap,
+    }
+
+
+def _support_review(
+    label: str,
+    hallucination_label: str | None,
+    claim_type: str,
+    metadata_overlap: dict[str, object],
+    has_complete_metadata: bool,
+    has_claim_context: bool,
+) -> tuple[str, str, list[str], list[str], list[str]]:
+    support_signals: list[str] = []
+    risk_signals: list[str] = []
+    next_actions: list[str] = []
+
+    if has_complete_metadata:
+        support_signals.append("complete_metadata")
+    else:
+        risk_signals.append("incomplete_metadata")
+
+    if has_claim_context:
+        support_signals.append("has_claim_context")
+    else:
+        risk_signals.append("bare_context")
+
+    if hallucination_label == "PASS":
+        support_signals.append("low_hallucination_risk")
+    elif hallucination_label in {"REVIEW", "HIGH_RISK"}:
+        risk_signals.append(f"{hallucination_label.lower()}_reference")
+    elif hallucination_label == "UNSUPPORTED":
+        risk_signals.append("unsupported_reference")
+    elif hallucination_label is None:
+        risk_signals.append("missing_hallucination_evidence")
+
+    overlap_score = float(metadata_overlap.get("title_token_overlap") or 0.0)
+    if overlap_score > 0:
+        support_signals.append("metadata_title_overlap")
+
+    if claim_type == "empirical_result" and overlap_score == 0.0:
+        risk_signals.append("empirical_claim_without_title_overlap")
+
+    if label == "ORPHANED":
+        next_actions.append("Fix the citation key or add the missing bibliography entry after manual confirmation.")
+        return "ORPHANED", "Citation key is missing from the bibliography.", support_signals, risk_signals, next_actions
+
+    if label == "UNVERIFIABLE":
+        next_actions.append("Manually verify the source because current evidence cannot automatically assess it.")
+        return "UNVERIFIABLE", "Reference is unsupported by the current automatic evidence layer.", support_signals, risk_signals, next_actions
+
+    if "high_risk_reference" in risk_signals:
+        next_actions.append("Verify the cited source against DOI, publisher, database, or original document evidence.")
+        return "NEEDS_MANUAL_REVIEW", "Cited reference carries HIGH_RISK hallucination evidence.", support_signals, risk_signals, next_actions
+
+    if label == "WEAK":
+        next_actions.append("Check whether this reference directly supports the nearby claim or add a closer source.")
+        return "WEAK_REVIEW", "Evidence is structurally weak or incomplete.", support_signals, risk_signals, next_actions
+
+    if risk_signals:
+        next_actions.append("Review the citation context and metadata before final submission.")
+        return "ADEQUATE_REVIEW", "Evidence appears adequate with minor caveats.", support_signals, risk_signals, next_actions
+
+    next_actions.append("No immediate action; keep available for final human review.")
+    return "STRONG_REVIEW", "Evidence is structurally strong and low-risk.", support_signals, risk_signals, next_actions
 
 
 def triage_claim_citation(
@@ -138,10 +270,24 @@ def _build_triage_result(
                 reference_metadata[k] = bib_entry.fields[k]
         has_complete_metadata = bool(reference_metadata.get("title") and reference_metadata.get("author"))
 
+    claim_type = _claim_type(context.context)
+    metadata_overlap = _metadata_overlap(context.context, bib_entry)
+    support_review_label, support_review_reason, support_signals, risk_signals, next_actions = _support_review(
+        label,
+        hallucination_label,
+        claim_type,
+        metadata_overlap,
+        has_complete_metadata,
+        bool(context.context.strip()),
+    )
+
     return {
         "citation_key": context.key,
         "triage_label": label,
         "triage_score": round(score, 4) if score is not None else None,
+        "claim_type": claim_type,
+        "support_review_label": support_review_label,
+        "support_review_reason": support_review_reason,
         "claim_context": context.context,
         "citation_command": context.command,
         "file": context.file,
@@ -149,13 +295,17 @@ def _build_triage_result(
         "reference_metadata": reference_metadata,
         "hallucination_risk_label": hallucination_label,
         "citation_frequency": citation_frequency,
+        "support_signals": support_signals,
+        "risk_signals": risk_signals,
         "evidence": {
             "has_complete_metadata": has_complete_metadata,
             "has_claim_context": bool(context.context.strip()),
             "is_grouped_citation": group_size > 1,
             "group_size": group_size,
+            **metadata_overlap,
         },
         "recommended_action": _recommended_action(label, hallucination_label),
+        "next_actions": next_actions,
     }
 
 
@@ -330,8 +480,12 @@ def render_claim_citation_markdown(report: dict[str, object]) -> str:
             key = entry.get("citation_key", "")
             score = entry.get("triage_score", "")
             risk = entry.get("hallucination_risk_label", "")
+            review = entry.get("support_review_label", "")
+            reason = entry.get("support_review_reason", "")
             action = entry.get("recommended_action", "")
-            lines.append(f"- `{key}` {file}:{line_num} (score={score}, risk={risk})")
+            lines.append(f"- `{key}` {file}:{line_num} (score={score}, risk={risk}, review={review})")
+            if reason:
+                lines.append(f"  - {reason}")
             if claim:
                 lines.append(f"  > {claim}")
             if action:
@@ -350,12 +504,18 @@ _CSV_FIELDNAMES = [
     "citation_key",
     "triage_label",
     "triage_score",
+    "claim_type",
+    "support_review_label",
+    "support_review_reason",
     "claim_context",
     "file",
     "line",
     "hallucination_risk_label",
     "citation_frequency",
+    "support_signals",
+    "risk_signals",
     "recommended_action",
+    "next_actions",
 ]
 
 
@@ -368,4 +528,9 @@ def write_claim_citation_report_csv(report: dict[str, object], output: str | Pat
         writer = csv.DictWriter(handle, fieldnames=_CSV_FIELDNAMES)
         writer.writeheader()
         for entry in sorted(non_pass, key=lambda e: (str(e.get("file", "")), int(e.get("line") or 0))):
-            writer.writerow({key: entry.get(key, "") for key in _CSV_FIELDNAMES})
+            row = {key: entry.get(key, "") for key in _CSV_FIELDNAMES}
+            for key in ("support_signals", "risk_signals", "next_actions"):
+                value = row.get(key)
+                if isinstance(value, list):
+                    row[key] = "; ".join(str(item) for item in value)
+            writer.writerow(row)

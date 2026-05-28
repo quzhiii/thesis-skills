@@ -286,6 +286,8 @@ Triage labels:
 | `ORPHANED` | Citation key not found in bibliography files |
 | `UNVERIFIABLE` | Cited reference UNSUPPORTED in V3.0 (CJK, thesis type) |
 
+The report also includes a backward-compatible support-review layer: `claim_type`, `support_review_label`, `support_review_reason`, `support_signals`, `risk_signals`, and `next_actions`. These fields explain why a pair deserves manual review; they do not replace the original `triage_label` or make final truth claims.
+
 V3.1 boundaries:
 
 - No LLM usage. Scoring is deterministic based on V3.0 risk labels, metadata, context quality, grouping, and citation frequency.
