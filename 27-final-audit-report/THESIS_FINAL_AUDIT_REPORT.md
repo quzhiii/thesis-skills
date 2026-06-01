@@ -1,0 +1,48 @@
+# Final Audit Report
+
+## Module
+
+`27-final-audit-report/build_final_audit_report.py`
+
+## Purpose
+
+Aggregate existing JSON evidence into a single final-audit handoff report. This module does not rerun checkers, rewrite source files, repair references, or generate HTML. JSON reports remain the source of truth.
+
+## Usage
+
+```bash
+python 27-final-audit-report/build_final_audit_report.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+## Output
+
+- `reports/final-audit-report.json`
+
+## Inputs
+
+Required foundation inputs:
+
+- `reports/final-cleanup-report.json`
+- `reports/statistical-consistency-report.json`
+- `reports/manual-anchor-report.json`
+
+Optional evidence inputs:
+
+- `reports/readiness-report.json`
+- `reports/citation-integrity-report.json`
+- `reports/final-reference-set-report.json`
+- `reports/external-verification-report.json`
+- `reports/missing-doi-candidates.json`
+- `reports/url-verification-report.json`
+- `reports/hallucination-risk-report.json`
+- `reports/claim-citation-triage-report.json`
+
+## Boundaries
+
+- Aggregates existing reports only.
+- Does not call external services.
+- Does not modify `.tex`, `.bib`, `.aux`, `.bbl`, or report inputs.
+- Preserves distinctions between blocking local evidence and advisory review evidence.
+- Designed as the JSON source for future static HTML report surfaces.

@@ -143,6 +143,17 @@ The baseline `run_check_once.py` command writes machine-readable artifacts such 
 - `reports/readiness-report.json`
 - `reports/run-summary.json`
 
+Optional final-audit foundation artifact:
+
+- `reports/final-cleanup-report.json` from `23-check-final-cleanup/check_final_cleanup.py`
+- `reports/statistical-consistency-report.json` from `25-check-statistical-consistency/check_statistical_consistency.py`
+- `reports/manual-anchor-report.json` from `26-check-manual-anchor/check_manual_anchor.py`
+- `reports/final-audit-report.json` from `27-final-audit-report/build_final_audit_report.py`
+- `reports/reference-audit-ledger.csv` from `28-reference-audit-ledger/build_reference_audit_ledger.py`
+- `reports/index.html` from `29-report-index/build_report_index.py`
+- `reports/final-audit-report.html` from `30-final-audit-html/build_final_audit_html.py`
+- `reports/reference-audit-ledger.html` from `31-reference-ledger-html/build_reference_audit_ledger_html.py`
+
 The optional v3.3 evidence pipeline writes the citation evidence artifacts:
 
 - `reports/final-reference-set-report.json`
@@ -295,6 +306,99 @@ V3.1 boundaries:
 - No automatic citation rewrite or suggestion.
 - Reads `reports/hallucination-risk-report.json` if present; treats missing it conservatively.
 - Exit code 1 when any pair is `ORPHANED`.
+
+### Final Cleanup Checker
+
+Before final PDF or submission handoff, scan LaTeX sources for process residue such as `TODO`, `FIXME`, `???`, `\textcolor{blue}`, `\color{blue}`, `draft`, `debug`, and Chinese review notes like `待修改` or `待核查`.
+
+```bash
+python 23-check-final-cleanup/check_final_cleanup.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+Output: `reports/final-cleanup-report.json`. This checker is report-only: it does not delete markers, rewrite prose, or change source files. The JSON artifact is designed to be folded later into `reports/final-audit-report.json` and static HTML report surfaces.
+
+### Statistical Consistency Checker
+
+Before final submission, scan for mixed statistical notation such as `p值/P值`, `p=/P=`, `95%CI/95\%CI/95%置信区间`, `Bootstrap/自助法`, and `SMD/标准化均数差`.
+
+```bash
+python 25-check-statistical-consistency/check_statistical_consistency.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+Output: `reports/statistical-consistency-report.json`. The checker reports the dominant style in the current project and flags deviations; it does not force a universal notation preference or rewrite source files.
+
+### Manual Anchor Checker
+
+If the project uses manual contents entries, scan for `\addcontentsline` commands that may be missing a nearby preceding `\phantomsection` anchor.
+
+```bash
+python 26-check-manual-anchor/check_manual_anchor.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+Output: `reports/manual-anchor-report.json`. The checker reports likely TOC / LOF / LOT hyperlink-jump risks, but it does not repair labels, captions, numbering, figures, tables, or references.
+
+### Final Audit Report
+
+After generating the source-of-truth JSON reports, aggregate them into a single final-audit handoff artifact:
+
+```bash
+python 27-final-audit-report/build_final_audit_report.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+Output: `reports/final-audit-report.json`. This report imports existing JSON evidence and groups dimensions, blockers, warnings, next actions, and source links. It does not rerun checks, call external services, modify thesis sources, or replace the raw JSON reports.
+
+### Reference Audit Ledger
+
+For spreadsheet review and advisor/service handoff, aggregate existing reference evidence into one CSV ledger:
+
+```bash
+python 28-reference-audit-ledger/build_reference_audit_ledger.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+Output: `reports/reference-audit-ledger.csv`. The ledger preserves source-specific statuses from local citation integrity, final reference set, external verification, DOI candidates, URL verification, and hallucination-risk reports. It does not edit `.bib`, insert DOI values, replace URLs, call external services, or treat `NO_CANDIDATE` as fake.
+
+### Static Report Index
+
+Generate a local HTML landing page for the reports directory:
+
+```bash
+python 29-report-index/build_report_index.py \
+  --project-root thesis
+```
+
+Output: `reports/index.html`. This page links available JSON / CSV artifacts and shows present / missing / unreadable counts. It is a local reading surface only; JSON and CSV remain the source of truth.
+
+### Final Audit HTML
+
+Generate a readable local detail page for the aggregated final-audit JSON:
+
+```bash
+python 30-final-audit-html/build_final_audit_html.py \
+  --project-root thesis
+```
+
+Output: `reports/final-audit-report.html`. This static page is generated from `final-audit-report.json` and shows the overall verdict, KPI row, dimension matrix, issues, next actions, and source links. JSON remains authoritative.
+
+### Reference Audit Ledger HTML
+
+Generate a readable local detail page for the reference-audit CSV ledger:
+
+```bash
+python 31-reference-ledger-html/build_reference_audit_ledger_html.py \
+  --project-root thesis
+```
+
+Output: `reports/reference-audit-ledger.html`. This static page is generated from `reference-audit-ledger.csv` and shows summary stats, scope slices, citation-key groupings, and the full ledger table. CSV remains authoritative.
 
 ## Scenarios
 

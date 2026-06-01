@@ -69,6 +69,11 @@ All listed workflow families remain part of the current `v3.3.0` public contract
 | External reference verification | Stable advisory | `18-verify-references/verify_external_references.py` |
 | Hallucination risk scoring | Stable | `19-check-hallucination-risk/check_hallucination_risk.py` |
 | Claim-citation support triage | Stable | `20-check-claim-citation/check_claim_citation.py` |
+| Final cleanup residue scanning | Stable advisory | `23-check-final-cleanup/check_final_cleanup.py` |
+| Statistical expression consistency | Stable advisory | `25-check-statistical-consistency/check_statistical_consistency.py` |
+| Manual anchor / contents jump check | Stable advisory | `26-check-manual-anchor/check_manual_anchor.py` |
+| Final audit JSON aggregation | Stable advisory | `27-final-audit-report/build_final_audit_report.py` |
+| Reference audit ledger | Stable advisory | `28-reference-audit-ledger/build_reference_audit_ledger.py` |
 | Baseline language lint | Stable | `11-check-language/check_language.py` |
 | Format checking | Stable | `12-check-format/check_format.py` |
 | Content checking | Stable | `13-check-content/check_content.py` |
@@ -180,18 +185,69 @@ Rule packs are the distribution layer for schools, journals, and service workflo
 - define a versioned export bundle for sharing rule packs outside a local checkout
 - keep policy in rule packs, not hard-coded into checkers
 
-### Track D: Productized Evidence Handoff
+### Track D: Final-Audit And Evidence Handoff
 
-The evidence layer is now broad enough to package as a review deliverable:
+The next missing product layer is a **final-audit workflow** that turns the existing deterministic checks into a clearer pre-submission deliverable.
 
-- citation health packet for AI-generated or suspicious references
-- pre-submission evidence packet for advisor / lab / service handoff
-- clean/broken demos that non-technical users can inspect without reading module internals
-- static site examples that show real artifacts and boundaries, not marketing claims
+This track should absorb the highest-value parts of `thesis-skills-final-audit-rules.md` that fit the current product philosophy:
 
-This track is commercializable before any candidate-reference feature exists. It should remain report-first and bounded.
+- final cleanup residue scanning (`TODO`, `FIXME`, `\textcolor{blue}`, `draft`, `debug`, `???`, and similar process traces)
+- statistical expression consistency checks (`p值/P值`, `P=`, `95%CI`, `Bootstrap`, `SMD`, and related mixed notation)
+- manual anchor / `\phantomsection` / `\addcontentsline` checks for table-of-contents, list-of-figures, and list-of-tables jump integrity
+- reference audit consolidation across local citation integrity, final reference set, external verification, DOI candidates, URL verification, and hallucination risk
+- final-audit readiness presentation that is easier for students, advisors, and service workflows to review
 
-### Track E: Public Surface And Verification Discipline
+Initial foundation now available:
+
+- final cleanup residue scanning: `23-check-final-cleanup/check_final_cleanup.py`, writing `reports/final-cleanup-report.json` as a deterministic report-only artifact
+- statistical expression consistency: `25-check-statistical-consistency/check_statistical_consistency.py`, writing `reports/statistical-consistency-report.json` as a dominant-style/deviation artifact
+- manual anchor / contents jump check: `26-check-manual-anchor/check_manual_anchor.py`, writing `reports/manual-anchor-report.json` for `\addcontentsline` / `\phantomsection` review
+- final audit JSON aggregation: `27-final-audit-report/build_final_audit_report.py`, writing `reports/final-audit-report.json` by aggregating existing JSON evidence without rerunning checks or rewriting source files
+- reference audit ledger: `28-reference-audit-ledger/build_reference_audit_ledger.py`, writing `reports/reference-audit-ledger.csv` from existing reference evidence without bibliography edits or external lookups
+
+Recommended outputs for this track:
+
+- `reports/final-audit-report.json`
+- `reports/reference-audit-ledger.csv`
+- `reports/final-audit-report.html`
+- `reports/reference-audit-ledger.html`
+
+This track should stay conservative:
+
+- report-first, not auto-rewrite-first
+- no large-scale wording changes
+- no automatic conclusion-strength edits
+- no automatic bibliography insertion or replacement
+
+### Track E: Human-Readable Report Surfaces
+
+The current machine-readable artifacts are strong, but the human-reading experience is still too rough. Future work should improve report UX without replacing the existing JSON / CSV source of truth.
+
+Preferred direction:
+
+- keep JSON / CSV as the machine-readable contract
+- generate static HTML as the primary human-readable review surface
+- make HTML work as a local artifact bundle, not a required web app or hosted service
+- keep the visual system consistent with the repository's existing editorial/static-site language where it helps
+
+The HTML layer should eventually support:
+
+- report index / landing page for one project run
+- severity-grouped issues (`P0` / `P1` / `P2` / `P3` or equivalent review groupings)
+- issue cards with file, line, evidence, rationale, and suggested action
+- cross-links between readiness, references, claim-citation review, and final-audit artifacts
+- better mobile and desktop reading experience
+- cleaner advisor / lab / service handoff screenshots and exports
+
+This is a UX and packaging track, not a replacement for the CLI-first architecture.
+
+Initial HTML surface now available:
+
+- static report index: `29-report-index/build_report_index.py`, writing `reports/index.html` as a local landing page over JSON / CSV source artifacts
+- final audit detail page: `30-final-audit-html/build_final_audit_html.py`, writing `reports/final-audit-report.html` from `final-audit-report.json` as a local reading surface
+- reference ledger detail page: `31-reference-ledger-html/build_reference_audit_ledger_html.py`, writing `reports/reference-audit-ledger.html` from `reference-audit-ledger.csv` as a local reading surface
+
+### Track F: Public Surface And Verification Discipline
 
 Every roadmap item must keep the public surface aligned with shipped behavior:
 
@@ -248,7 +304,8 @@ Showcase work must follow the same bounded philosophy as code: no marketing copy
 | Track | User Value | Strategic Value | Risk | Priority |
 |---|---|---|---|---|
 | Citation support review depth | High | High | Medium | P0 |
-| Productized evidence handoff | High | High | Low-Medium | P0 |
+| Final-audit checker foundation | High | High | Low-Medium | P0 |
+| Human-readable report UX | High | High | Medium | P0 |
 | Public-surface / docs / examples consistency | High | High | Low | P0 |
 | Rule-pack and packaging ecosystem | Medium | High | Low-Medium | P1 |
 | Candidate reference support | High | Medium-High | High | P2 |
@@ -258,11 +315,13 @@ Showcase work must follow the same bounded philosophy as code: no marketing copy
 Given the current repository state at `v3.3.0`, the next work should proceed in this order:
 
 1. **Lock the post-v3.3 roadmap**: keep `docs/roadmap.md` aligned with the product direction above and avoid assigning `v4.0` / `v5.0` labels until a true major iteration is chosen.
-2. **Deepen citation support review**: improve claim-citation support review using explicit evidence signals while preserving report-first, human-confirmed behavior.
-3. **Package evidence handoff**: turn existing outputs into clearer citation health packets and pre-submission evidence packets for advisor / lab / service workflows.
-4. **Harden rule-pack packaging**: improve pack lint, completeness, scorecard, and export-bundle workflows so packs can be shared safely.
-5. **Evaluate candidate reference support later**: only start recommendation work after the support-review and handoff tracks are stable.
-6. **Run cross-release verification**: grep, link, command, and test verification remain mandatory before treating any roadmap item as complete.
+2. **Complete the citation support review line**: continue improving claim-citation support review using explicit evidence signals while preserving report-first, human-confirmed behavior.
+3. **Add final-audit checker foundations**: implement final cleanup scanning, statistical expression consistency, and manual anchor / `\phantomsection` checks as deterministic pre-submission audit layers.
+4. **Package evidence handoff**: consolidate the current evidence stack into handoff-friendly artifacts such as `reference-audit-ledger.csv` and a final-audit readiness presentation.
+5. **Build human-readable report surfaces**: generate static HTML review artifacts that sit on top of the existing JSON / CSV contracts and improve usability on desktop and mobile.
+6. **Harden rule-pack packaging**: improve pack lint, completeness, scorecard, and export-bundle workflows so packs can be shared safely.
+7. **Evaluate candidate reference support later**: only start recommendation work after the support-review, final-audit, and handoff tracks are stable.
+8. **Run cross-release verification**: grep, link, command, and test verification remain mandatory before treating any roadmap item as complete.
 
 ## Cross-Release Acceptance Gates
 

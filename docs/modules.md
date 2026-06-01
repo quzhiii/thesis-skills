@@ -45,6 +45,16 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 6.6 Claim-citation support triage (v3.1)
     · Deterministic triage scoring      20-check-claim-citation/
 
+6.7 Final-audit foundations
+    · Process residue scanning          23-check-final-cleanup/
+    · Statistical notation consistency  25-check-statistical-consistency/
+    · Manual contents anchor checks     26-check-manual-anchor/
+    · JSON handoff aggregation          27-final-audit-report/
+    · Reference audit ledger            28-reference-audit-ledger/
+    · Static HTML report index          29-report-index/
+    · Final audit HTML detail           30-final-audit-html/
+    · Reference ledger HTML detail      31-reference-ledger-html/
+
 7. Defense preparation
     · Outline, figure inventory, notes  17-defense-pack/
 
@@ -75,6 +85,14 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Verify (alpha) | `18-verify-references/` | `verify_external_references.py` | Query CrossRef / OpenAlex / Semantic Scholar for selected bibliography entries; write `external-verification-report.json`, `missing-doi-candidates.json`, and `url-verification-report.json` |
 | Risk (v3.0) | `19-check-hallucination-risk/` | `check_hallucination_risk.py` | Score bibliography entries for hallucination risk; write `hallucination-risk-report.json` and `high-risk-references.csv` |
 | Triage (v3.1+) | `20-check-claim-citation/` | `check_claim_citation.py` | Extract citation contexts and triage claim-citation pairs by structural support, local metadata-overlap, grouped-cluster, and citation-needed advisory signals; write `claim-citation-triage-report.json`, `claim-citation-triage.md`, and `claim-citation-triage.csv` with support-review enrichment fields |
+| Final audit | `23-check-final-cleanup/` | `check_final_cleanup.py` | Scan final LaTeX source for process residue such as `TODO`, `FIXME`, `???`, blue text markers, `draft`, and `debug`; write `final-cleanup-report.json` without modifying source files |
+| Final audit | `25-check-statistical-consistency/` | `check_statistical_consistency.py` | Report mixed statistical notation families such as `p值/P值`, `p=/P=`, confidence interval notation, Bootstrap terms, and SMD terms; write `statistical-consistency-report.json` without rewriting source files |
+| Final audit | `26-check-manual-anchor/` | `check_manual_anchor.py` | Report manual `\addcontentsline` entries that may lack a nearby preceding `\phantomsection`; write `manual-anchor-report.json` without repairing anchors or numbering |
+| Final audit | `27-final-audit-report/` | `build_final_audit_report.py` | Aggregate existing final-audit, readiness, citation, and reference evidence into `final-audit-report.json` without rerunning checks or rewriting source files |
+| Final audit | `28-reference-audit-ledger/` | `build_reference_audit_ledger.py` | Aggregate existing reference evidence into `reference-audit-ledger.csv` with one spreadsheet-friendly row per source-specific reference status |
+| Report UX | `29-report-index/` | `build_report_index.py` | Generate static local `reports/index.html` linking JSON / CSV source-of-truth artifacts without replacing them |
+| Report UX | `30-final-audit-html/` | `build_final_audit_html.py` | Generate static local `reports/final-audit-report.html` from `final-audit-report.json` with verdict, KPI, dimension matrix, issues, and source links |
+| Report UX | `31-reference-ledger-html/` | `build_reference_audit_ledger_html.py` | Generate static local `reports/reference-audit-ledger.html` from `reference-audit-ledger.csv` with summary stats, scope views, key-grouped slices, and full-table browsing |
 | Defense | `17-defense-pack/` | `generate_outline.py` | Generate thesis outline for defense preparation |
 | Defense | `17-defense-pack/` | `generate_figure_inventory.py` | Inventory figures and visual evidence |
 | Defense | `17-defense-pack/` | `generate_talk_prep_notes.py` | Generate editable talk-prep notes |
@@ -96,3 +114,11 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 - Start with `02-latex-to-word/` when the advisor review format is Word but the source of truth is LaTeX.
 - Start with `16-check-readiness/` after reports exist and you need a one-page handoff verdict.
 - Start with `19-check-hallucination-risk/` when you want a fast screen for AI-drafted or suspicious references.
+- Start with `23-check-final-cleanup/` before final PDF/submission handoff when you want to catch process residue without auto-editing the thesis.
+- Start with `25-check-statistical-consistency/` when you need final-stage statistical notation consistency evidence.
+- Start with `26-check-manual-anchor/` when manual TOC / LOF / LOT entries may affect PDF hyperlink jump targets.
+- Start with `27-final-audit-report/` after source-of-truth JSON reports exist and you need a single final-audit handoff artifact.
+- Start with `28-reference-audit-ledger/` when you need a spreadsheet handoff across local citation integrity, final reference set, external verification, DOI, URL, and hallucination-risk evidence.
+- Start with `29-report-index/` when you want a local static HTML landing page for generated JSON / CSV artifacts.
+- Start with `30-final-audit-html/` when you want a readable local detail page for the aggregated final-audit JSON.
+- Start with `31-reference-ledger-html/` when you want a readable local HTML surface for the aggregated reference-audit CSV ledger.

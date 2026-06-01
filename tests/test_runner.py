@@ -56,6 +56,52 @@ class RunnerTest(unittest.TestCase):
             compile_checker["runner"], "15-check-compile/check_compile.py"
         )
 
+    def test_manifest_registers_final_cleanup_checker(self) -> None:
+        manifest = json.loads((ROOT / "skills-manifest.json").read_text(encoding="utf-8"))
+        modules = {item["id"]: item for item in manifest["modules"]}
+        self.assertIn("23-check-final-cleanup", modules)
+        self.assertEqual(
+            modules["23-check-final-cleanup"]["entry"],
+            "23-check-final-cleanup/THESIS_FINAL_CLEANUP.md",
+        )
+        self.assertEqual(modules["23-check-final-cleanup"]["type"], "checker")
+        self.assertEqual(
+            modules["23-check-final-cleanup"]["runner"],
+            "23-check-final-cleanup/check_final_cleanup.py",
+        )
+
+    def test_manifest_registers_final_audit_foundation_checkers(self) -> None:
+        manifest = json.loads((ROOT / "skills-manifest.json").read_text(encoding="utf-8"))
+        modules = {item["id"]: item for item in manifest["modules"]}
+        self.assertEqual(
+            modules["25-check-statistical-consistency"]["runner"],
+            "25-check-statistical-consistency/check_statistical_consistency.py",
+        )
+        self.assertEqual(
+            modules["26-check-manual-anchor"]["runner"],
+            "26-check-manual-anchor/check_manual_anchor.py",
+        )
+        self.assertEqual(
+            modules["27-final-audit-report"]["runner"],
+            "27-final-audit-report/build_final_audit_report.py",
+        )
+        self.assertEqual(
+            modules["28-reference-audit-ledger"]["runner"],
+            "28-reference-audit-ledger/build_reference_audit_ledger.py",
+        )
+        self.assertEqual(
+            modules["29-report-index"]["runner"],
+            "29-report-index/build_report_index.py",
+        )
+        self.assertEqual(
+            modules["30-final-audit-html"]["runner"],
+            "30-final-audit-html/build_final_audit_html.py",
+        )
+        self.assertEqual(
+            modules["31-reference-ledger-html"]["runner"],
+            "31-reference-ledger-html/build_reference_audit_ledger_html.py",
+        )
+
     def test_run_check_once_generates_summary(self) -> None:
         with workspace_project_copy(SAMPLE, "runner-") as project_root:
             result = subprocess.run(

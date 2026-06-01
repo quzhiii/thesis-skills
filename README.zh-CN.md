@@ -143,6 +143,17 @@ Word/LaTeX       格式结构           显式确认修改         阻断       
 - `reports/readiness-report.json`
 - `reports/run-summary.json`
 
+可选的 final-audit foundation artifact：
+
+- `reports/final-cleanup-report.json`，由 `23-check-final-cleanup/check_final_cleanup.py` 生成
+- `reports/statistical-consistency-report.json`，由 `25-check-statistical-consistency/check_statistical_consistency.py` 生成
+- `reports/manual-anchor-report.json`，由 `26-check-manual-anchor/check_manual_anchor.py` 生成
+- `reports/final-audit-report.json`，由 `27-final-audit-report/build_final_audit_report.py` 生成
+- `reports/reference-audit-ledger.csv`，由 `28-reference-audit-ledger/build_reference_audit_ledger.py` 生成
+- `reports/index.html`，由 `29-report-index/build_report_index.py` 生成
+- `reports/final-audit-report.html`，由 `30-final-audit-html/build_final_audit_html.py` 生成
+- `reports/reference-audit-ledger.html`，由 `31-reference-ledger-html/build_reference_audit_ledger_html.py` 生成
+
 可选的 v3.3 evidence pipeline 会生成这些引用证据 artifacts：
 
 - `reports/final-reference-set-report.json`
@@ -326,6 +337,77 @@ python 20-check-claim-citation/check_claim_citation.py \
 ```
 
 它会输出 `reports/claim-citation-triage-report.json`，对声明-引用支撑分级做确定性分层。报告保留原有 `triage_label`，并额外给出 `claim_type`、`support_review_label`、`support_review_reason`、`support_signals`、`risk_signals`、`cluster_keys`、`cluster_risk_summary` 和 `next_actions`，帮助人工判断单条引用或成组引用下一步该核验什么；这些字段不等同于最终真伪判断。如果 `.bib` 中有 title、abstract、keywords，本地词面证据会分别计算这些字段与 claim context 的 token overlap。JSON/Markdown 报告也可能包含 advisory `citation_needed_candidates`，用于提示没有引用但像强断言的句子，默认不作为 blocking 结果。
+
+### 7. 我准备提交终稿，需要清理过程痕迹
+
+```bash
+python 23-check-final-cleanup/check_final_cleanup.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+输出：`reports/final-cleanup-report.json`。它会扫描 `TODO`、`FIXME`、`???`、`\textcolor{blue}`、`\color{blue}`、`draft`、`debug`、`待修改`、`待核查` 等终稿残留，但只报告定位，不自动删除、不改写正文。这个 JSON artifact 后续可以并入 `reports/final-audit-report.json`，再由 static HTML report surfaces 展示。
+
+### 8. 我需要检查统计表达和手工目录锚点
+
+```bash
+python 25-check-statistical-consistency/check_statistical_consistency.py \
+  --project-root thesis \
+  --ruleset university-generic
+
+python 26-check-manual-anchor/check_manual_anchor.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+统计一致性报告输出 `reports/statistical-consistency-report.json`，会先统计当前项目的主流写法，再报告偏离主流的 `p值/P值`、`p=/P=`、`95%CI/95\%CI/95%置信区间`、`Bootstrap/自助法`、`SMD/标准化均数差` 等混用情况。手工锚点报告输出 `reports/manual-anchor-report.json`，会提示 `\addcontentsline` 前可能缺少 `\phantomsection` 的位置。两者都只报告风险，不自动改写统计表达、不改 label、caption、编号、表格、图片或 `\ref{}`。
+
+### 9. 我需要一份终稿审计总报告
+
+```bash
+python 27-final-audit-report/build_final_audit_report.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+输出：`reports/final-audit-report.json`。它只聚合已经生成的 JSON evidence，把 final cleanup、statistical consistency、manual anchor、readiness、citation integrity、final reference set、external verification、DOI candidates、URL verification、hallucination risk、claim-citation support 等维度汇总成一个 handoff artifact。它不重新运行检查器、不联网、不修改 `.tex` / `.bib`，也不替代原始 JSON source-of-truth。
+
+### 10. 我需要引用审计表格交付
+
+```bash
+python 28-reference-audit-ledger/build_reference_audit_ledger.py \
+  --project-root thesis \
+  --ruleset university-generic
+```
+
+输出：`reports/reference-audit-ledger.csv`。它把本地 citation integrity、final reference set、external verification、DOI candidates、URL verification、hallucination risk 等已有证据合并为表格行，保留每个来源自己的 status。它不修改 `.bib`、不自动插入 DOI、不替换 URL、不联网，也不会把外部数据库 `NO_CANDIDATE` 直接说成假文献。
+
+### 11. 我需要一个本地报告入口页
+
+```bash
+python 29-report-index/build_report_index.py \
+  --project-root thesis
+```
+
+输出：`reports/index.html`。这个页面只作为本地阅读入口，链接已有 JSON / CSV artifacts，并展示 present / missing / unreadable 数量。JSON / CSV 仍然是 source of truth，不需要前端框架或后端服务。
+
+### 12. 我想先看一版终稿审计 HTML 页
+
+```bash
+python 30-final-audit-html/build_final_audit_html.py \
+  --project-root thesis
+```
+
+输出：`reports/final-audit-report.html`。它从 `final-audit-report.json` 生成，展示 overall verdict、KPI、dimension matrix、issues、next actions 和 source links。JSON 仍然是 authoritative source，不会被 HTML 替代。
+
+### 13. 我想先看一版引用审计台账 HTML 页
+
+```bash
+python 31-reference-ledger-html/build_reference_audit_ledger_html.py \
+  --project-root thesis
+```
+
+输出：`reports/reference-audit-ledger.html`。它从 `reference-audit-ledger.csv` 生成，展示 summary stats、按 scope 浏览、按 citation key 浏览，以及完整台账表格。CSV 仍然是 authoritative source，不会被 HTML 替代。
 
 如果你想先看外部元数据层面的风险分值，可先运行 `19-check-hallucination-risk/check_hallucination_risk.py`，查看每条文献的 `hallucination_risk_score`。
 

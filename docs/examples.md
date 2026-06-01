@@ -222,6 +222,137 @@ All references in this demo are Chinese-language and marked `UNSUPPORTED` by V3.
 
 Boundary: the claim-citation triage runner does not use LLMs, does not judge semantic similarity between claims and references, and never auto-rewrites citations.
 
+## Final cleanup checker
+
+The final cleanup checker is the first final-audit foundation. It scans final LaTeX sources for process residue such as `TODO`, `FIXME`, `待修改`, `待核查`, `见截图`, `这里再改`, `临时`, `占位`, `???`, `\textcolor{blue}`, `\color{blue}`, `draft`, and `debug`.
+
+```bash
+python 23-check-final-cleanup/check_final_cleanup.py \
+  --project-root examples/minimal-latex-project \
+  --ruleset university-generic
+```
+
+Expected output:
+
+- `reports/final-cleanup-report.json`
+
+Boundary: this checker is deterministic and report-only. It does not delete markers, rewrite prose, or change source files. The JSON report is intended to become the `final_cleanup` section of a future `reports/final-audit-report.json` and can be rendered later as static HTML issue cards grouped by risk level.
+
+## Statistical consistency checker
+
+The statistical consistency checker reports mixed notation families and suggests reviewing deviations from the dominant style in the current project.
+
+```bash
+python 25-check-statistical-consistency/check_statistical_consistency.py \
+  --project-root examples/minimal-latex-project \
+  --ruleset university-generic
+```
+
+Expected output:
+
+- `reports/statistical-consistency-report.json`
+
+Boundary: this checker does not decide that one notation is universally correct. It reports mixed styles such as `p值/P值`, `p=/P=`, `95%CI/95\%CI/95%置信区间`, `Bootstrap/自助法`, and `SMD/标准化均数差` so a human can normalize final wording if needed.
+
+## Manual anchor checker
+
+The manual anchor checker reports manual contents entries that may be missing a nearby preceding `\phantomsection`, which can make TOC / LOF / LOT links jump to the previous section, figure, or table.
+
+```bash
+python 26-check-manual-anchor/check_manual_anchor.py \
+  --project-root examples/minimal-latex-project \
+  --ruleset university-generic
+```
+
+Expected output:
+
+- `reports/manual-anchor-report.json`
+
+Boundary: this checker does not repair labels, captions, numbering, tables, figures, or `\ref{}` usage. It only reports likely hyperlink-anchor risks for manual verification.
+
+## Final audit report
+
+After generating source-of-truth JSON evidence, build a single final-audit handoff artifact:
+
+```bash
+python 27-final-audit-report/build_final_audit_report.py \
+  --project-root examples/minimal-latex-project \
+  --ruleset university-generic
+```
+
+Expected output:
+
+- `reports/final-audit-report.json`
+
+This report aggregates available JSON evidence, including final cleanup, statistical consistency, manual anchor checks, readiness, citation integrity, final reference set, external verification, DOI candidates, URL verification, hallucination risk, and claim-citation support. It does not rerun checkers, call external services, modify sources, or replace the raw JSON reports.
+
+## Reference audit ledger
+
+Build a spreadsheet-friendly ledger from existing reference evidence:
+
+```bash
+python 28-reference-audit-ledger/build_reference_audit_ledger.py \
+  --project-root examples/citation-integrity-broken \
+  --ruleset university-generic
+```
+
+Expected output:
+
+- `reports/reference-audit-ledger.csv`
+
+Ledger columns:
+
+```text
+key,title,authors,year,venue,doi,scope,source_checked,status,issue,action_suggested
+```
+
+Boundary: this ledger aggregates existing evidence only. It does not rerun reference checks, call external services, edit `.bib`, insert DOI values, replace URLs, or label externally not-found references as fake.
+
+## Static report index
+
+Generate a local HTML landing page for available report artifacts:
+
+```bash
+python 29-report-index/build_report_index.py \
+  --project-root examples/minimal-latex-project
+```
+
+Expected output:
+
+- `reports/index.html`
+
+Boundary: the HTML index is a reading surface only. JSON / CSV remain the source of truth. It links known artifacts, shows present / missing / unreadable counts, and avoids a frontend framework or hosted backend.
+
+## Final audit HTML
+
+Generate a local detail page for the aggregated final-audit JSON:
+
+```bash
+python 30-final-audit-html/build_final_audit_html.py \
+  --project-root examples/minimal-latex-project
+```
+
+Expected output:
+
+- `reports/final-audit-report.html`
+
+Boundary: this page is generated from `final-audit-report.json` and remains a reading surface only. It does not replace the JSON, rerun checks, or modify thesis sources.
+
+## Reference audit ledger HTML
+
+Generate a local detail page for the spreadsheet-friendly reference ledger:
+
+```bash
+python 31-reference-ledger-html/build_reference_audit_ledger_html.py \
+  --project-root examples/citation-integrity-broken
+```
+
+Expected output:
+
+- `reports/reference-audit-ledger.html`
+
+Boundary: this page is generated from `reference-audit-ledger.csv` and remains a reading surface only. It does not replace the CSV, rerun checks, call external services, or modify bibliography or thesis source files.
+
 ## Unified Evidence Pipeline (v3.3.0)
 
 Run final reference set plus all four citation evidence layers in a single command:
