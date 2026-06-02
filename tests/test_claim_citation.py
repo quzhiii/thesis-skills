@@ -243,6 +243,37 @@ class ClaimCitationTriageTest(unittest.TestCase):
         self.assertEqual(result["support_review_label"], "NEEDS_MANUAL_REVIEW")
         self.assertTrue(any("strength" in action.lower() for action in result["next_actions"]))
 
+    def test_recent_background_sentence_does_not_trigger_outdated_support(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        context = self._context(context="Recent studies explored early transformer variants in prior work.")
+        entry = self._entry(fields={"title": "Transformer Variants In Prior Work", "author": "Smith, Jane", "year": "2012"})
+
+        result = triage_claim_citation(context, entry, self._risk(), 2)
+
+        self.assertEqual(result["claim_type"], "background")
+        self.assertNotIn("possible_outdated_support", result["risk_signals"])
+        self.assertNotEqual(result["support_review_label"], "NEEDS_MANUAL_REVIEW")
+
+    def test_strong_empirical_claim_with_abstract_overlap_does_not_trigger_topic_mismatch(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        context = self._context(context="The method significantly improves benchmark accuracy.")
+        entry = self._entry(
+            fields={
+                "title": "A Study Of Model Training",
+                "author": "Smith, Jane",
+                "year": "2024",
+                "abstract": "We evaluate benchmark accuracy improvements across multiple systems.",
+                "keywords": "benchmark; accuracy; evaluation",
+            }
+        )
+
+        result = triage_claim_citation(context, entry, self._risk(), 2)
+
+        self.assertGreater(result["evidence"]["abstract_token_overlap"], 0)
+        self.assertNotIn("possible_topic_mismatch", result["risk_signals"])
+
     def test_build_report_counts_entries_and_uncited_references(self) -> None:
         from core.citation_integrity.claim_citation import build_claim_citation_report
 

@@ -4,7 +4,7 @@
 
 `v1.0.0` was the public-story stabilization milestone for `thesis-skills`.
 
-`v3.3.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, the V2.0 external metadata verification layer, the V3.0 hallucination risk scoring layer, the V3.1 claim-citation support triage layer, and the V3.3 reference verification hardening layer.
+`v3.4.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, the V2.0 external metadata verification layer, the V3.0 hallucination risk scoring layer, the V3.1 claim-citation support triage layer, the V3.3 reference verification hardening layer, and the V3.4 final-audit / report-UX layer.
 
 ```text
 bibliography intake
@@ -52,7 +52,7 @@ Design rules that stay in effect:
 
 ## Current Workflow Status
 
-All listed workflow families remain part of the current `v3.3.0` public contract:
+All listed workflow families remain part of the current `v3.4.0` public contract:
 
 | Workflow | Status | Entrypoint |
 |---|---|---|
@@ -131,10 +131,11 @@ All listed workflow families remain part of the current `v3.3.0` public contract
 | v3.1.0 | Claim-citation support triage, `claim-citation-triage-report.json`, context extraction, deterministic triage scoring, and three demo projects |
 | v3.2.0 | Readiness gate integration (hallucination risk + claim-citation dimensions), unified evidence pipeline runner `run_evidence_pipeline.py` |
 | v3.3.0 | Final reference set, resumeable external verification, DOI candidates, URL verification, and evidence pipeline hardening |
+| v3.4.0 | Final-audit foundation checkers, final-audit/report HTML surfaces, reference-audit ledger, and conservative claim-citation support-risk signals |
 
-## Post-v3.3 Product Roadmap
+## Post-v3.4 Product Roadmap
 
-`v3.3.0` is the current product baseline, not a stepping stone that forces the next feature to become `v4.0.0` or `v5.0.0`.
+`v3.4.0` is the current product baseline, not a stepping stone that forces the next feature to become `v4.0.0` or `v5.0.0`.
 
 Future work should be organized as product tracks. Reserve a new major version only when the public contract changes in a large way: a new user workflow, a new artifact family, a new distribution model, or a capability that materially changes user expectations. Smaller improvements should stay in the current release line or become minor/patch releases.
 
@@ -151,11 +152,12 @@ The citation integrity line remains the highest-value product path. The shipped 
 - Claim-citation support triage: `20-check-claim-citation/check_claim_citation.py`, `reports/claim-citation-triage-report.json`, `reports/claim-citation-triage.md`, `reports/claim-citation-triage.csv`
 - unified orchestration: `run_evidence_pipeline.py`
 
-The next citation work should deepen **claim-citation support review** without claiming automatic truth judgment:
+The next citation work should make **claim-citation support review** easier to consume without claiming automatic truth judgment:
 
-- improve claim extraction and citation-cluster grouping
-- use bibliography metadata, hallucination risk labels, and optional abstract/keyword evidence as explicit signals
-- flag likely topic mismatch, overclaim, outdated support, weak support, orphaned citation, and citation-needed cases
+- improve claim-citation HTML / presentation so support signals, risk signals, citation-needed candidates, and clusters are easier to review
+- continue calibrating claim extraction and citation-cluster grouping with fixtures from real thesis projects
+- continue using bibliography metadata, hallucination risk labels, and optional abstract/keyword evidence as explicit signals
+- keep likely topic mismatch, overclaim, outdated support, weak support, orphaned citation, and citation-needed cases conservative
 - keep every finding conservative: "needs manual review", not "this is false"
 - keep outputs report-first and human-confirmed; no automatic citation rewrite and no automatic bibliography insertion
 
@@ -312,16 +314,14 @@ Showcase work must follow the same bounded philosophy as code: no marketing copy
 
 ## Suggested Execution Order
 
-Given the current repository state at `v3.3.0`, the next work should proceed in this order:
+Given the current repository state at `v3.4.0`, the next work should proceed in this order:
 
-1. **Lock the post-v3.3 roadmap**: keep `docs/roadmap.md` aligned with the product direction above and avoid assigning `v4.0` / `v5.0` labels until a true major iteration is chosen.
-2. **Complete the citation support review line**: continue improving claim-citation support review using explicit evidence signals while preserving report-first, human-confirmed behavior.
-3. **Add final-audit checker foundations**: implement final cleanup scanning, statistical expression consistency, and manual anchor / `\phantomsection` checks as deterministic pre-submission audit layers.
-4. **Package evidence handoff**: consolidate the current evidence stack into handoff-friendly artifacts such as `reference-audit-ledger.csv` and a final-audit readiness presentation.
-5. **Build human-readable report surfaces**: generate static HTML review artifacts that sit on top of the existing JSON / CSV contracts and improve usability on desktop and mobile.
-6. **Harden rule-pack packaging**: improve pack lint, completeness, scorecard, and export-bundle workflows so packs can be shared safely.
-7. **Evaluate candidate reference support later**: only start recommendation work after the support-review, final-audit, and handoff tracks are stable.
-8. **Run cross-release verification**: grep, link, command, and test verification remain mandatory before treating any roadmap item as complete.
+1. **Build claim-citation HTML**: add a static local `reports/claim-citation-triage.html` surface for support-review labels, risk signals, clusters, and citation-needed candidates.
+2. **Polish cross-report navigation**: link claim-citation, readiness, final-audit, reference ledger, and raw JSON / CSV artifacts consistently.
+3. **Calibrate support-risk heuristics**: add more fixtures for `possible_topic_mismatch`, `possible_outdated_support`, and `possible_overclaim` without turning them into truth claims.
+4. **Harden rule-pack packaging**: improve pack lint, completeness, scorecard, and export-bundle workflows so packs can be shared safely.
+5. **Evaluate candidate reference support later**: only start recommendation work after support-review presentation, final-audit, and handoff tracks are stable.
+6. **Run cross-release verification**: grep, link, command, and test verification remain mandatory before treating any roadmap item as complete.
 
 ## Cross-Release Acceptance Gates
 

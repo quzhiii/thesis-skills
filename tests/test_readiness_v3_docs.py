@@ -21,7 +21,7 @@ class ReadinessV3DocsTest(unittest.TestCase):
                 "hallucination_risk",
                 "claim_citation",
                 "run_evidence_pipeline.py",
-                "v3.3.0",
+                "v3.4.0",
                 "final-reference-set-report.json",
             ],
         )
@@ -73,9 +73,9 @@ class ReadinessV3DocsTest(unittest.TestCase):
             ],
         )
 
-    def test_pyproject_is_3_3_0(self) -> None:
+    def test_pyproject_is_3_4_0(self) -> None:
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-        self.assertIn('version = "3.3.0"', pyproject)
+        self.assertIn('version = "3.4.0"', pyproject)
 
 
 if __name__ == "__main__":

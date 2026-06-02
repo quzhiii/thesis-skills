@@ -60,7 +60,7 @@ class FinalCleanupDocsTest(unittest.TestCase):
         self._assert_contains_all(
             "docs/roadmap.md",
             [
-                "v3.3.0` is the current product baseline",
+                "v3.4.0` is the current product baseline",
                 "Final cleanup residue scanning",
                 "23-check-final-cleanup/check_final_cleanup.py",
                 "final-cleanup-report.json",

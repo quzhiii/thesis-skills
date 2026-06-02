@@ -2,6 +2,14 @@
 
 All notable changes to Thesis Skills are summarized here.
 
+## v3.4.0
+
+- Added final-audit foundation checkers for final cleanup residue, statistical notation consistency, and manual `\addcontentsline` / `\phantomsection` anchor review.
+- Added `reports/final-audit-report.json` and `reports/reference-audit-ledger.csv` as handoff-oriented aggregation artifacts over existing JSON / CSV evidence.
+- Added static local report surfaces: `reports/index.html`, `reports/final-audit-report.html`, and `reports/reference-audit-ledger.html`.
+- Enriched claim-citation support review with conservative advisory signals: `possible_topic_mismatch`, `possible_outdated_support`, and `possible_overclaim`.
+- Kept JSON / CSV source-of-truth behavior, CLI-first operation, and no automatic thesis or bibliography rewriting.
+
 ## v3.3.0
 
 - Added a final reference set layer that parses `.aux` and `.bbl` artifacts, reports unused bib entries vs actually rendered bibliography entries, and falls back to TeX citation parsing when compile artifacts are missing.

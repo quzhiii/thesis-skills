@@ -80,6 +80,7 @@ REPORT_ARTIFACTS: tuple[ReportArtifactSpec, ...] = (
 HTML_DETAILS = {
     "final_audit": "final-audit-report.html",
     "reference_ledger": "reference-audit-ledger.html",
+    "claim_citation": "claim-citation-triage.html",
 }
 
 

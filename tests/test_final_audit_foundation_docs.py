@@ -28,9 +28,11 @@ class FinalAuditFoundationDocsTest(unittest.TestCase):
                 "29-report-index",
                 "30-final-audit-html",
                 "31-reference-ledger-html",
+                "32-claim-citation-html",
                 "reports/index.html",
                 "reports/final-audit-report.html",
                 "reports/reference-audit-ledger.html",
+                "reports/claim-citation-triage.html",
             ],
         )
         self._assert_contains_all(
@@ -43,6 +45,7 @@ class FinalAuditFoundationDocsTest(unittest.TestCase):
                 "Static report index",
                 "Final audit HTML",
                 "Reference audit ledger HTML",
+                "Claim-citation HTML",
                 "25-check-statistical-consistency/check_statistical_consistency.py",
                 "26-check-manual-anchor/check_manual_anchor.py",
                 "27-final-audit-report/build_final_audit_report.py",
@@ -50,6 +53,7 @@ class FinalAuditFoundationDocsTest(unittest.TestCase):
                 "29-report-index/build_report_index.py",
                 "30-final-audit-html/build_final_audit_html.py",
                 "31-reference-ledger-html/build_reference_audit_ledger_html.py",
+                "32-claim-citation-html/build_claim_citation_html.py",
             ],
         )
 
@@ -66,6 +70,7 @@ class FinalAuditFoundationDocsTest(unittest.TestCase):
                 "reports/index.html",
                 "reports/final-audit-report.html",
                 "reports/reference-audit-ledger.html",
+                "reports/claim-citation-triage.html",
             ],
         )
         self._assert_contains_all(
@@ -78,6 +83,7 @@ class FinalAuditFoundationDocsTest(unittest.TestCase):
                 "reports/index.html",
                 "reports/final-audit-report.html",
                 "reports/reference-audit-ledger.html",
+                "reports/claim-citation-triage.html",
                 "不自动改写统计表达",
             ],
         )

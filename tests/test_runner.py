@@ -101,6 +101,10 @@ class RunnerTest(unittest.TestCase):
             modules["31-reference-ledger-html"]["runner"],
             "31-reference-ledger-html/build_reference_audit_ledger_html.py",
         )
+        self.assertEqual(
+            modules["32-claim-citation-html"]["runner"],
+            "32-claim-citation-html/build_claim_citation_html.py",
+        )
 
     def test_run_check_once_generates_summary(self) -> None:
         with workspace_project_copy(SAMPLE, "runner-") as project_root:

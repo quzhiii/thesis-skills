@@ -26,6 +26,11 @@ I18N = {
         "deduped": "去重后",
         "source_artifacts": "源产物",
         "source_truth": "JSON / CSV 仍是 authoritative source",
+        "related_reports": "相关报告",
+        "related_reports_note": "在终稿审计、引用台账和声明-引用支撑分级之间快速跳转。",
+        "report_index": "报告入口页",
+        "reference_ledger_html": "引用审计 HTML",
+        "claim_citation_html": "声明-引用 HTML",
         "artifact": "产物",
         "status": "状态",
         "kind": "类型",
@@ -66,6 +71,11 @@ I18N = {
         "deduped": "deduped",
         "source_artifacts": "Source Artifacts",
         "source_truth": "JSON / CSV remain authoritative",
+        "related_reports": "Related Reports",
+        "related_reports_note": "Jump quickly between final-audit, reference-ledger, and claim-citation review surfaces.",
+        "report_index": "Report index",
+        "reference_ledger_html": "Reference ledger HTML",
+        "claim_citation_html": "Claim-citation HTML",
         "artifact": "Artifact",
         "status": "Status",
         "kind": "Kind",
@@ -316,6 +326,21 @@ def _source_row(source: dict[str, object], lang: str) -> str:
 """
 
 
+def _related_reports(lang: str) -> str:
+    links = [
+        ("index.html", _text("report_index", lang)),
+        ("reference-audit-ledger.html", _text("reference_ledger_html", lang)),
+        ("claim-citation-triage.html", _text("claim_citation_html", lang)),
+    ]
+    pills = "".join(f'<a class="nav-pill" href="{_e(path)}">{_e(label)}</a>' for path, label in links)
+    return f"""
+      <section class="section nav-section">
+        <div class="section-head"><h2>{_e(_text('related_reports', lang))}</h2><span class="meta">{_e(_text('related_reports_note', lang))}</span></div>
+        <div class="nav-pills">{pills}</div>
+      </section>
+"""
+
+
 def _render_lang_block(report: dict[str, object], lang: str) -> str:
     overall = str(report.get("overall_verdict", "WARN"))
     summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
@@ -384,6 +409,7 @@ def _render_lang_block(report: dict[str, object], lang: str) -> str:
           <tbody>{source_rows}</tbody>
         </table>
       </section>
+      {_related_reports(lang)}
       <div class="raw-note">{_e(_text('generated_from', lang))} <a href="final-audit-report.json">final-audit-report.json</a>{_e(_text('regenerate_note', lang))}</div>
     </section>
 """
@@ -439,6 +465,9 @@ def render_final_audit_html(report: dict[str, object]) -> str:
     th, td {{ border-bottom:1px solid var(--grey-2); text-align:left; padding:12px 10px; vertical-align:top; font-size:14px; }}
     th {{ font-family:"IBM Plex Mono", Consolas, monospace; text-transform:uppercase; letter-spacing:.1em; font-size:11px; color:var(--grey-3); }}
     .pill {{ display:inline-block; padding:4px 7px; background:var(--grey-1); }}
+    .nav-pills {{ display:flex; flex-wrap:wrap; gap:10px; }}
+    .nav-pill {{ display:inline-block; padding:10px 12px; border:1px solid var(--grey-2); background:#fff; }}
+    .nav-section .meta {{ text-transform:none; letter-spacing:0; font-family:Inter, "Helvetica Neue", Helvetica, Arial, sans-serif; font-size:14px; color:var(--grey-3); }}
     .status-present {{ color:var(--pass); }} .status-missing {{ color:var(--warn); }} .status-unreadable {{ color:var(--block); }}
     .raw-note {{ margin-top:24px; padding:16px; border:1px solid var(--grey-2); background:var(--grey-1); color:var(--grey-3); }}
     @media (max-width:920px) {{ header, .matrix, .issue-grid {{ grid-template-columns:1fr; }} .kpis {{ grid-template-columns:repeat(2,1fr); }} }}

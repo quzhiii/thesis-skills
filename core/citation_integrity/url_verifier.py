@@ -53,7 +53,7 @@ def _classify_status(http_status: int, original_url: str, final_url: str) -> str
 
 
 def _request(url: str, method: str, timeout: float) -> tuple[int, str]:
-    request = urllib.request.Request(url, method=method, headers={"User-Agent": "thesis-skills/3.3.0"})
+    request = urllib.request.Request(url, method=method, headers={"User-Agent": "thesis-skills/3.4.0"})
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             status = getattr(response, "status", None)

@@ -23,6 +23,11 @@ I18N = {
         "scope_count": "行",
         "source_truth": "CSV 仍然是 authoritative source。这个页面只帮助你按 scope / key 快速浏览。",
         "open_csv": "打开 CSV 源文件",
+        "related_reports": "相关报告",
+        "related_note": "在报告入口、终稿审计和声明-引用支撑分级之间跳转。",
+        "report_index": "报告入口页",
+        "final_audit": "终稿审计 HTML",
+        "claim_citation": "声明-引用 HTML",
         "column_key": "key",
         "column_title": "标题",
         "column_authors": "作者",
@@ -52,6 +57,11 @@ I18N = {
         "scope_count": "rows",
         "source_truth": "CSV remains authoritative. This page only helps you browse by scope and citation key.",
         "open_csv": "Open CSV source",
+        "related_reports": "Related Reports",
+        "related_note": "Jump between the report index, final-audit detail, and claim-citation review surfaces.",
+        "report_index": "Report index",
+        "final_audit": "Final audit HTML",
+        "claim_citation": "Claim-citation HTML",
         "column_key": "key",
         "column_title": "title",
         "column_authors": "authors",
@@ -163,6 +173,21 @@ def _group_cards(rows: list[dict[str, str]], group_key: str, lang: str) -> str:
     return "".join(cards)
 
 
+def _related_reports(lang: str) -> str:
+    links = [
+        ("index.html", I18N[lang]["report_index"]),
+        ("final-audit-report.html", I18N[lang]["final_audit"]),
+        ("claim-citation-triage.html", I18N[lang]["claim_citation"]),
+    ]
+    pills = "".join(f'<a class="nav-pill" href="{html.escape(path)}">{html.escape(label)}</a>' for path, label in links)
+    return f"""
+      <section class="section nav-section">
+        <div class="section-head"><h2>{html.escape(I18N[lang]['related_reports'])}</h2><span class="meta-copy">{html.escape(I18N[lang]['related_note'])}</span></div>
+        <div class="nav-pills">{pills}</div>
+      </section>
+"""
+
+
 def _lang_block(rows: list[dict[str, str]], csv_name: str, lang: str) -> str:
     unique_keys = len({row.get("key", "") for row in rows if row.get("key", "")})
     scopes = len({row.get("scope", "") for row in rows if row.get("scope", "")})
@@ -205,6 +230,7 @@ def _lang_block(rows: list[dict[str, str]], csv_name: str, lang: str) -> str:
           <tbody>{table_rows}</tbody>
         </table>
       </section>
+      {_related_reports(lang)}
     </section>
 """
 
@@ -246,6 +272,9 @@ def render_reference_audit_ledger_html(rows: list[dict[str, str]], *, csv_name: 
     .group-key, .group-count {{ font-family:"IBM Plex Mono", Consolas, monospace; text-transform:uppercase; font-size:12px; letter-spacing:.1em; }}
     .group-count {{ color:var(--grey-3); }}
     .group-meta {{ color:var(--grey-3); font-size:14px; line-height:1.45; }}
+    .nav-pills {{ display:flex; flex-wrap:wrap; gap:10px; }}
+    .nav-pill {{ display:inline-block; padding:10px 12px; border:1px solid var(--grey-2); background:#fff; }}
+    .meta-copy {{ color:var(--grey-3); font-size:14px; }}
     table {{ width:100%; border-collapse:collapse; background:#fff; }}
     th, td {{ border-bottom:1px solid var(--grey-2); text-align:left; padding:10px 8px; vertical-align:top; font-size:13px; }}
     th {{ font-family:"IBM Plex Mono", Consolas, monospace; text-transform:uppercase; letter-spacing:.1em; font-size:11px; color:var(--grey-3); position:sticky; top:0; background:#fff; }}

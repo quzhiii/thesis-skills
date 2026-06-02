@@ -17,8 +17,8 @@ class V33DocsTest(unittest.TestCase):
         self._assert_contains_all(
             "README.md",
             [
-                "# Thesis Skills v3.3.0",
-                "What's new in v3.3.0",
+                "# Thesis Skills v3.4.0",
+                "What's new in v3.4.0",
                 "final-reference-set-report.json",
                 "missing-doi-candidates.json",
                 "url-verification-report.json",
@@ -29,8 +29,8 @@ class V33DocsTest(unittest.TestCase):
         self._assert_contains_all(
             "README.zh-CN.md",
             [
-                "# Thesis Skills v3.3.0",
-                "v3.3.0 有哪些更新",
+                "# Thesis Skills v3.4.0",
+                "v3.4.0 有哪些更新",
                 "final-reference-set-report.json",
                 "missing-doi-candidates.json",
                 "url-verification-report.json",
@@ -79,11 +79,11 @@ class V33DocsTest(unittest.TestCase):
             ],
         )
 
-    def test_versions_bumped_to_v3_3_0(self) -> None:
+    def test_versions_bumped_to_v3_4_0(self) -> None:
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
         manifest = (ROOT / "skills-manifest.json").read_text(encoding="utf-8")
-        self.assertIn('version = "3.3.0"', pyproject)
-        self.assertIn('"version": "3.3.0"', manifest)
+        self.assertIn('version = "3.4.0"', pyproject)
+        self.assertIn('"version": "3.4.0"', manifest)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-# Thesis Skills v3.3.0
+# Thesis Skills v3.4.0
 
 <div align="center">
 
@@ -13,7 +13,7 @@
 
 **中文文档** · [English](README.md) · [展示页面](https://quzhiii.github.io/thesis-skills)
 
-[v3.3.0 亮点](#v330-有哪些更新) · [快速开始](#快速开始) · [输出](#输出) · [使用场景](#使用场景) · [如何同步后续更新](#如何同步后续更新) · [规则包](#规则包) · [创建自己的规则包](#创建你自己的学校规则包) · [边界](#边界)
+[v3.4.0 亮点](#v340-有哪些更新) · [快速开始](#快速开始) · [输出](#输出) · [使用场景](#使用场景) · [如何同步后续更新](#如何同步后续更新) · [规则包](#规则包) · [创建自己的规则包](#创建你自己的学校规则包) · [边界](#边界)
 
 </div>
 
@@ -53,14 +53,14 @@ LaTeX 项目 ───────┤                                           
 
 ---
 
-## v3.3.0 有哪些更新
+## v3.4.0 有哪些更新
 
-- **Readiness Gate 集成** 的四层引用证据流水线继续保留，依然可以一键跑完四层引用证据流水线；V3.3 在其上新增 final reference set、DOI 候选和 URL 验证。
-- **引用验证加固**：新增 `.aux` / `.bbl` final reference set 解析，能区分“最终编译进参考文献表的条目”和“只是 bib 里存在但没有进入最终文档的条目”。
-- 新增报告：`reports/final-reference-set-report.json`、`reports/final-reference-set-report.csv`、`reports/missing-doi-candidates.json`、`reports/missing-doi-candidates.csv`、`reports/url-verification-report.json`、`reports/url-verification-flagged.csv`。
-- `18-verify-references/verify_external_references.py` 新增 `--scope final|cited|all`、`--resume`、`--only-key`，并支持 crash-safe partial report 写入。
-- 外部验证 mismatch taxonomy 扩展到 DOI、标题、subtitle、作者人数/顺序、年份、venue、volume/issue/pages。
-- `run_evidence_pipeline.py` 现在线性执行 final reference set → 外部验证 → 幻觉风险 → 声明-引用分级。
+- **Readiness Gate 集成** 的四层引用证据流水线继续保留，依然可以一键跑完四层引用证据流水线；V3.4 在其上把 final-audit 与本地 HTML 报告界面补齐。
+- **终稿审计界面**：新增 final cleanup、statistical consistency、manual anchor 三个确定性检查，并聚合到 `reports/final-audit-report.json`。
+- **引用审计交付表**：`28-reference-audit-ledger/build_reference_audit_ledger.py` 从已有引用证据生成表格友好的 `reports/reference-audit-ledger.csv`。
+- **本地静态报告 UX**：新增 `reports/index.html`、`reports/final-audit-report.html`、`reports/reference-audit-ledger.html`，方便阅读，但 JSON / CSV 仍然是 source of truth。
+- **声明-引用支撑复核**：新增 `possible_topic_mismatch`、`possible_outdated_support`、`possible_overclaim` 等保守 advisory 风险信号。
+- **V3.3 引用验证加固** 继续保留：final reference set、DOI 候选、URL 验证、可限定范围/可续跑外部验证，以及统一证据流水线 runner `run_evidence_pipeline.py`。
 
 ---
 
@@ -153,6 +153,7 @@ Word/LaTeX       格式结构           显式确认修改         阻断       
 - `reports/index.html`，由 `29-report-index/build_report_index.py` 生成
 - `reports/final-audit-report.html`，由 `30-final-audit-html/build_final_audit_html.py` 生成
 - `reports/reference-audit-ledger.html`，由 `31-reference-ledger-html/build_reference_audit_ledger_html.py` 生成
+- `reports/claim-citation-triage.html`，由 `32-claim-citation-html/build_claim_citation_html.py` 生成
 
 可选的 v3.3 evidence pipeline 会生成这些引用证据 artifacts：
 
@@ -173,7 +174,7 @@ Word/LaTeX       格式结构           显式确认修改         阻断       
 
 ### Citation Integrity 预览
 
-当前 `v3.3.0` 版本线把本地优先的 Citation Integrity 作为提交前引用检查的第一层：
+当前 `v3.4.0` 版本线把本地优先的 Citation Integrity 作为提交前引用检查的第一层：
 
 ```text
 References: BLOCK
@@ -409,6 +410,15 @@ python 31-reference-ledger-html/build_reference_audit_ledger_html.py \
 
 输出：`reports/reference-audit-ledger.html`。它从 `reference-audit-ledger.csv` 生成，展示 summary stats、按 scope 浏览、按 citation key 浏览，以及完整台账表格。CSV 仍然是 authoritative source，不会被 HTML 替代。
 
+### 14. 我想先看一版声明-引用支撑 HTML 页
+
+```bash
+python 32-claim-citation-html/build_claim_citation_html.py \
+  --project-root thesis
+```
+
+输出：`reports/claim-citation-triage.html`。它从 `claim-citation-triage-report.json` 生成，展示 triage 分组、citation-needed candidates、uncited references、引用簇复核信息，以及 support/risk signals 和 next actions。JSON 仍然是 authoritative source，不会被 HTML 替代。
+
 如果你想先看外部元数据层面的风险分值，可先运行 `19-check-hallucination-risk/check_hallucination_risk.py`，查看每条文献的 `hallucination_risk_score`。
 
 更多场景见 [`docs/examples.md`](docs/examples.md)。
@@ -584,6 +594,7 @@ python run_check_once.py \
 
 ## 历史迭代记录
 
+- `v3.4.0`：加入终稿审计报告界面、引用审计 HTML 台账，以及保守的声明-引用支撑风险信号。
 - `v3.3.0`：加入 final reference set、可续跑外部验证、DOI 候选建议和 URL 验证。
 - `v3.2.0`：将幻觉风险评分和声明-引用分级接入 readiness gate，新增统一证据流水线 runner。
 - `v3.1.0`：加入声明-引用支撑分级、`claim-citation-triage-report.json`、确定性分级评分，以及三个 demo 项目。

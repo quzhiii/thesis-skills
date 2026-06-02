@@ -1,4 +1,4 @@
-# Thesis Skills v3.3.0
+# Thesis Skills v3.4.0
 
 <div align="center">
 
@@ -13,7 +13,7 @@ Spend your time thinking, not fixing formatting.
 
 [中文文档](README.zh-CN.md) · **English** · [Showcase](https://quzhiii.github.io/thesis-skills)
 
-[What's New](#whats-new-in-v330) · [Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
+[What's New](#whats-new-in-v340) · [Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
 
 </div>
 
@@ -53,14 +53,14 @@ For repetitive finishing work, the expected time savings are concrete:
 
 ---
 
-## What's new in v3.3.0
+## What's new in v3.4.0
 
-- **Readiness Gate Integration** remains in place from V3.2, and V3.3 extends that evidence stack with harder reference verification.
-- **Reference verification hardening**: new final reference set parsing from `.aux` / `.bbl`, with fallback to TeX citation parsing when compile artifacts are unavailable.
-- New reports: `reports/final-reference-set-report.json`, `reports/final-reference-set-report.csv`, `reports/missing-doi-candidates.json`, `reports/missing-doi-candidates.csv`, `reports/url-verification-report.json`, and `reports/url-verification-flagged.csv`.
-- `18-verify-references/verify_external_references.py` now supports `--scope final|cited|all`, `--resume`, `--only-key`, and crash-safe partial report writing.
-- Expanded external mismatch taxonomy: DOI, title, subtitle, author count/order, year, venue, and volume/issue/pages mismatches.
-- `run_evidence_pipeline.py` now runs the final reference set step before external verification and downstream citation evidence steps.
+- **Readiness Gate Integration** remains in place from V3.2, and V3.4 extends that citation evidence stack with final-audit and local HTML report surfaces.
+- **Final-audit surfaces**: new deterministic final cleanup, statistical consistency, and manual-anchor checks feed `reports/final-audit-report.json`.
+- **Reference audit handoff**: `28-reference-audit-ledger/build_reference_audit_ledger.py` writes a spreadsheet-friendly `reports/reference-audit-ledger.csv` from existing reference evidence.
+- **Static local report UX**: `reports/index.html`, `reports/final-audit-report.html`, and `reports/reference-audit-ledger.html` make JSON / CSV artifacts easier to review without replacing them as source of truth.
+- **Claim-citation support review** now includes conservative advisory signals such as `possible_topic_mismatch`, `possible_outdated_support`, and `possible_overclaim`.
+- **V3.3 reference verification hardening** remains in place: final reference set parsing, DOI candidates, URL verification, scoped/resumable external verification, and the unified evidence pipeline runner `run_evidence_pipeline.py`.
 
 ---
 
@@ -153,6 +153,7 @@ Optional final-audit foundation artifact:
 - `reports/index.html` from `29-report-index/build_report_index.py`
 - `reports/final-audit-report.html` from `30-final-audit-html/build_final_audit_html.py`
 - `reports/reference-audit-ledger.html` from `31-reference-ledger-html/build_reference_audit_ledger_html.py`
+- `reports/claim-citation-triage.html` from `32-claim-citation-html/build_claim_citation_html.py`
 
 The optional v3.3 evidence pipeline writes the citation evidence artifacts:
 
@@ -173,7 +174,7 @@ Example JSON snippets and demo walkthroughs: [`docs/examples.md`](docs/examples.
 
 ### Citation Integrity preview
 
-The current v3.3.0 release line keeps local Citation Integrity as the first layer of pre-submission reference checking:
+The current v3.4.0 release line keeps local Citation Integrity as the first layer of pre-submission reference checking:
 
 ```text
 References: BLOCK
@@ -399,6 +400,17 @@ python 31-reference-ledger-html/build_reference_audit_ledger_html.py \
 ```
 
 Output: `reports/reference-audit-ledger.html`. This static page is generated from `reference-audit-ledger.csv` and shows summary stats, scope slices, citation-key groupings, and the full ledger table. CSV remains authoritative.
+
+### Claim-Citation HTML
+
+Generate a readable local detail page for claim-citation support review:
+
+```bash
+python 32-claim-citation-html/build_claim_citation_html.py \
+  --project-root thesis
+```
+
+Output: `reports/claim-citation-triage.html`. This static page is generated from `claim-citation-triage-report.json` and shows triage groups, citation-needed candidates, uncited references, cluster review details, support/risk signals, and next actions. JSON remains authoritative.
 
 ## Scenarios
 
@@ -649,6 +661,7 @@ Tweak → re-run → review reports. Most packs converge in 1–2 calibration ro
 
 ## Release history
 
+- `v3.4.0`: added final-audit report surfaces, reference-audit ledger HTML, and conservative claim-citation support-risk signals.
 - `v3.3.0`: hardened reference verification with final reference set parsing, resumeable external verification, DOI candidate suggestions, and URL verification.
 - `v3.2.0`: integrated hallucination risk and claim-citation triage into readiness gate, added unified evidence pipeline runner, `run_evidence_pipeline.py`.
 - `v3.1.0`: added claim-citation support triage, `claim-citation-triage-report.json`, deterministic triage scoring, and three demo projects.

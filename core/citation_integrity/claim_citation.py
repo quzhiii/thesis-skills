@@ -266,7 +266,7 @@ def _support_review(
 
     current_claim = _contains_any(context, _CURRENT_CLAIM_PATTERNS)
     current_year = datetime.now(timezone.utc).year
-    if current_claim and reference_year is not None and current_year - reference_year >= OUTDATED_SUPPORT_YEAR_GAP:
+    if claim_type in {"empirical_result", "method_claim"} and current_claim and reference_year is not None and current_year - reference_year >= OUTDATED_SUPPORT_YEAR_GAP:
         risk_signals.append("possible_outdated_support")
         next_actions.append("Check whether newer evidence is needed or soften current/latest wording.")
 

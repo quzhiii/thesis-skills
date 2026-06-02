@@ -353,6 +353,21 @@ Expected output:
 
 Boundary: this page is generated from `reference-audit-ledger.csv` and remains a reading surface only. It does not replace the CSV, rerun checks, call external services, or modify bibliography or thesis source files.
 
+## Claim-citation HTML
+
+Generate a local detail page for claim-citation support review:
+
+```bash
+python 32-claim-citation-html/build_claim_citation_html.py \
+  --project-root examples/claim-citation-mixed
+```
+
+Expected output:
+
+- `reports/claim-citation-triage.html`
+
+Boundary: this page is generated from `claim-citation-triage-report.json` and remains a reading surface only. It does not replace the JSON / Markdown / CSV artifacts, rerun claim-citation checks, or modify thesis source files.
+
 ## Unified Evidence Pipeline (v3.3.0)
 
 Run final reference set plus all four citation evidence layers in a single command:

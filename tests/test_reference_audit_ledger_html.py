@@ -38,6 +38,10 @@ class ReferenceAuditLedgerHtmlTest(unittest.TestCase):
         self.assertIn("按 scope 查看", html)
         self.assertIn("Browse by scope", html)
         self.assertIn("引用证据总表", html)
+        self.assertIn("相关报告", html)
+        self.assertIn("Related Reports", html)
+        self.assertIn("final-audit-report.html", html)
+        self.assertIn("claim-citation-triage.html", html)
         self.assertIn("data-lang-btn=\"zh\"", html)
 
     def test_write_and_cli_generate_html(self) -> None:
