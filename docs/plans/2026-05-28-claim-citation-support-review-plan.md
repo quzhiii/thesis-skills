@@ -65,47 +65,47 @@ Current tests:
 
 ## Current Gaps
 
-The current implementation is useful, but it is still a structural triage layer rather than a true support-review layer.
+The current implementation has moved beyond basic structural triage into a conservative support-review layer. The remaining gaps are calibration and presentation depth, not a missing artifact family.
 
-### Gap 1: Claim Extraction Is Shallow
+### Gap 1: Claim Extraction Is Still Heuristic
 
-`extract_citation_contexts()` currently extracts a cleaned sentence around each citation. It does not identify which part of the sentence is the claim, whether the sentence contains a substantive claim, or whether the citation is only background.
+`extract_citation_contexts()` extracts a cleaned sentence around each citation, and the support-review layer now classifies simple claim types such as `empirical_result`, `method_claim`, `background`, and `definition`. It still does not parse full argument structure or decide whether a citation truly supports the claim.
 
 Examples that need better handling:
 
 - "Prior work explored similar architectures \cite{...}" is background, not a strong empirical claim.
 - "The method significantly improves accuracy \cite{...}" is a stronger support claim.
-- A bare citation line is detected, but there is no classification beyond missing context.
+- A bare citation line is detected and flagged as weak context, but there is no deeper discourse analysis.
 
-### Gap 2: Citation Cluster Semantics Are Minimal
+### Gap 2: Citation Cluster Semantics Need Better Presentation
 
-Grouped citations are represented only by `group_size`. The report does not explain whether a citation belongs to a cluster, what the peer keys are, or whether the cluster mixes strong and weak evidence.
+Grouped citations now include `cluster_keys`, `cluster_size`, cluster-level risk summaries, and mixed-cluster risk signals. The remaining work is mostly presentation: make grouped review easier to scan in future HTML or richer Markdown surfaces.
 
-### Gap 3: No Citation-Needed Detection
+### Gap 3: Citation-Needed Detection Is Conservative
 
-The current runner only sees existing citations. It cannot flag high-assertion sentences without nearby citations.
+The current runner can emit advisory `citation_needed_candidates` for uncited high-assertion sentences. This should stay conservative because false positives can be noisy.
 
-This should be added carefully because false positives can be noisy. Start with conservative heuristics only.
+Future work should improve precision, not broaden aggressively.
 
-### Gap 4: No Topic / Field Mismatch Signals
+### Gap 4: Topic / Field Mismatch Signals Are Heuristic
 
-The current scorer does not compare claim context with reference metadata. It can detect high-risk references via hallucination labels, but it cannot flag likely topic mismatch between claim text and title/abstract/keywords.
+The current scorer compares claim context with title, abstract, and keyword token overlap when local `.bib` metadata is available. It can emit `possible_topic_mismatch` when a strong empirical or method claim has no local lexical overlap. This is weak lexical evidence, not semantic similarity.
 
-### Gap 5: No Overclaim Or Outdated-Support Signals
+### Gap 5: Overclaim And Outdated-Support Signals Need Calibration
 
-The current scorer does not distinguish:
+The current scorer can emit conservative `possible_overclaim` and `possible_outdated_support` risk signals. It still does not make final support judgments and should be calibrated with more fixtures before becoming more sensitive.
 
 - weak support
-- overclaim
-- outdated support
+- possible overclaim
+- possible outdated support
 - generic background citation
 - citation key missing
 
-Everything collapses into `WEAK`, `SUPPORTED`, or `WELL_SUPPORTED`.
+Legacy `triage_label` remains backward compatible, while `support_review_label`, `risk_signals`, and `next_actions` carry the richer review guidance.
 
-### Gap 6: Next Actions Are Too Generic
+### Gap 6: Next Actions Need Ongoing Refinement
 
-`recommended_action` is currently tied mostly to the triage label and hallucination risk. It should become more actionable:
+`recommended_action` remains backward-compatible, and `next_actions` now adds more specific prompts for orphaned keys, high-risk references, topic mismatch, outdated support, overclaim, grouped clusters, and citation-needed candidates. Future work should keep refining action wording with real examples:
 
 - "Check whether this reference actually supports the claimed improvement."
 - "Add a closer source or soften the wording."
@@ -211,9 +211,19 @@ This is not semantic similarity. It is a weak signal that should be reported as 
 
 ### 4. Outdated-Support Heuristic
 
-If the claim context contains recent-year wording or explicit current-year references and the cited reference is old, flag `possible_outdated_support`.
+If the claim context contains recent/current wording and the cited reference is old, flag `possible_outdated_support`.
 
-Keep this conservative and opt-in by rule-pack threshold later if needed.
+Current implementation uses a conservative fixed year gap. Future work can move the threshold into rule packs if needed.
+
+### 4.5 Topic Mismatch And Overclaim Heuristics
+
+Implemented conservative risk signals:
+
+- `possible_topic_mismatch`: strong empirical/method claim with no title/abstract/keyword lexical overlap
+- `possible_outdated_support`: recent/current wording backed by an older reference
+- `possible_overclaim`: strong claim wording combined with weak metadata overlap or non-PASS hallucination risk
+
+These are manual-review prompts only. They do not change the legacy `triage_label` contract and do not claim the citation is wrong.
 
 ### 5. Citation-Needed Candidate Detection
 
@@ -342,6 +352,6 @@ Use a normal incremental release only after the public docs and examples are ali
 
 ## Recommended Next Action
 
-Start with **Phase 1: Report Enrichment Without Behavior Breakage**.
+Start the next step with **HTML / presentation for claim-citation support review**, or continue calibrating the new heuristic risk signals with more fixtures.
 
-It is the lowest-risk step because it improves user value while preserving current labels, output filenames, readiness integration, and CLI exit behavior.
+The low-risk enrichment phases have been implemented while preserving current labels, output filenames, readiness integration, and CLI exit behavior.

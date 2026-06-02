@@ -207,6 +207,42 @@ class ClaimCitationTriageTest(unittest.TestCase):
         self.assertIn("metadata_keyword_overlap", result["support_signals"])
         self.assertNotIn("empirical_claim_without_metadata_overlap", result["risk_signals"])
 
+    def test_empirical_claim_without_metadata_overlap_flags_topic_mismatch_review(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        context = self._context(context="The method significantly improves benchmark accuracy.")
+        entry = self._entry(fields={"title": "Urban Housing Policy", "author": "Smith, Jane", "year": "2024"})
+
+        result = triage_claim_citation(context, entry, self._risk(), 2)
+
+        self.assertIn("possible_topic_mismatch", result["risk_signals"])
+        self.assertEqual(result["support_review_label"], "NEEDS_MANUAL_REVIEW")
+        self.assertTrue(any("topic" in action.lower() for action in result["next_actions"]))
+
+    def test_current_claim_with_old_reference_flags_outdated_support_review(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        context = self._context(context="Recent state-of-the-art systems significantly improve benchmark accuracy.")
+        entry = self._entry(fields={"title": "Benchmark Accuracy Systems", "author": "Smith, Jane", "year": "2012"})
+
+        result = triage_claim_citation(context, entry, self._risk(), 2)
+
+        self.assertIn("possible_outdated_support", result["risk_signals"])
+        self.assertEqual(result["support_review_label"], "NEEDS_MANUAL_REVIEW")
+        self.assertTrue(any("newer" in action.lower() for action in result["next_actions"]))
+
+    def test_strong_claim_with_review_risk_flags_overclaim_review(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        context = self._context(context="The method proves the best accuracy without tradeoffs.")
+        entry = self._entry(fields={"title": "Accuracy Method", "author": "Smith, Jane", "year": "2024"})
+
+        result = triage_claim_citation(context, entry, self._risk(label="REVIEW"), 2)
+
+        self.assertIn("possible_overclaim", result["risk_signals"])
+        self.assertEqual(result["support_review_label"], "NEEDS_MANUAL_REVIEW")
+        self.assertTrue(any("strength" in action.lower() for action in result["next_actions"]))
+
     def test_build_report_counts_entries_and_uncited_references(self) -> None:
         from core.citation_integrity.claim_citation import build_claim_citation_report
 

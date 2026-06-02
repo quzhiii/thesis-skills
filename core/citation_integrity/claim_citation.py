@@ -24,6 +24,7 @@ SCORE_EXTRA_CITATION_KEY = 0.05
 SCORE_SINGLE_CITATION = 0.05
 SCORE_OVER_CITATION = 0.05
 OVER_CITATION_THRESHOLD = 10
+OUTDATED_SUPPORT_YEAR_GAP = 8
 
 _STOPWORDS = {
     "a",
@@ -60,6 +61,32 @@ _CLAIM_TYPE_PATTERNS: list[tuple[str, tuple[str, ...]]] = [
     ("background", ("prior work", "studies", "literature", "has explored", "have explored", "work explored")),
     ("definition", ("defined as", "refers to", "means", "is defined")),
 ]
+
+_CURRENT_CLAIM_PATTERNS = (
+    "current",
+    "currently",
+    "recent",
+    "recently",
+    "latest",
+    "state-of-the-art",
+    "state of the art",
+    "nowadays",
+)
+
+_STRONG_CLAIM_PATTERNS = (
+    "significant",
+    "significantly",
+    "outperform",
+    "outperforms",
+    "best",
+    "prove",
+    "proves",
+    "always",
+    "guarantee",
+    "guarantees",
+    "without tradeoffs",
+    "without trade-offs",
+)
 
 LABEL_THRESHOLDS: list[tuple[float, str]] = [
     (0.0, "WELL_SUPPORTED"),
@@ -101,6 +128,19 @@ def _claim_type(context: str) -> str:
         if any(pattern in text for pattern in patterns):
             return label
     return "unclear"
+
+
+def _contains_any(text: str, patterns: tuple[str, ...]) -> bool:
+    lowered = text.lower()
+    return any(pattern in lowered for pattern in patterns)
+
+
+def _reference_year(bib_entry: BibEntry | None) -> int | None:
+    if bib_entry is None:
+        return None
+    raw = bib_entry.fields.get("year", "")
+    match = re.search(r"(?:19|20)\d{2}", raw)
+    return int(match.group(0)) if match else None
 
 
 def _tokens(text: str) -> set[str]:
@@ -176,9 +216,11 @@ def _support_review(
     label: str,
     hallucination_label: str | None,
     claim_type: str,
+    context: str,
     metadata_overlap: dict[str, object],
     has_complete_metadata: bool,
     has_claim_context: bool,
+    reference_year: int | None,
 ) -> tuple[str, str, list[str], list[str], list[str]]:
     support_signals: list[str] = []
     risk_signals: list[str] = []
@@ -206,6 +248,7 @@ def _support_review(
     title_overlap_score = float(metadata_overlap.get("title_token_overlap") or 0.0)
     abstract_overlap_score = float(metadata_overlap.get("abstract_token_overlap") or 0.0)
     keyword_overlap_score = float(metadata_overlap.get("keyword_token_overlap") or 0.0)
+    max_metadata_overlap = max(title_overlap_score, abstract_overlap_score, keyword_overlap_score)
     if title_overlap_score > 0:
         support_signals.append("metadata_title_overlap")
     if abstract_overlap_score > 0:
@@ -213,8 +256,23 @@ def _support_review(
     if keyword_overlap_score > 0:
         support_signals.append("metadata_keyword_overlap")
 
-    if claim_type == "empirical_result" and max(title_overlap_score, abstract_overlap_score, keyword_overlap_score) == 0.0:
+    if claim_type == "empirical_result" and max_metadata_overlap == 0.0:
         risk_signals.append("empirical_claim_without_metadata_overlap")
+
+    strong_claim = _contains_any(context, _STRONG_CLAIM_PATTERNS)
+    if claim_type in {"empirical_result", "method_claim"} and strong_claim and max_metadata_overlap == 0.0:
+        risk_signals.append("possible_topic_mismatch")
+        next_actions.append("Check whether the cited source is on the same topic as the nearby claim; lexical metadata overlap is absent.")
+
+    current_claim = _contains_any(context, _CURRENT_CLAIM_PATTERNS)
+    current_year = datetime.now(timezone.utc).year
+    if current_claim and reference_year is not None and current_year - reference_year >= OUTDATED_SUPPORT_YEAR_GAP:
+        risk_signals.append("possible_outdated_support")
+        next_actions.append("Check whether newer evidence is needed or soften current/latest wording.")
+
+    if strong_claim and (hallucination_label not in {"PASS", None} or max_metadata_overlap == 0.0):
+        risk_signals.append("possible_overclaim")
+        next_actions.append("Verify whether the cited source supports the strength of the claim before final submission.")
 
     if label == "ORPHANED":
         next_actions.append("Fix the citation key or add the missing bibliography entry after manual confirmation.")
@@ -227,6 +285,9 @@ def _support_review(
     if "high_risk_reference" in risk_signals:
         next_actions.append("Verify the cited source against DOI, publisher, database, or original document evidence.")
         return "NEEDS_MANUAL_REVIEW", "Cited reference carries HIGH_RISK hallucination evidence.", support_signals, risk_signals, next_actions
+
+    if any(signal in risk_signals for signal in ("possible_topic_mismatch", "possible_outdated_support", "possible_overclaim")):
+        return "NEEDS_MANUAL_REVIEW", "Conservative support-risk heuristic flagged this claim-citation pair for manual review.", support_signals, risk_signals, next_actions
 
     if label == "WEAK":
         next_actions.append("Check whether this reference directly supports the nearby claim or add a closer source.")
@@ -328,15 +389,18 @@ def _build_triage_result(
 
     claim_type = _claim_type(context.context)
     metadata_overlap = _metadata_overlap(context.context, bib_entry)
+    reference_year = _reference_year(bib_entry)
     normalized_cluster_keys = cluster_keys or [context.key]
     cluster_size = len(normalized_cluster_keys)
     support_review_label, support_review_reason, support_signals, risk_signals, next_actions = _support_review(
         label,
         hallucination_label,
         claim_type,
+        context.context,
         metadata_overlap,
         has_complete_metadata,
         bool(context.context.strip()),
+        reference_year,
     )
 
     return {

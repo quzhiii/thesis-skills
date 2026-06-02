@@ -336,7 +336,7 @@ python 20-check-claim-citation/check_claim_citation.py \
   --ruleset university-generic
 ```
 
-它会输出 `reports/claim-citation-triage-report.json`，对声明-引用支撑分级做确定性分层。报告保留原有 `triage_label`，并额外给出 `claim_type`、`support_review_label`、`support_review_reason`、`support_signals`、`risk_signals`、`cluster_keys`、`cluster_risk_summary` 和 `next_actions`，帮助人工判断单条引用或成组引用下一步该核验什么；这些字段不等同于最终真伪判断。如果 `.bib` 中有 title、abstract、keywords，本地词面证据会分别计算这些字段与 claim context 的 token overlap。JSON/Markdown 报告也可能包含 advisory `citation_needed_candidates`，用于提示没有引用但像强断言的句子，默认不作为 blocking 结果。
+它会输出 `reports/claim-citation-triage-report.json`，对声明-引用支撑分级做确定性分层。报告保留原有 `triage_label`，并额外给出 `claim_type`、`support_review_label`、`support_review_reason`、`support_signals`、`risk_signals`、`cluster_keys`、`cluster_risk_summary` 和 `next_actions`，帮助人工判断单条引用或成组引用下一步该核验什么；这些字段不等同于最终真伪判断。如果 `.bib` 中有 title、abstract、keywords，本地词面证据会分别计算这些字段与 claim context 的 token overlap。`possible_topic_mismatch`、`possible_outdated_support`、`possible_overclaim` 等保守风险信号只提示人工复核，不自动判定引用错误。JSON/Markdown 报告也可能包含 advisory `citation_needed_candidates`，用于提示没有引用但像强断言的句子，默认不作为 blocking 结果。
 
 ### 7. 我准备提交终稿，需要清理过程痕迹
 
