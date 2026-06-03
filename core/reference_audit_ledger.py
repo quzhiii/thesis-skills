@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from core.citation_integrity.bib_parser import parse_bib_entries_from_text
+from core.citation_integrity.tex_parser import collect_citations_from_text
 from core.project import ThesisProject
 
 
@@ -21,6 +22,9 @@ LEDGER_FIELDS = [
     "status",
     "issue",
     "action_suggested",
+    "is_final_reference",
+    "is_cited_in_tex",
+    "is_unused_bib_entry",
 ]
 
 
@@ -37,6 +41,9 @@ class ReferenceLedgerRow:
     status: str = "present"
     issue: str = ""
     action_suggested: str = ""
+    is_final_reference: str = "false"
+    is_cited_in_tex: str = "false"
+    is_unused_bib_entry: str = "false"
 
     def to_dict(self) -> dict[str, str]:
         return {field: str(getattr(self, field)) for field in LEDGER_FIELDS}
@@ -101,6 +108,28 @@ def _metadata_from_payload(payload: dict[str, object]) -> dict[str, str]:
         "venue": str(meta.get("journal", meta.get("venue", meta.get("container_title", "")))),
         "doi": str(meta.get("doi", "")),
     }
+
+
+def _collect_cited_keys(project: ThesisProject) -> set[str]:
+    keys: set[str] = set()
+    seen_paths: set[Path] = set()
+    for path in [project.main_tex, *project.chapter_files]:
+        resolved = path.resolve()
+        if resolved in seen_paths or not path.exists():
+            continue
+        seen_paths.add(resolved)
+        relative = project.rel(path)
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        keys.update(occurrence.key for occurrence in collect_citations_from_text(text, relative))
+    return keys
+
+
+def _final_keys_from_report(project: ThesisProject, cited_keys: set[str]) -> set[str]:
+    report = _load_json(project.reports_dir / "final-reference-set-report.json")
+    final_keys = report.get("final_keys") if report else None
+    if isinstance(final_keys, list):
+        return {key for key in final_keys if isinstance(key, str) and key}
+    return set(cited_keys)
 
 
 def _seed_row(rows: dict[str, ReferenceLedgerRow], key: str, payload: dict[str, object] | None = None) -> ReferenceLedgerRow:
@@ -178,14 +207,20 @@ def _apply_final_reference_set(project: ThesisProject, base_rows: dict[str, Refe
                 continue
             key = str(issue.get("key", ""))
             base = _seed_row(base_rows, key)
+            code = str(issue.get("code", ""))
+            is_unused_issue = code == "FRS-UNUSED-BIB" or "not in the final reference set" in str(issue.get("message", "")).lower()
             _append_row(
                 rows,
                 base,
                 scope="final_reference_set",
                 source_checked="final-reference-set-report.json",
-                status=str(issue.get("severity", "warn")),
+                status="not_in_final_reference_set" if is_unused_issue else str(issue.get("severity", "warn")),
                 issue=str(issue.get("message", issue.get("code", "Final reference set issue"))),
-                action_suggested="Review final reference set issue before submission.",
+                action_suggested=(
+                    "Remove the unused bibliography entry or check why it remains in active .bib files."
+                    if is_unused_issue
+                    else "Review final reference set issue before submission."
+                ),
             )
 
 
@@ -286,8 +321,40 @@ def _apply_hallucination_risk(project: ThesisProject, base_rows: dict[str, Refer
         )
 
 
+def _mark_reference_scope(rows: list[ReferenceLedgerRow], final_keys: set[str], cited_keys: set[str], bib_keys: set[str]) -> None:
+    not_final_bib_keys = bib_keys - final_keys
+    unused_bib_keys = not_final_bib_keys - cited_keys
+    for row in rows:
+        row.is_final_reference = "true" if row.key in final_keys else "false"
+        row.is_cited_in_tex = "true" if row.key in cited_keys else "false"
+        row.is_unused_bib_entry = "true" if row.key in unused_bib_keys else "false"
+        if row.scope != "bibliography" or row.key not in not_final_bib_keys:
+            continue
+
+        status_parts = [part.strip() for part in row.status.split(";") if part.strip()]
+        if "not_in_final_reference_set" not in status_parts:
+            status_parts.append("not_in_final_reference_set")
+        if row.key in unused_bib_keys and "unused_bib_entry" not in status_parts:
+            status_parts.append("unused_bib_entry")
+        row.status = "; ".join(status_parts)
+
+        issue_parts = [part.strip() for part in row.issue.split(";") if part.strip()]
+        if "Present in .bib files but not in the final reference set" not in issue_parts:
+            issue_parts.append("Present in .bib files but not in the final reference set")
+        if row.key in unused_bib_keys and "not cited in discovered TeX files" not in issue_parts:
+            issue_parts.append("not cited in discovered TeX files")
+        row.issue = "; ".join(issue_parts)
+        if row.key in unused_bib_keys:
+            row.action_suggested = "Remove unused bibliography entries or check active .bib files if they are template leftovers."
+        else:
+            row.action_suggested = "Check why this cited key did not enter the final reference set before removing it."
+
+
 def build_reference_audit_ledger_rows(project: ThesisProject) -> list[ReferenceLedgerRow]:
     base_rows = _base_rows_from_bib(project)
+    bib_keys = set(base_rows)
+    cited_keys = _collect_cited_keys(project)
+    final_keys = _final_keys_from_report(project, cited_keys)
     rows = [
         ReferenceLedgerRow(**row.to_dict())
         for row in sorted(base_rows.values(), key=lambda item: item.key)
@@ -298,6 +365,7 @@ def build_reference_audit_ledger_rows(project: ThesisProject) -> list[ReferenceL
     _apply_doi_candidates(project, base_rows, rows)
     _apply_url_verification(project, base_rows, rows)
     _apply_hallucination_risk(project, base_rows, rows)
+    _mark_reference_scope(rows, final_keys, cited_keys, bib_keys)
     return rows
 
 

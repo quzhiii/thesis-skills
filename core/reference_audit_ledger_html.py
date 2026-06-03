@@ -16,12 +16,23 @@ I18N = {
         "unique_keys": "唯一 key",
         "scopes": "scope 数量",
         "statuses": "status 数量",
+        "final_reference_count": "最终引用文献",
+        "all_bibliography_count": "全部 Bib 条目",
+        "unused_bibliography_count": "未引用 Bib 条目",
+        "evidence_row_count": "证据行",
         "scope_section": "按 scope 查看",
-        "key_section": "按引用 key 查看",
+        "final_section": "最终引用文献 / Final references only",
+        "final_section_hint": "默认主视图。只展示真正进入最终参考文献集或被正文引用的 key，避免模板 Bib 条目混入最终参考文献审计。",
+        "all_bibliography_section": "全部 Bib 条目 / All bibliography entries",
+        "all_bibliography_hint": "来自 active .bib 文件的全量条目，包含最终引用文献和未引用/模板残留候选。",
+        "unused_bibliography_section": "未引用 Bib 条目 / Unused bibliography entries",
+        "unused_bibliography_hint": "这些 key 在 .bib 文件中存在，但未在 TeX 正文中被引用，通常也未进入最终参考文献集。建议移除或检查 bib 文件。",
+        "evidence_section": "证据行 / Evidence rows",
+        "evidence_hint": "保留 final_reference_set、local_citation_integrity、hallucination_risk 等证据行；CSV 仍完整保留所有来源证据。",
         "summary_section": "摘要",
-        "table_section": "完整表格",
         "scope_count": "行",
-        "source_truth": "CSV 仍然是 authoritative source。这个页面只帮助你按 scope / key 快速浏览。",
+        "source_truth": "CSV 仍然是 authoritative source。这个页面只帮助你按 final/all/unused/evidence 分区和 scope 摘要快速浏览。",
+        "filter_note": "默认先看 Final references only；全部 Bib 条目、未引用条目和 hallucination_risk 证据放在后续 secondary sections。",
         "open_csv": "打开 CSV 源文件",
         "related_reports": "相关报告",
         "related_note": "在报告入口、终稿审计和声明-引用支撑分级之间跳转。",
@@ -39,7 +50,11 @@ I18N = {
         "column_status": "状态",
         "column_issue": "问题",
         "column_action": "建议动作",
+        "column_is_final_reference": "最终引用",
+        "column_is_cited_in_tex": "正文引用",
+        "column_is_unused_bib_entry": "未引用 Bib",
         "no_value": "—",
+        "empty_rows": "当前没有此类行。",
     },
     "en": {
         "title": "Reference Audit Ledger",
@@ -50,12 +65,23 @@ I18N = {
         "unique_keys": "unique keys",
         "scopes": "scopes",
         "statuses": "statuses",
+        "final_reference_count": "Final references",
+        "all_bibliography_count": "All bibliography entries",
+        "unused_bibliography_count": "Unused bibliography entries",
+        "evidence_row_count": "Evidence rows",
         "scope_section": "Browse by scope",
-        "key_section": "Browse by citation key",
+        "final_section": "Final references only",
+        "final_section_hint": "Default primary view. Shows only keys that entered the final reference set or are cited in TeX, so template BibTeX entries do not look like final references.",
+        "all_bibliography_section": "All bibliography entries",
+        "all_bibliography_hint": "Full entries from active .bib files, including final references and unused/template-leftover candidates.",
+        "unused_bibliography_section": "Unused bibliography entries",
+        "unused_bibliography_hint": "These keys are present in .bib files but were not cited in discovered TeX files and usually did not enter the final reference set. Remove them or check the bib files.",
+        "evidence_section": "Evidence rows",
+        "evidence_hint": "Keeps final_reference_set, local_citation_integrity, hallucination_risk, and other evidence rows; CSV still preserves every source row.",
         "summary_section": "Summary",
-        "table_section": "Full table",
         "scope_count": "rows",
-        "source_truth": "CSV remains authoritative. This page only helps you browse by scope and citation key.",
+        "source_truth": "CSV remains authoritative. This page only helps you browse final/all/unused/evidence sections and the scope summary.",
+        "filter_note": "Start with Final references only. All bibliography entries, unused entries, and hallucination_risk evidence are kept in secondary sections below.",
         "open_csv": "Open CSV source",
         "related_reports": "Related Reports",
         "related_note": "Jump between the report index, final-audit detail, and claim-citation review surfaces.",
@@ -73,7 +99,11 @@ I18N = {
         "column_status": "status",
         "column_issue": "issue",
         "column_action": "action_suggested",
+        "column_is_final_reference": "is_final_reference",
+        "column_is_cited_in_tex": "is_cited_in_tex",
+        "column_is_unused_bib_entry": "is_unused_bib_entry",
         "no_value": "—",
+        "empty_rows": "No rows in this section.",
     },
 }
 
@@ -126,6 +156,9 @@ def _table_headers(lang: str) -> str:
         "column_status",
         "column_issue",
         "column_action",
+        "column_is_final_reference",
+        "column_is_cited_in_tex",
+        "column_is_unused_bib_entry",
     ]
     return "".join(f"<th>{html.escape(I18N[lang][key])}</th>" for key in keys)
 
@@ -143,6 +176,9 @@ def _row_html(row: dict[str, str]) -> str:
         row.get("status", ""),
         row.get("issue", ""),
         row.get("action_suggested", ""),
+        row.get("is_final_reference", ""),
+        row.get("is_cited_in_tex", ""),
+        row.get("is_unused_bib_entry", ""),
     ]
     return "<tr>" + "".join(f"<td>{_e(value)}</td>" for value in ordered) + "</tr>"
 
@@ -173,6 +209,119 @@ def _group_cards(rows: list[dict[str, str]], group_key: str, lang: str) -> str:
     return "".join(cards)
 
 
+def _truthy(row: dict[str, str], field: str) -> bool:
+    return row.get(field, "").strip().lower() in {"1", "true", "yes", "y"}
+
+
+def _has_field(row: dict[str, str], field: str) -> bool:
+    return field in row and row.get(field, "").strip() != ""
+
+
+def _row_key(row: dict[str, str]) -> str:
+    return row.get("key", "").strip()
+
+
+def _is_bibliography_row(row: dict[str, str]) -> bool:
+    return row.get("scope", "") == "bibliography"
+
+
+def _final_reference_keys(rows: list[dict[str, str]]) -> set[str]:
+    flagged = {_row_key(row) for row in rows if _row_key(row) and _truthy(row, "is_final_reference")}
+    if flagged:
+        return flagged
+    included = {
+        _row_key(row)
+        for row in rows
+        if _row_key(row)
+        and row.get("scope", "") == "final_reference_set"
+        and row.get("status", "") == "included_final"
+    }
+    if included:
+        return included
+    if any(row.get("scope", "") == "final_reference_set" for row in rows):
+        return set()
+    return {_row_key(row) for row in rows if _row_key(row) and _truthy(row, "is_cited_in_tex")}
+
+
+def _is_final_table_row(row: dict[str, str]) -> bool:
+    return _is_bibliography_row(row) or row.get("scope", "") == "final_reference_set"
+
+
+def _row_sort_key(row: dict[str, str]) -> tuple[str, str]:
+    return (row.get("scope", ""), _row_key(row))
+
+
+def _dedupe_reference_rows(rows: list[dict[str, str]], keys: set[str]) -> list[dict[str, str]]:
+    result: list[dict[str, str]] = []
+    for key in sorted(keys):
+        candidates = [row for row in rows if _row_key(row) == key and _is_final_table_row(row)]
+        if not candidates:
+            continue
+        result.append(
+            sorted(
+                candidates,
+                key=lambda row: (
+                    0 if _is_bibliography_row(row) else 1 if row.get("scope", "") == "final_reference_set" else 2,
+                    0 if row.get("title", "") else 1,
+                ),
+            )[0]
+        )
+    return result
+
+
+def _status_blob(row: dict[str, str]) -> str:
+    return " ".join([row.get("status", ""), row.get("issue", ""), row.get("action_suggested", "")]).lower()
+
+
+def _all_bibliography_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    return sorted([row for row in rows if _is_bibliography_row(row)], key=_row_sort_key)
+
+
+def _unused_bibliography_rows(rows: list[dict[str, str]], final_keys: set[str]) -> list[dict[str, str]]:
+    unused_rows: list[dict[str, str]] = []
+    for row in _all_bibliography_rows(rows):
+        key = _row_key(row)
+        blob = _status_blob(row)
+        if _truthy(row, "is_unused_bib_entry") or "unused_bib_entry" in blob or "not cited in discovered tex files" in blob:
+            is_unused = True
+        elif _has_field(row, "is_cited_in_tex"):
+            is_unused = not _truthy(row, "is_cited_in_tex") and (
+                "not_in_final_reference_set" in blob
+                or "not in the final reference set" in blob
+                or (bool(final_keys) and key not in final_keys)
+            )
+        else:
+            is_unused = "not_in_final_reference_set" in blob or "not in the final reference set" in blob or (bool(final_keys) and key not in final_keys)
+        if is_unused:
+            unused_rows.append(row)
+    return unused_rows
+
+
+def _evidence_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    return sorted([row for row in rows if not _is_bibliography_row(row)], key=_row_sort_key)
+
+
+def _table(rows: list[dict[str, str]], lang: str) -> str:
+    if not rows:
+        return f"<div class=\"empty\">{html.escape(I18N[lang]['empty_rows'])}</div>"
+    table_rows = "".join(_row_html(row) for row in rows)
+    return f"""
+        <table>
+          <thead><tr>{_table_headers(lang)}</tr></thead>
+          <tbody>{table_rows}</tbody>
+        </table>
+"""
+
+
+def _ledger_section(section_id: str, title: str, hint: str, rows: list[dict[str, str]], lang: str) -> str:
+    return f"""
+      <section id="{html.escape(section_id)}" class="section ledger-section">
+        <div class="section-head"><h2>{html.escape(title)}</h2><span class="meta-copy">{html.escape(hint)}</span></div>
+        {_table(rows, lang)}
+      </section>
+"""
+
+
 def _related_reports(lang: str) -> str:
     links = [
         ("index.html", I18N[lang]["report_index"]),
@@ -189,12 +338,15 @@ def _related_reports(lang: str) -> str:
 
 
 def _lang_block(rows: list[dict[str, str]], csv_name: str, lang: str) -> str:
+    final_keys = _final_reference_keys(rows)
+    all_bib_rows = _all_bibliography_rows(rows)
+    unused_bib_rows = _unused_bibliography_rows(rows, final_keys)
+    evidence_rows = _evidence_rows(rows)
+    final_rows = _dedupe_reference_rows(rows, final_keys)
     unique_keys = len({row.get("key", "") for row in rows if row.get("key", "")})
     scopes = len({row.get("scope", "") for row in rows if row.get("scope", "")})
     statuses = len({row.get("status", "") for row in rows if row.get("status", "")})
     scope_cards = _group_cards(rows, "scope", lang)
-    key_cards = _group_cards(rows, "key", lang)
-    table_rows = "".join(_row_html(row) for row in rows)
     return f"""
     <section class="lang-panel" data-lang-panel="{lang}">
       <header>
@@ -204,31 +356,26 @@ def _lang_block(rows: list[dict[str, str]], csv_name: str, lang: str) -> str:
           <p class="lede">{html.escape(I18N[lang]['lede'])}</p>
         </div>
         <div class="stats">
-          <div class="stat"><strong>{len(rows)}</strong><span>{html.escape(I18N[lang]['rows'])}</span></div>
-          <div class="stat"><strong>{unique_keys}</strong><span>{html.escape(I18N[lang]['unique_keys'])}</span></div>
-          <div class="stat"><strong>{scopes}</strong><span>{html.escape(I18N[lang]['scopes'])}</span></div>
-          <div class="stat"><strong>{statuses}</strong><span>{html.escape(I18N[lang]['statuses'])}</span></div>
+          <div class="stat"><strong>{len(final_keys)}</strong><span>{html.escape(I18N[lang]['final_reference_count'])}</span></div>
+          <div class="stat"><strong>{len(all_bib_rows)}</strong><span>{html.escape(I18N[lang]['all_bibliography_count'])}</span></div>
+          <div class="stat"><strong>{len(unused_bib_rows)}</strong><span>{html.escape(I18N[lang]['unused_bibliography_count'])}</span></div>
+          <div class="stat"><strong>{len(evidence_rows)}</strong><span>{html.escape(I18N[lang]['evidence_row_count'])}</span></div>
         </div>
       </header>
 
-      <section class="notice">{html.escape(I18N[lang]['source_truth'])} <a href="{html.escape(csv_name)}">{html.escape(I18N[lang]['open_csv'])}</a></section>
+      <section class="notice">{html.escape(I18N[lang]['source_truth'])} {html.escape(I18N[lang]['filter_note'])} <a href="{html.escape(csv_name)}">{html.escape(I18N[lang]['open_csv'])}</a></section>
+
+      {_ledger_section(f"final-references-{lang}", I18N[lang]['final_section'], I18N[lang]['final_section_hint'], final_rows, lang)}
+
+      {_ledger_section(f"all-bibliography-{lang}", I18N[lang]['all_bibliography_section'], I18N[lang]['all_bibliography_hint'], all_bib_rows, lang)}
+
+      {_ledger_section(f"unused-bibliography-{lang}", I18N[lang]['unused_bibliography_section'], I18N[lang]['unused_bibliography_hint'], unused_bib_rows, lang)}
+
+      {_ledger_section(f"evidence-rows-{lang}", I18N[lang]['evidence_section'], I18N[lang]['evidence_hint'], evidence_rows, lang)}
 
       <section class="section">
-        <div class="section-head"><h2>{html.escape(I18N[lang]['scope_section'])}</h2></div>
+        <div class="section-head"><h2>{html.escape(I18N[lang]['scope_section'])}</h2><span class="meta-copy">{len(rows)} {html.escape(I18N[lang]['rows'])} · {unique_keys} {html.escape(I18N[lang]['unique_keys'])} · {scopes} {html.escape(I18N[lang]['scopes'])} · {statuses} {html.escape(I18N[lang]['statuses'])}</span></div>
         <div class="group-grid">{scope_cards}</div>
-      </section>
-
-      <section class="section">
-        <div class="section-head"><h2>{html.escape(I18N[lang]['key_section'])}</h2></div>
-        <div class="group-grid">{key_cards}</div>
-      </section>
-
-      <section class="section">
-        <div class="section-head"><h2>{html.escape(I18N[lang]['table_section'])}</h2></div>
-        <table>
-          <thead><tr>{_table_headers(lang)}</tr></thead>
-          <tbody>{table_rows}</tbody>
-        </table>
       </section>
       {_related_reports(lang)}
     </section>
@@ -264,7 +411,8 @@ def render_reference_audit_ledger_html(rows: list[dict[str, str]], *, csv_name: 
     .stat span {{ color:var(--grey-3); font-size:13px; }}
     .notice {{ margin:24px 0; border:1px solid var(--grey-2); background:#fff7ed; padding:16px; color:#7c2d12; }}
     .section {{ margin-top:30px; }}
-    .section-head {{ border-bottom:1px solid var(--ink); padding-bottom:10px; margin-bottom:16px; }}
+    .section-head {{ border-bottom:1px solid var(--ink); padding-bottom:10px; margin-bottom:16px; display:flex; justify-content:space-between; gap:16px; align-items:end; }}
+    .ledger-section {{ overflow-x:auto; }}
     h2 {{ margin:0; font-size:32px; font-weight:300; letter-spacing:-.04em; }}
     .group-grid {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }}
     .group-card {{ background:#fff; border:1px solid var(--grey-2); padding:16px; min-height:150px; display:flex; flex-direction:column; gap:10px; }}
@@ -274,13 +422,14 @@ def render_reference_audit_ledger_html(rows: list[dict[str, str]], *, csv_name: 
     .group-meta {{ color:var(--grey-3); font-size:14px; line-height:1.45; }}
     .nav-pills {{ display:flex; flex-wrap:wrap; gap:10px; }}
     .nav-pill {{ display:inline-block; padding:10px 12px; border:1px solid var(--grey-2); background:#fff; }}
-    .meta-copy {{ color:var(--grey-3); font-size:14px; }}
+    .meta-copy {{ color:var(--grey-3); font-size:14px; line-height:1.45; max-width:720px; }}
+    .empty {{ background:#fff; border:1px dashed var(--grey-2); color:var(--grey-3); padding:18px; }}
     table {{ width:100%; border-collapse:collapse; background:#fff; }}
     th, td {{ border-bottom:1px solid var(--grey-2); text-align:left; padding:10px 8px; vertical-align:top; font-size:13px; }}
     th {{ font-family:"IBM Plex Mono", Consolas, monospace; text-transform:uppercase; letter-spacing:.1em; font-size:11px; color:var(--grey-3); position:sticky; top:0; background:#fff; }}
     a {{ color:var(--accent); font-weight:700; text-decoration:none; }}
     a:hover {{ text-decoration:underline; }}
-    @media (max-width:980px) {{ header, .group-grid {{ grid-template-columns:1fr; }} .stats {{ grid-template-columns:repeat(2,1fr); }} }}
+    @media (max-width:980px) {{ header, .group-grid {{ grid-template-columns:1fr; }} .stats {{ grid-template-columns:repeat(2,1fr); }} .section-head {{ display:block; }} .meta-copy {{ display:block; margin-top:8px; }} }}
     @media (max-width:560px) {{ .stats {{ grid-template-columns:1fr; }} .page {{ padding:18px 14px 40px; }} }}
   </style>
 </head>

@@ -140,8 +140,130 @@ class ReferenceAuditLedgerTest(unittest.TestCase):
         self.assertEqual(rows[0]["scope"], "bibliography")
         self.assertEqual(
             list(rows[0].keys()),
-            ["key", "title", "authors", "year", "venue", "doi", "scope", "source_checked", "status", "issue", "action_suggested"],
+            [
+                "key",
+                "title",
+                "authors",
+                "year",
+                "venue",
+                "doi",
+                "scope",
+                "source_checked",
+                "status",
+                "issue",
+                "action_suggested",
+                "is_final_reference",
+                "is_cited_in_tex",
+                "is_unused_bib_entry",
+            ],
         )
+
+    def test_marks_template_bib_entries_outside_final_reference_set(self) -> None:
+        with workspace_tempdir("reference-ledger-unused-template-") as base:
+            materialize_project(
+                base,
+                {
+                    "main.tex": "\\documentclass{article}\n\\begin{document}\n\\cite{actual2024}\n\\end{document}\n",
+                    "ref/refs.bib": "@book{zhukezhen1973, title={Template Reference}, author={Zhu}, year={1973}}\n",
+                    "ref/refs-import.bib": "@article{actual2024, title={Actual Reference}, author={A}, year={2024}, journal={J}}\n",
+                    "reports/final-reference-set-report.json": json.dumps(
+                        {
+                            "final_keys": ["actual2024"],
+                            "issues": [
+                                {
+                                    "code": "FRS-UNUSED-BIB",
+                                    "key": "zhukezhen1973",
+                                    "severity": "info",
+                                    "message": "Citation key 'zhukezhen1973' is present in .bib files but not in the final reference set.",
+                                }
+                            ],
+                        },
+                        ensure_ascii=False,
+                    ),
+                    "reports/citation-integrity-report.json": json.dumps(
+                        {
+                            "issues": [
+                                {
+                                    "severity": "WARN",
+                                    "category": "unused_bib_entry",
+                                    "message": "Bibliography entry `zhukezhen1973` is not cited in discovered TeX files.",
+                                    "evidence": {"citation_key": "zhukezhen1973"},
+                                    "suggested_action": "Remove unused bibliography entries or cite them if they are required.",
+                                }
+                            ]
+                        },
+                        ensure_ascii=False,
+                    ),
+                    "reports/hallucination-risk-report.json": json.dumps(
+                        {
+                            "entries": [
+                                {"citation_key": "actual2024", "risk_label": "LOW_RISK", "hallucination_risk_score": 0.1},
+                                {"citation_key": "zhukezhen1973", "risk_label": "REVIEW", "hallucination_risk_score": 0.6},
+                            ]
+                        },
+                        ensure_ascii=False,
+                    ),
+                },
+            )
+            project, _pack = self._project(base)
+            output = base / "reports" / "reference-audit-ledger.csv"
+            write_reference_audit_ledger_csv(build_reference_audit_ledger_rows(project), output)
+            with output.open("r", encoding="utf-8", newline="") as handle:
+                rows = list(csv.DictReader(handle))
+
+        actual_rows = [row for row in rows if row["key"] == "actual2024"]
+        template_rows = [row for row in rows if row["key"] == "zhukezhen1973"]
+        template_bib = [row for row in template_rows if row["scope"] == "bibliography"][0]
+
+        self.assertTrue(actual_rows)
+        self.assertTrue(template_rows)
+        self.assertTrue(any(row["scope"] == "hallucination_risk" for row in template_rows))
+        self.assertTrue(all(row["is_final_reference"] == "true" for row in actual_rows))
+        self.assertTrue(all(row["is_cited_in_tex"] == "true" for row in actual_rows))
+        self.assertEqual(template_bib["is_final_reference"], "false")
+        self.assertEqual(template_bib["is_cited_in_tex"], "false")
+        self.assertEqual(template_bib["is_unused_bib_entry"], "true")
+        self.assertIn("unused_bib_entry", template_bib["status"])
+        self.assertIn("not_in_final_reference_set", template_bib["status"])
+        self.assertIn("Remove unused bibliography entries", template_bib["action_suggested"])
+
+    def test_cited_bib_entry_missing_from_final_set_is_not_unused(self) -> None:
+        with workspace_tempdir("reference-ledger-cited-not-final-") as base:
+            materialize_project(
+                base,
+                {
+                    "main.tex": "\\documentclass{article}\n\\begin{document}\n\\cite{cited2024}\n\\end{document}\n",
+                    "ref/refs.bib": "@article{cited2024, title={Cited But Missing Final}, author={A}, year={2024}, journal={J}}\n",
+                    "reports/final-reference-set-report.json": json.dumps(
+                        {
+                            "final_keys": [],
+                            "issues": [
+                                {
+                                    "code": "FRS-AUX-NO-BBL",
+                                    "key": "cited2024",
+                                    "severity": "warn",
+                                    "message": "Citation key 'cited2024' appears in .aux but not in .bbl.",
+                                }
+                            ],
+                        },
+                        ensure_ascii=False,
+                    ),
+                },
+            )
+            project, _pack = self._project(base)
+            output = base / "reports" / "reference-audit-ledger.csv"
+            write_reference_audit_ledger_csv(build_reference_audit_ledger_rows(project), output)
+            with output.open("r", encoding="utf-8", newline="") as handle:
+                rows = list(csv.DictReader(handle))
+
+        bib_row = [row for row in rows if row["key"] == "cited2024" and row["scope"] == "bibliography"][0]
+
+        self.assertEqual(bib_row["is_final_reference"], "false")
+        self.assertEqual(bib_row["is_cited_in_tex"], "true")
+        self.assertEqual(bib_row["is_unused_bib_entry"], "false")
+        self.assertIn("not_in_final_reference_set", bib_row["status"])
+        self.assertNotIn("unused_bib_entry", bib_row["status"])
+        self.assertIn("Check why this cited key did not enter the final reference set", bib_row["action_suggested"])
 
     def test_cli_writes_default_ledger(self) -> None:
         with workspace_tempdir("reference-ledger-cli-") as base:
