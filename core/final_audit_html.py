@@ -27,8 +27,9 @@ I18N = {
         "source_artifacts": "源产物",
         "source_truth": "JSON / CSV 仍是 authoritative source",
         "related_reports": "相关报告",
-        "related_reports_note": "在终稿审计、引用台账和声明-引用支撑分级之间快速跳转。",
+        "related_reports_note": "在报告入口、readiness 门禁、引用台账和声明-引用支撑分级之间快速跳转。",
         "report_index": "报告入口页",
+        "readiness_json": "readiness JSON",
         "reference_ledger_html": "引用审计 HTML",
         "claim_citation_html": "声明-引用 HTML",
         "artifact": "产物",
@@ -72,8 +73,9 @@ I18N = {
         "source_artifacts": "Source Artifacts",
         "source_truth": "JSON / CSV remain authoritative",
         "related_reports": "Related Reports",
-        "related_reports_note": "Jump quickly between final-audit, reference-ledger, and claim-citation review surfaces.",
+        "related_reports_note": "Jump quickly between the report index, readiness gate, reference-ledger, and claim-citation review surfaces.",
         "report_index": "Report index",
+        "readiness_json": "Readiness JSON",
         "reference_ledger_html": "Reference ledger HTML",
         "claim_citation_html": "Claim-citation HTML",
         "artifact": "Artifact",
@@ -329,6 +331,7 @@ def _source_row(source: dict[str, object], lang: str) -> str:
 def _related_reports(lang: str) -> str:
     links = [
         ("index.html", _text("report_index", lang)),
+        ("readiness-report.json", _text("readiness_json", lang)),
         ("reference-audit-ledger.html", _text("reference_ledger_html", lang)),
         ("claim-citation-triage.html", _text("claim_citation_html", lang)),
     ]

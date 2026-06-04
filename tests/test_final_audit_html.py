@@ -82,6 +82,7 @@ class FinalAuditHtmlTest(unittest.TestCase):
         self.assertIn("源产物", html)
         self.assertIn("Related Reports", html)
         self.assertIn("相关报告", html)
+        self.assertIn("readiness-report.json", html)
         self.assertIn("final-cleanup-report.json", html)
         self.assertIn("reference-audit-ledger.html", html)
         self.assertIn("claim-citation-triage.html", html)

@@ -27,8 +27,9 @@ I18N = {
         "open_md": "打开 Markdown 源文件",
         "open_csv": "打开 CSV 源文件",
         "related_reports": "相关报告",
-        "related_note": "在报告入口、终稿审计和引用审计台账之间跳转。",
+        "related_note": "在报告入口、readiness 门禁、终稿审计和引用审计台账之间跳转。",
         "report_index": "报告入口页",
+        "readiness_json": "readiness JSON",
         "final_audit": "终稿审计 HTML",
         "reference_ledger": "引用审计 HTML",
         "claim_type": "claim 类型",
@@ -73,8 +74,9 @@ I18N = {
         "open_md": "Open Markdown source",
         "open_csv": "Open CSV source",
         "related_reports": "Related Reports",
-        "related_note": "Jump between the report index, final-audit detail, and reference-ledger review surfaces.",
+        "related_note": "Jump between the report index, readiness gate, final-audit detail, and reference-ledger review surfaces.",
         "report_index": "Report index",
+        "readiness_json": "Readiness JSON",
         "final_audit": "Final audit HTML",
         "reference_ledger": "Reference ledger HTML",
         "claim_type": "claim type",
@@ -224,6 +226,7 @@ def _uncited_rows(rows: list[dict[str, object]], lang: str) -> str:
 def _related_reports(lang: str) -> str:
     links = [
         ("index.html", I18N[lang]["report_index"]),
+        ("readiness-report.json", I18N[lang]["readiness_json"]),
         ("final-audit-report.html", I18N[lang]["final_audit"]),
         ("reference-audit-ledger.html", I18N[lang]["reference_ledger"]),
     ]

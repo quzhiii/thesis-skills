@@ -50,6 +50,7 @@ class ReferenceAuditLedgerHtmlTest(unittest.TestCase):
         self.assertIn("引用证据总表", html)
         self.assertIn("相关报告", html)
         self.assertIn("Related Reports", html)
+        self.assertIn("readiness-report.json", html)
         self.assertIn("final-audit-report.html", html)
         self.assertIn("claim-citation-triage.html", html)
         self.assertIn("data-lang-btn=\"zh\"", html)
