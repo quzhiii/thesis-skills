@@ -219,6 +219,17 @@ class ClaimCitationTriageTest(unittest.TestCase):
         self.assertEqual(result["support_review_label"], "NEEDS_MANUAL_REVIEW")
         self.assertTrue(any("topic" in action.lower() for action in result["next_actions"]))
 
+    def test_pass_reference_with_topic_mismatch_does_not_duplicate_overclaim_signal(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        context = self._context(context="The method significantly improves benchmark accuracy.")
+        entry = self._entry(fields={"title": "Urban Housing Policy", "author": "Smith, Jane", "year": "2024"})
+
+        result = triage_claim_citation(context, entry, self._risk(label="PASS"), 2)
+
+        self.assertIn("possible_topic_mismatch", result["risk_signals"])
+        self.assertNotIn("possible_overclaim", result["risk_signals"])
+
     def test_current_claim_with_old_reference_flags_outdated_support_review(self) -> None:
         from core.citation_integrity.claim_citation import triage_claim_citation
 
