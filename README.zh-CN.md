@@ -58,7 +58,7 @@ LaTeX 项目 ───────┤                                           
 - **Readiness Gate 集成** 的四层引用证据流水线继续保留，依然可以一键跑完四层引用证据流水线；V3.4 在其上把 final-audit 与本地 HTML 报告界面补齐。
 - **终稿审计界面**：新增 final cleanup、statistical consistency、manual anchor 三个确定性检查，并聚合到 `reports/final-audit-report.json`。
 - **引用审计交付表**：`28-reference-audit-ledger/build_reference_audit_ledger.py` 从已有引用证据生成表格友好的 `reports/reference-audit-ledger.csv`。
-- **本地静态报告 UX**：新增 `reports/index.html`、`reports/final-audit-report.html`、`reports/reference-audit-ledger.html`，方便阅读，但 JSON / CSV 仍然是 source of truth。
+- **本地静态报告 UX**：新增 `reports/index.html`、`reports/final-audit-report.html`、`reports/reference-audit-ledger.html`、`reports/claim-citation-triage.html`，方便阅读，但 JSON / CSV 仍然是 source of truth。
 - **声明-引用支撑复核**：新增 `possible_topic_mismatch`、`possible_outdated_support`、`possible_overclaim` 等保守 advisory 风险信号。
 - **V3.3 引用验证加固** 继续保留：final reference set、DOI 候选、URL 验证、可限定范围/可续跑外部验证，以及统一证据流水线 runner `run_evidence_pipeline.py`。
 

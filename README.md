@@ -58,7 +58,7 @@ For repetitive finishing work, the expected time savings are concrete:
 - **Readiness Gate Integration** remains in place from V3.2, and V3.4 extends that citation evidence stack with final-audit and local HTML report surfaces.
 - **Final-audit surfaces**: new deterministic final cleanup, statistical consistency, and manual-anchor checks feed `reports/final-audit-report.json`.
 - **Reference audit handoff**: `28-reference-audit-ledger/build_reference_audit_ledger.py` writes a spreadsheet-friendly `reports/reference-audit-ledger.csv` from existing reference evidence.
-- **Static local report UX**: `reports/index.html`, `reports/final-audit-report.html`, and `reports/reference-audit-ledger.html` make JSON / CSV artifacts easier to review without replacing them as source of truth.
+- **Static local report UX**: `reports/index.html`, `reports/final-audit-report.html`, `reports/reference-audit-ledger.html`, and `reports/claim-citation-triage.html` make JSON / CSV artifacts easier to review without replacing them as source of truth.
 - **Claim-citation support review** now includes conservative advisory signals such as `possible_topic_mismatch`, `possible_outdated_support`, and `possible_overclaim`.
 - **V3.3 reference verification hardening** remains in place: final reference set parsing, DOI candidates, URL verification, scoped/resumable external verification, and the unified evidence pipeline runner `run_evidence_pipeline.py`.
 

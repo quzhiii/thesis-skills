@@ -248,6 +248,7 @@ Initial HTML surface now available:
 - static report index: `29-report-index/build_report_index.py`, writing `reports/index.html` as a local landing page over JSON / CSV source artifacts
 - final audit detail page: `30-final-audit-html/build_final_audit_html.py`, writing `reports/final-audit-report.html` from `final-audit-report.json` as a local reading surface
 - reference ledger detail page: `31-reference-ledger-html/build_reference_audit_ledger_html.py`, writing `reports/reference-audit-ledger.html` from `reference-audit-ledger.csv` as a local reading surface
+- claim-citation detail page: `32-claim-citation-html/build_claim_citation_html.py`, writing `reports/claim-citation-triage.html` from `claim-citation-triage-report.json` as a local reading surface
 
 ### Track F: Public Surface And Verification Discipline
 
