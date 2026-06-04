@@ -1,4 +1,4 @@
-# Thesis Skills v3.4.0
+# Thesis Skills v3.4.1
 
 <div align="center">
 
@@ -13,7 +13,7 @@ Spend your time thinking, not fixing formatting.
 
 [中文文档](README.zh-CN.md) · **English** · [Showcase](https://quzhiii.github.io/thesis-skills)
 
-[What's New](#whats-new-in-v340) · [Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
+[What's New](#whats-new-in-v341) · [Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
 
 </div>
 
@@ -53,8 +53,10 @@ For repetitive finishing work, the expected time savings are concrete:
 
 ---
 
-## What's new in v3.4.0
+## What's new in v3.4.1
 
+- **Report navigation polish**: local HTML report surfaces now cross-link `index`, `final-audit`, `reference-ledger`, `claim-citation`, readiness, and raw JSON / CSV artifacts more consistently.
+- **Support-risk heuristic calibration**: `possible_overclaim` no longer duplicates `possible_topic_mismatch` when a `PASS` reference is already flagged by the more specific topic-mismatch signal.
 - **Readiness Gate Integration** remains in place from V3.2, and V3.4 extends that citation evidence stack with final-audit and local HTML report surfaces.
 - **Final-audit surfaces**: new deterministic final cleanup, statistical consistency, and manual-anchor checks feed `reports/final-audit-report.json`.
 - **Reference audit handoff**: `28-reference-audit-ledger/build_reference_audit_ledger.py` writes a spreadsheet-friendly `reports/reference-audit-ledger.csv` from existing reference evidence.
@@ -174,7 +176,7 @@ Example JSON snippets and demo walkthroughs: [`docs/examples.md`](docs/examples.
 
 ### Citation Integrity preview
 
-The current v3.4.0 release line keeps local Citation Integrity as the first layer of pre-submission reference checking:
+The current v3.4.1 release line keeps local Citation Integrity as the first layer of pre-submission reference checking:
 
 ```text
 References: BLOCK
@@ -661,6 +663,7 @@ Tweak → re-run → review reports. Most packs converge in 1–2 calibration ro
 
 ## Release history
 
+- `v3.4.1`: polished cross-report HTML navigation and calibrated duplicate support-risk signals.
 - `v3.4.0`: added final-audit report surfaces, reference-audit ledger HTML, and conservative claim-citation support-risk signals.
 - `v3.3.0`: hardened reference verification with final reference set parsing, resumeable external verification, DOI candidate suggestions, and URL verification.
 - `v3.2.0`: integrated hallucination risk and claim-citation triage into readiness gate, added unified evidence pipeline runner, `run_evidence_pipeline.py`.
