@@ -56,6 +56,8 @@ I18N = {
         "column_is_unused_bib_entry": "未引用 Bib",
         "no_value": "—",
         "empty_rows": "当前没有此类行。",
+        "generated_from": "本页面根据",
+        "regenerate_note": "生成。请先更新引用审计 CSV 总表，再重新生成本 HTML 页面。",
     },
     "en": {
         "title": "Reference Audit Ledger",
@@ -106,6 +108,8 @@ I18N = {
         "column_is_unused_bib_entry": "is_unused_bib_entry",
         "no_value": "—",
         "empty_rows": "No rows in this section.",
+        "generated_from": "This page is generated from",
+        "regenerate_note": ". Re-run the reference audit CSV ledger first, then regenerate this HTML page.",
     },
 }
 
@@ -381,6 +385,7 @@ def _lang_block(rows: list[dict[str, str]], csv_name: str, lang: str) -> str:
         <div class="group-grid">{scope_cards}</div>
       </section>
       {_related_reports(lang)}
+      <div class="raw-note">{html.escape(I18N[lang]['generated_from'])} <a href="{html.escape(csv_name)}">{html.escape(csv_name)}</a>{html.escape(I18N[lang]['regenerate_note'])}</div>
     </section>
 """
 
@@ -427,6 +432,7 @@ def render_reference_audit_ledger_html(rows: list[dict[str, str]], *, csv_name: 
     .nav-pill {{ display:inline-block; padding:10px 12px; border:1px solid var(--grey-2); background:#fff; }}
     .meta-copy {{ color:var(--grey-3); font-size:14px; line-height:1.45; max-width:720px; }}
     .empty {{ background:#fff; border:1px dashed var(--grey-2); color:var(--grey-3); padding:18px; }}
+    .raw-note {{ margin-top:24px; padding:16px; border:1px solid var(--grey-2); background:var(--grey-1); color:var(--grey-3); }}
     table {{ width:100%; border-collapse:collapse; background:#fff; }}
     th, td {{ border-bottom:1px solid var(--grey-2); text-align:left; padding:10px 8px; vertical-align:top; font-size:13px; }}
     th {{ font-family:"IBM Plex Mono", Consolas, monospace; text-transform:uppercase; letter-spacing:.1em; font-size:11px; color:var(--grey-3); position:sticky; top:0; background:#fff; }}
