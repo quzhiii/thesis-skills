@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 from pathlib import Path
 from typing import Any
 
 from core.rules import load_rule_pack
+
+
+_PACK_ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
 
 
 def _rewrite_pack_file(path: Path, replacements: dict[str, str]) -> None:
@@ -28,6 +32,11 @@ def _load_intake(path: str | Path) -> dict[str, Any]:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+def _validate_pack_segment(value: str, field: str) -> None:
+    if not _PACK_ID_PATTERN.fullmatch(value):
+        raise ValueError(f"{field} must contain only letters, numbers, underscores, or hyphens")
+
+
 def create_rule_pack(
     repo_root: str | Path,
     output_root: str | Path,
@@ -38,6 +47,8 @@ def create_rule_pack(
 ) -> Path:
     repo_root = Path(repo_root)
     output_root = Path(output_root)
+    _validate_pack_segment(pack_id, "pack_id")
+    _validate_pack_segment(starter, "starter")
     starter_path = repo_root / "90-rules" / "packs" / starter
     if not starter_path.exists():
         raise FileNotFoundError(f"starter pack not found: {starter}")

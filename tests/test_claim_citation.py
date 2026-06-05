@@ -230,6 +230,33 @@ class ClaimCitationTriageTest(unittest.TestCase):
         self.assertIn("possible_topic_mismatch", result["risk_signals"])
         self.assertNotIn("possible_overclaim", result["risk_signals"])
 
+    def test_review_reference_with_topic_mismatch_keeps_overclaim_signal(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        context = self._context(context="The method significantly improves benchmark accuracy.")
+        entry = self._entry(fields={"title": "Urban Housing Policy", "author": "Smith, Jane", "year": "2024"})
+
+        result = triage_claim_citation(context, entry, self._risk(label="REVIEW"), 2)
+
+        self.assertIn("possible_topic_mismatch", result["risk_signals"])
+        self.assertIn("possible_overclaim", result["risk_signals"])
+        self.assertEqual(result["support_review_label"], "NEEDS_MANUAL_REVIEW")
+        self.assertTrue(any("topic" in action.lower() for action in result["next_actions"]))
+        self.assertTrue(any("strength" in action.lower() for action in result["next_actions"]))
+
+    def test_missing_hallucination_evidence_with_topic_mismatch_keeps_overclaim_signal(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        context = self._context(context="The method significantly improves benchmark accuracy.")
+        entry = self._entry(fields={"title": "Urban Housing Policy", "author": "Smith, Jane", "year": "2024"})
+
+        result = triage_claim_citation(context, entry, None, 2)
+
+        self.assertIn("missing_hallucination_evidence", result["risk_signals"])
+        self.assertIn("possible_topic_mismatch", result["risk_signals"])
+        self.assertIn("possible_overclaim", result["risk_signals"])
+        self.assertEqual(result["support_review_label"], "NEEDS_MANUAL_REVIEW")
+
     def test_current_claim_with_old_reference_flags_outdated_support_review(self) -> None:
         from core.citation_integrity.claim_citation import triage_claim_citation
 
@@ -241,6 +268,16 @@ class ClaimCitationTriageTest(unittest.TestCase):
         self.assertIn("possible_outdated_support", result["risk_signals"])
         self.assertEqual(result["support_review_label"], "NEEDS_MANUAL_REVIEW")
         self.assertTrue(any("newer" in action.lower() for action in result["next_actions"]))
+
+    def test_concurrent_claim_does_not_trigger_outdated_support(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        context = self._context(context="Concurrent systems significantly improve benchmark accuracy.")
+        entry = self._entry(fields={"title": "Benchmark Accuracy Systems", "author": "Smith, Jane", "year": "2012"})
+
+        result = triage_claim_citation(context, entry, self._risk(), 2)
+
+        self.assertNotIn("possible_outdated_support", result["risk_signals"])
 
     def test_strong_claim_with_review_risk_flags_overclaim_review(self) -> None:
         from core.citation_integrity.claim_citation import triage_claim_citation
@@ -309,6 +346,20 @@ class ClaimCitationTriageTest(unittest.TestCase):
         self.assertIn("method", result["evidence"]["metadata_overlap"]["overlap_tokens"]["title"])
         self.assertIn("possible_topic_mismatch", result["risk_signals"])
         self.assertNotIn("possible_overclaim", result["risk_signals"])
+        self.assertEqual(result["support_review_label"], "NEEDS_MANUAL_REVIEW")
+
+    def test_warn_reference_with_only_generic_topic_overlap_keeps_overclaim_signal(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        context = self._context(context="A proposed framework guarantees safe deployment outcomes.")
+        entry = self._entry(fields={"title": "Urban Housing Framework", "author": "Smith, Jane", "year": "2024"})
+
+        result = triage_claim_citation(context, entry, self._risk(label="WARN"), 2)
+
+        self.assertEqual(result["claim_type"], "method_claim")
+        self.assertIn("framework", result["evidence"]["metadata_overlap"]["overlap_tokens"]["title"])
+        self.assertIn("possible_topic_mismatch", result["risk_signals"])
+        self.assertIn("possible_overclaim", result["risk_signals"])
         self.assertEqual(result["support_review_label"], "NEEDS_MANUAL_REVIEW")
 
     def test_build_report_counts_entries_and_uncited_references(self) -> None:

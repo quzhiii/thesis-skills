@@ -147,7 +147,7 @@ def _claim_type(context: str) -> str:
 
 def _contains_any(text: str, patterns: tuple[str, ...]) -> bool:
     lowered = text.lower()
-    return any(pattern in lowered for pattern in patterns)
+    return any(re.search(rf"(?<![A-Za-z0-9_-]){re.escape(pattern.lower())}(?![A-Za-z0-9_-])", lowered) for pattern in patterns)
 
 
 def _reference_year(bib_entry: BibEntry | None) -> int | None:
@@ -302,7 +302,8 @@ def _support_review(
         risk_signals.append("possible_outdated_support")
         next_actions.append("Check whether newer evidence is needed or soften current/latest wording.")
 
-    if strong_claim and ((hallucination_label not in {"PASS", None}) or not has_substantive_overlap) and "possible_topic_mismatch" not in risk_signals:
+    suppress_pass_topic_mismatch_duplicate = hallucination_label == "PASS" and "possible_topic_mismatch" in risk_signals
+    if strong_claim and ((hallucination_label not in {"PASS", None}) or not has_substantive_overlap) and not suppress_pass_topic_mismatch_duplicate:
         risk_signals.append("possible_overclaim")
         next_actions.append("Verify whether the cited source supports the strength of the claim before final submission.")
 

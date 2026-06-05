@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 from pathlib import Path
+from uuid import uuid4
 
 import json
 
@@ -28,6 +29,35 @@ class PackGeneratorTest(unittest.TestCase):
         self.assertEqual(pack.pack["id"], "my-journal")
         self.assertEqual(pack.pack["display_name"], "My Journal")
         self.assertIn("project", pack.rules)
+
+    def test_create_rule_pack_rejects_path_traversal_pack_id(self) -> None:
+        with workspace_tempdir("pack-generator-") as output_root:
+            escaped_name = f"escaped-pack-{uuid4().hex}"
+            with self.assertRaises(ValueError):
+                create_rule_pack(
+                    repo_root=ROOT,
+                    output_root=output_root,
+                    pack_id=f"../{escaped_name}",
+                    display_name="Escaped Pack",
+                    starter="journal-generic",
+                    kind="journal",
+                )
+
+            self.assertFalse((output_root.parent / escaped_name).exists())
+
+    def test_create_rule_pack_rejects_path_traversal_starter(self) -> None:
+        with workspace_tempdir("pack-generator-") as output_root:
+            with self.assertRaises(ValueError):
+                create_rule_pack(
+                    repo_root=ROOT,
+                    output_root=output_root,
+                    pack_id="safe-pack",
+                    display_name="Safe Pack",
+                    starter="../journal-generic",
+                    kind="journal",
+                )
+
+            self.assertFalse((output_root / "safe-pack").exists())
 
     def test_create_draft_pack_from_intake_metadata(self) -> None:
         with workspace_tempdir("pack-generator-") as output_root:
