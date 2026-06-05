@@ -48,6 +48,11 @@ def _validate_non_empty(value: str, field: str) -> None:
         raise ValueError(f"{field} must be a non-empty string")
 
 
+def _validate_optional_list(value: object, field: str) -> None:
+    if value is not None and not isinstance(value, list):
+        raise ValueError(f"{field} must be a list")
+
+
 def create_rule_pack(
     repo_root: str | Path,
     output_root: str | Path,
@@ -92,6 +97,8 @@ def create_draft_pack(
     display_name = str(intake["display_name"])
     starter = str(intake.get("starter", "university-generic"))
     kind = str(intake.get("kind", "university-thesis"))
+    for field in ("guide_sources", "template_sources", "sample_sources"):
+        _validate_optional_list(intake.get(field), field)
     destination = create_rule_pack(
         repo_root, output_root, pack_id, display_name, starter, kind
     )

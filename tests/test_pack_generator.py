@@ -129,6 +129,29 @@ class PackGeneratorTest(unittest.TestCase):
         self.assertIn("Heading 1", pack.mappings["source_template_mappings"])
         self.assertIn("guide.pdf", notes)
 
+    def test_create_draft_pack_rejects_non_list_source_fields_before_writing(self) -> None:
+        with workspace_tempdir("pack-generator-") as output_root:
+            intake = output_root / "intake.json"
+            intake.write_text(
+                json.dumps(
+                    {
+                        "pack_id": "bad-sources",
+                        "display_name": "Bad Sources",
+                        "kind": "university-thesis",
+                        "starter": "university-generic",
+                        "guide_sources": "guide.pdf",
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError):
+                create_draft_pack(ROOT, output_root, intake)
+
+            self.assertFalse((output_root / "bad-sources").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
