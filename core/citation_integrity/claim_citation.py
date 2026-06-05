@@ -270,7 +270,7 @@ def _support_review(
         risk_signals.append("possible_outdated_support")
         next_actions.append("Check whether newer evidence is needed or soften current/latest wording.")
 
-    if strong_claim and hallucination_label not in {"PASS", None}:
+    if strong_claim and ((hallucination_label not in {"PASS", None}) or max_metadata_overlap == 0.0) and "possible_topic_mismatch" not in risk_signals:
         risk_signals.append("possible_overclaim")
         next_actions.append("Verify whether the cited source supports the strength of the claim before final submission.")
 
