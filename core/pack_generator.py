@@ -43,6 +43,11 @@ def _validate_kind(kind: str) -> None:
         raise ValueError("kind must be one of: university-thesis, journal")
 
 
+def _validate_non_empty(value: str, field: str) -> None:
+    if not value.strip():
+        raise ValueError(f"{field} must be a non-empty string")
+
+
 def create_rule_pack(
     repo_root: str | Path,
     output_root: str | Path,
@@ -56,6 +61,7 @@ def create_rule_pack(
     _validate_pack_segment(pack_id, "pack_id")
     _validate_pack_segment(starter, "starter")
     _validate_kind(kind)
+    _validate_non_empty(display_name, "display_name")
     starter_path = repo_root / "90-rules" / "packs" / starter
     if not starter_path.exists():
         raise FileNotFoundError(f"starter pack not found: {starter}")

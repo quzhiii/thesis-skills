@@ -73,6 +73,20 @@ class PackGeneratorTest(unittest.TestCase):
 
             self.assertFalse((output_root / "bad-kind-pack").exists())
 
+    def test_create_rule_pack_rejects_empty_display_name_before_writing(self) -> None:
+        with workspace_tempdir("pack-generator-") as output_root:
+            with self.assertRaises(ValueError):
+                create_rule_pack(
+                    repo_root=ROOT,
+                    output_root=output_root,
+                    pack_id="empty-name-pack",
+                    display_name="",
+                    starter="journal-generic",
+                    kind="journal",
+                )
+
+            self.assertFalse((output_root / "empty-name-pack").exists())
+
     def test_create_draft_pack_from_intake_metadata(self) -> None:
         with workspace_tempdir("pack-generator-") as output_root:
             intake = output_root / "intake.json"
