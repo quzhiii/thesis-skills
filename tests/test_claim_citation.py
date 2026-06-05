@@ -298,6 +298,19 @@ class ClaimCitationTriageTest(unittest.TestCase):
         self.assertGreater(result["evidence"]["abstract_token_overlap"], 0)
         self.assertNotIn("possible_topic_mismatch", result["risk_signals"])
 
+    def test_generic_method_token_overlap_still_flags_topic_mismatch(self) -> None:
+        from core.citation_integrity.claim_citation import triage_claim_citation
+
+        context = self._context(context="The method significantly improves benchmark accuracy.")
+        entry = self._entry(fields={"title": "Urban Housing Method", "author": "Smith, Jane", "year": "2024"})
+
+        result = triage_claim_citation(context, entry, self._risk(label="PASS"), 2)
+
+        self.assertIn("method", result["evidence"]["metadata_overlap"]["overlap_tokens"]["title"])
+        self.assertIn("possible_topic_mismatch", result["risk_signals"])
+        self.assertNotIn("possible_overclaim", result["risk_signals"])
+        self.assertEqual(result["support_review_label"], "NEEDS_MANUAL_REVIEW")
+
     def test_build_report_counts_entries_and_uncited_references(self) -> None:
         from core.citation_integrity.claim_citation import build_claim_citation_report
 
