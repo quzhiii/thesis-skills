@@ -152,6 +152,85 @@ class PackGeneratorTest(unittest.TestCase):
 
             self.assertFalse((output_root / "bad-sources").exists())
 
+    def test_create_draft_pack_rejects_incomplete_word_style_mapping_before_writing(self) -> None:
+        with workspace_tempdir("pack-generator-") as output_root:
+            intake = output_root / "intake.json"
+            intake.write_text(
+                json.dumps(
+                    {
+                        "pack_id": "bad-word-mapping",
+                        "display_name": "Bad Word Mapping",
+                        "kind": "university-thesis",
+                        "starter": "university-generic",
+                        "word_style_mappings": [
+                            {
+                                "role": "chapter",
+                                "latex_command": "chapter",
+                            }
+                        ],
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError):
+                create_draft_pack(ROOT, output_root, intake)
+
+            self.assertFalse((output_root / "bad-word-mapping").exists())
+
+    def test_create_draft_pack_rejects_non_mapping_word_style_entry_before_writing(self) -> None:
+        with workspace_tempdir("pack-generator-") as output_root:
+            intake = output_root / "intake.json"
+            intake.write_text(
+                json.dumps(
+                    {
+                        "pack_id": "bad-word-entry",
+                        "display_name": "Bad Word Entry",
+                        "kind": "university-thesis",
+                        "starter": "university-generic",
+                        "word_style_mappings": ["Heading 1"],
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError):
+                create_draft_pack(ROOT, output_root, intake)
+
+            self.assertFalse((output_root / "bad-word-entry").exists())
+
+    def test_create_draft_pack_rejects_incomplete_chapter_role_mapping_before_writing(self) -> None:
+        with workspace_tempdir("pack-generator-") as output_root:
+            intake = output_root / "intake.json"
+            intake.write_text(
+                json.dumps(
+                    {
+                        "pack_id": "bad-chapter-mapping",
+                        "display_name": "Bad Chapter Mapping",
+                        "kind": "university-thesis",
+                        "starter": "university-generic",
+                        "chapter_role_mappings": [
+                            {
+                                "role": "introduction",
+                                "target": "chapters/01-introduction.tex",
+                            }
+                        ],
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError):
+                create_draft_pack(ROOT, output_root, intake)
+
+            self.assertFalse((output_root / "bad-chapter-mapping").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
