@@ -35,8 +35,9 @@ I18N = {
         "filter_note": "默认先看 Final references only；全部 Bib 条目、未引用条目和 hallucination_risk 证据放在后续 secondary sections。",
         "open_csv": "打开 CSV 源文件",
         "related_reports": "相关报告",
-        "related_note": "在报告入口、终稿审计和声明-引用支撑分级之间跳转。",
+        "related_note": "在报告入口、readiness 门禁、终稿审计和声明-引用支撑分级之间跳转。",
         "report_index": "报告入口页",
+        "readiness_json": "readiness JSON",
         "final_audit": "终稿审计 HTML",
         "claim_citation": "声明-引用 HTML",
         "column_key": "key",
@@ -55,6 +56,8 @@ I18N = {
         "column_is_unused_bib_entry": "未引用 Bib",
         "no_value": "—",
         "empty_rows": "当前没有此类行。",
+        "generated_from": "本页面根据",
+        "regenerate_note": "生成。请先更新引用审计 CSV 总表，再重新生成本 HTML 页面。",
     },
     "en": {
         "title": "Reference Audit Ledger",
@@ -84,8 +87,9 @@ I18N = {
         "filter_note": "Start with Final references only. All bibliography entries, unused entries, and hallucination_risk evidence are kept in secondary sections below.",
         "open_csv": "Open CSV source",
         "related_reports": "Related Reports",
-        "related_note": "Jump between the report index, final-audit detail, and claim-citation review surfaces.",
+        "related_note": "Jump between the report index, readiness gate, final-audit detail, and claim-citation review surfaces.",
         "report_index": "Report index",
+        "readiness_json": "Readiness JSON",
         "final_audit": "Final audit HTML",
         "claim_citation": "Claim-citation HTML",
         "column_key": "key",
@@ -104,6 +108,8 @@ I18N = {
         "column_is_unused_bib_entry": "is_unused_bib_entry",
         "no_value": "—",
         "empty_rows": "No rows in this section.",
+        "generated_from": "This page is generated from",
+        "regenerate_note": ". Re-run the reference audit CSV ledger first, then regenerate this HTML page.",
     },
 }
 
@@ -325,6 +331,7 @@ def _ledger_section(section_id: str, title: str, hint: str, rows: list[dict[str,
 def _related_reports(lang: str) -> str:
     links = [
         ("index.html", I18N[lang]["report_index"]),
+        ("readiness-report.json", I18N[lang]["readiness_json"]),
         ("final-audit-report.html", I18N[lang]["final_audit"]),
         ("claim-citation-triage.html", I18N[lang]["claim_citation"]),
     ]
@@ -378,6 +385,7 @@ def _lang_block(rows: list[dict[str, str]], csv_name: str, lang: str) -> str:
         <div class="group-grid">{scope_cards}</div>
       </section>
       {_related_reports(lang)}
+      <div class="raw-note">{html.escape(I18N[lang]['generated_from'])} <a href="{html.escape(csv_name)}">{html.escape(csv_name)}</a>{html.escape(I18N[lang]['regenerate_note'])}</div>
     </section>
 """
 
@@ -424,6 +432,7 @@ def render_reference_audit_ledger_html(rows: list[dict[str, str]], *, csv_name: 
     .nav-pill {{ display:inline-block; padding:10px 12px; border:1px solid var(--grey-2); background:#fff; }}
     .meta-copy {{ color:var(--grey-3); font-size:14px; line-height:1.45; max-width:720px; }}
     .empty {{ background:#fff; border:1px dashed var(--grey-2); color:var(--grey-3); padding:18px; }}
+    .raw-note {{ margin-top:24px; padding:16px; border:1px solid var(--grey-2); background:var(--grey-1); color:var(--grey-3); }}
     table {{ width:100%; border-collapse:collapse; background:#fff; }}
     th, td {{ border-bottom:1px solid var(--grey-2); text-align:left; padding:10px 8px; vertical-align:top; font-size:13px; }}
     th {{ font-family:"IBM Plex Mono", Consolas, monospace; text-transform:uppercase; letter-spacing:.1em; font-size:11px; color:var(--grey-3); position:sticky; top:0; background:#fff; }}

@@ -4,7 +4,7 @@
 
 `v1.0.0` was the public-story stabilization milestone for `thesis-skills`.
 
-`v3.4.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, the V2.0 external metadata verification layer, the V3.0 hallucination risk scoring layer, the V3.1 claim-citation support triage layer, the V3.3 reference verification hardening layer, and the V3.4 final-audit / report-UX layer.
+`v3.4.1` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, the V2.0 external metadata verification layer, the V3.0 hallucination risk scoring layer, the V3.1 claim-citation support triage layer, the V3.3 reference verification hardening layer, and the V3.4 final-audit / report-UX layer, with patch-level cross-report navigation polish and support-risk heuristic calibration.
 
 ```text
 bibliography intake
@@ -52,7 +52,7 @@ Design rules that stay in effect:
 
 ## Current Workflow Status
 
-All listed workflow families remain part of the current `v3.4.0` public contract:
+All listed workflow families remain part of the current `v3.4.1` public contract:
 
 | Workflow | Status | Entrypoint |
 |---|---|---|
@@ -132,10 +132,11 @@ All listed workflow families remain part of the current `v3.4.0` public contract
 | v3.2.0 | Readiness gate integration (hallucination risk + claim-citation dimensions), unified evidence pipeline runner `run_evidence_pipeline.py` |
 | v3.3.0 | Final reference set, resumeable external verification, DOI candidates, URL verification, and evidence pipeline hardening |
 | v3.4.0 | Final-audit foundation checkers, final-audit/report HTML surfaces, reference-audit ledger, and conservative claim-citation support-risk signals |
+| v3.4.1 | Cross-report HTML navigation polish and duplicate support-risk signal calibration |
 
-## Post-v3.4 Product Roadmap
+## Post-v3.4.1 Product Roadmap
 
-`v3.4.0` is the current product baseline, not a stepping stone that forces the next feature to become `v4.0.0` or `v5.0.0`.
+`v3.4.1` is the current product baseline, not a stepping stone that forces the next feature to become `v4.0.0` or `v5.0.0`.
 
 Future work should be organized as product tracks. Reserve a new major version only when the public contract changes in a large way: a new user workflow, a new artifact family, a new distribution model, or a capability that materially changes user expectations. Smaller improvements should stay in the current release line or become minor/patch releases.
 
@@ -248,6 +249,7 @@ Initial HTML surface now available:
 - static report index: `29-report-index/build_report_index.py`, writing `reports/index.html` as a local landing page over JSON / CSV source artifacts
 - final audit detail page: `30-final-audit-html/build_final_audit_html.py`, writing `reports/final-audit-report.html` from `final-audit-report.json` as a local reading surface
 - reference ledger detail page: `31-reference-ledger-html/build_reference_audit_ledger_html.py`, writing `reports/reference-audit-ledger.html` from `reference-audit-ledger.csv` as a local reading surface
+- claim-citation detail page: `32-claim-citation-html/build_claim_citation_html.py`, writing `reports/claim-citation-triage.html` from `claim-citation-triage-report.json` as a local reading surface
 
 ### Track F: Public Surface And Verification Discipline
 
@@ -314,7 +316,7 @@ Showcase work must follow the same bounded philosophy as code: no marketing copy
 
 ## Suggested Execution Order
 
-Given the current repository state at `v3.4.0`, the next work should proceed in this order:
+Given the current repository state at `v3.4.1`, the next work should proceed in this order:
 
 1. **Build claim-citation HTML**: add a static local `reports/claim-citation-triage.html` surface for support-review labels, risk signals, clusters, and citation-needed candidates.
 2. **Polish cross-report navigation**: link claim-citation, readiness, final-audit, reference ledger, and raw JSON / CSV artifacts consistently.

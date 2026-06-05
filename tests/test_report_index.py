@@ -35,6 +35,75 @@ class ReportIndexTest(unittest.TestCase):
         self.assertEqual(by_id["reference_ledger"]["row_count"], 1)
         self.assertEqual(by_id["readiness"]["status"], "missing")
         self.assertEqual(by_id["final_audit"]["title_zh"], "终稿审计总报告")
+        self.assertEqual(by_id["final_audit"]["detail_status"], "missing")
+
+    def test_render_hides_missing_html_detail_links(self) -> None:
+        html = render_report_index_html(
+            [
+                {
+                    "id": "final_audit",
+                    "title": "Final audit report",
+                    "title_zh": "终稿审计总报告",
+                    "path": "final-audit-report.json",
+                    "role": "JSON source",
+                    "role_zh": "JSON 源产物",
+                    "description": "Aggregated report",
+                    "description_zh": "聚合报告",
+                    "status": "present",
+                    "summary": {"headline": "Final audit verdict: PASS"},
+                    "detail_path": "final-audit-report.html",
+                    "detail_status": "missing",
+                }
+            ],
+            project_label="demo-project",
+        )
+
+        self.assertIn("final-audit-report.json", html)
+        self.assertNotIn("href=\"final-audit-report.html\"", html)
+        self.assertIn("Generate HTML detail first", html)
+
+    def test_render_distinguishes_html_detail_and_source_links(self) -> None:
+        html = render_report_index_html(
+            [
+                {
+                    "id": "final_audit",
+                    "title": "Final audit report",
+                    "title_zh": "终稿审计总报告",
+                    "path": "final-audit-report.json",
+                    "role": "JSON source",
+                    "role_zh": "JSON 源产物",
+                    "description": "Aggregated report",
+                    "description_zh": "聚合报告",
+                    "status": "present",
+                    "summary": {"headline": "Final audit verdict: PASS"},
+                    "detail_path": "final-audit-report.html",
+                    "detail_status": "present",
+                },
+                {
+                    "id": "reference_ledger",
+                    "title": "Reference audit ledger",
+                    "title_zh": "引用审计总表",
+                    "path": "reference-audit-ledger.csv",
+                    "role": "CSV source",
+                    "role_zh": "CSV 源产物",
+                    "description": "Spreadsheet handoff",
+                    "description_zh": "表格交付",
+                    "status": "present",
+                    "summary": {},
+                    "detail_path": "reference-audit-ledger.html",
+                    "detail_status": "present",
+                    "row_count": 10,
+                },
+            ],
+            project_label="demo-project",
+        )
+
+        self.assertIn("Open HTML detail", html)
+        self.assertIn("Open JSON source", html)
+        self.assertIn("Open CSV source", html)
+        self.assertIn("打开 HTML 详情", html)
+        self.assertIn("打开 JSON 源产物", html)
+        self.assertIn("打开 CSV 源产物", html)
 
     def test_renders_static_html_with_source_of_truth_notice(self) -> None:
         html = render_report_index_html(
@@ -50,6 +119,8 @@ class ReportIndexTest(unittest.TestCase):
                     "description_zh": "聚合报告",
                     "status": "present",
                     "summary": {"headline": "Final audit verdict: PASS"},
+                    "detail_path": "final-audit-report.html",
+                    "detail_status": "present",
                 }
             ],
             project_label="demo-project",
@@ -63,7 +134,8 @@ class ReportIndexTest(unittest.TestCase):
         self.assertIn("final-audit-report.json", html)
         self.assertIn("demo-project", html)
         self.assertIn("终稿审计总报告", html)
-        self.assertIn("打开源产物", html)
+        self.assertIn("打开 HTML 详情", html)
+        self.assertIn("打开 JSON 源产物", html)
         self.assertIn("final-audit-report.html", html)
 
     def test_cli_writes_reports_index_html(self) -> None:
@@ -96,7 +168,8 @@ class ReportIndexTest(unittest.TestCase):
         self.assertIn("Final audit verdict: PASS", html)
         self.assertIn("本地<br>报告入口", html)
         self.assertIn("已生成", html)
-        self.assertIn("Open source artifact HTML", html)
+        self.assertIn("Generate HTML detail first", html)
+        self.assertIn("Open JSON source", html)
 
 
 if __name__ == "__main__":

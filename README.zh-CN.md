@@ -1,4 +1,4 @@
-# Thesis Skills v3.4.0
+# Thesis Skills v3.4.1
 
 <div align="center">
 
@@ -13,7 +13,7 @@
 
 **中文文档** · [English](README.md) · [展示页面](https://quzhiii.github.io/thesis-skills)
 
-[v3.4.0 亮点](#v340-有哪些更新) · [快速开始](#快速开始) · [输出](#输出) · [使用场景](#使用场景) · [如何同步后续更新](#如何同步后续更新) · [规则包](#规则包) · [创建自己的规则包](#创建你自己的学校规则包) · [边界](#边界)
+[v3.4.1 亮点](#v341-有哪些更新) · [快速开始](#快速开始) · [输出](#输出) · [使用场景](#使用场景) · [如何同步后续更新](#如何同步后续更新) · [规则包](#规则包) · [创建自己的规则包](#创建你自己的学校规则包) · [边界](#边界)
 
 </div>
 
@@ -53,12 +53,14 @@ LaTeX 项目 ───────┤                                           
 
 ---
 
-## v3.4.0 有哪些更新
+## v3.4.1 有哪些更新
 
+- **报告导航打磨**：本地 HTML 报告界面现在更一致地互链 `index`、`final-audit`、`reference-ledger`、`claim-citation`、readiness 和原始 JSON / CSV artifacts。
+- **支撑风险信号校准**：当 `PASS` reference 已经被更具体的 `possible_topic_mismatch` 标记时，不再重复追加 `possible_overclaim`。
 - **Readiness Gate 集成** 的四层引用证据流水线继续保留，依然可以一键跑完四层引用证据流水线；V3.4 在其上把 final-audit 与本地 HTML 报告界面补齐。
 - **终稿审计界面**：新增 final cleanup、statistical consistency、manual anchor 三个确定性检查，并聚合到 `reports/final-audit-report.json`。
 - **引用审计交付表**：`28-reference-audit-ledger/build_reference_audit_ledger.py` 从已有引用证据生成表格友好的 `reports/reference-audit-ledger.csv`。
-- **本地静态报告 UX**：新增 `reports/index.html`、`reports/final-audit-report.html`、`reports/reference-audit-ledger.html`，方便阅读，但 JSON / CSV 仍然是 source of truth。
+- **本地静态报告 UX**：新增 `reports/index.html`、`reports/final-audit-report.html`、`reports/reference-audit-ledger.html`、`reports/claim-citation-triage.html`，方便阅读，但 JSON / CSV 仍然是 source of truth。
 - **声明-引用支撑复核**：新增 `possible_topic_mismatch`、`possible_outdated_support`、`possible_overclaim` 等保守 advisory 风险信号。
 - **V3.3 引用验证加固** 继续保留：final reference set、DOI 候选、URL 验证、可限定范围/可续跑外部验证，以及统一证据流水线 runner `run_evidence_pipeline.py`。
 
@@ -174,7 +176,7 @@ Word/LaTeX       格式结构           显式确认修改         阻断       
 
 ### Citation Integrity 预览
 
-当前 `v3.4.0` 版本线把本地优先的 Citation Integrity 作为提交前引用检查的第一层：
+当前 `v3.4.1` 版本线把本地优先的 Citation Integrity 作为提交前引用检查的第一层：
 
 ```text
 References: BLOCK
@@ -594,6 +596,7 @@ python run_check_once.py \
 
 ## 历史迭代记录
 
+- `v3.4.1`：打磨跨报告 HTML 导航，并校准重复的声明-引用支撑风险信号。
 - `v3.4.0`：加入终稿审计报告界面、引用审计 HTML 台账，以及保守的声明-引用支撑风险信号。
 - `v3.3.0`：加入 final reference set、可续跑外部验证、DOI 候选建议和 URL 验证。
 - `v3.2.0`：将幻觉风险评分和声明-引用分级接入 readiness gate，新增统一证据流水线 runner。

@@ -19,6 +19,10 @@ I18N = {
         "unreadable": "不可读取",
         "notice": "JSON / CSV 仍然是 source of truth。这个页面只是本地阅读入口，适合导师、实验室或服务交付时浏览。",
         "open_source": "打开源产物",
+        "open_html_detail": "打开 HTML 详情",
+        "open_json_source": "打开 JSON 源产物",
+        "open_csv_source": "打开 CSV 源产物",
+        "generate_html_first": "请先生成 HTML 详情页",
         "generate_first": "请先生成这个产物",
         "rows": "行数",
         "path": "路径",
@@ -38,6 +42,10 @@ I18N = {
         "unreadable": "unreadable",
         "notice": "Source of truth remains JSON / CSV. This page is a local reading surface for advisor, lab, or service handoff.",
         "open_source": "Open source artifact",
+        "open_html_detail": "Open HTML detail",
+        "open_json_source": "Open JSON source",
+        "open_csv_source": "Open CSV source",
+        "generate_html_first": "Generate HTML detail first",
         "generate_first": "Generate this artifact first",
         "rows": "rows",
         "path": "path",
@@ -143,6 +151,7 @@ def collect_report_index_items(reports_dir: str | Path) -> list[dict[str, object
         }
         if spec.id in HTML_DETAILS:
             item["detail_path"] = HTML_DETAILS[spec.id]
+            item["detail_status"] = _artifact_status(root / HTML_DETAILS[spec.id])
         if path.suffix == ".csv" and status == "present":
             item["row_count"] = _csv_row_count(path)
         items.append(item)
@@ -191,17 +200,21 @@ def _card(item: dict[str, object], lang: str) -> str:
     row_text = f'<div class="meta">{html.escape(I18N[lang]["rows"])}: {html.escape(str(row_count))}</div>' if row_count is not None else ""
     link = html.escape(str(item.get("path", "")))
     detail_link = str(item.get("detail_path") or HTML_DETAILS.get(str(item.get("id", "")), ""))
+    detail_status = str(item.get("detail_status", "missing" if detail_link else ""))
     title = html.escape(str(item.get("title_zh" if lang == "zh" else "title", "")))
     role = html.escape(str(item.get("role_zh" if lang == "zh" else "role", "")))
     description = html.escape(str(item.get("description_zh" if lang == "zh" else "description", "")))
     status_text = html.escape(I18N[lang].get(status, status))
     summary_html = html.escape(summary_text) if summary_text else I18N[lang]["no_summary"]
+    source_action_key = "open_csv_source" if str(item.get("role", "")).startswith("CSV") else "open_json_source"
     if status == "present":
-        if detail_link:
+        if detail_link and detail_status == "present":
             detail_html = html.escape(detail_link)
-            action = f'<a href="{detail_html}">{html.escape(I18N[lang]["open_source"])} HTML</a> · <a href="{link}">{html.escape(I18N[lang]["open_source"])} JSON/CSV</a>'
+            action = f'<a href="{detail_html}">{html.escape(I18N[lang]["open_html_detail"])}</a> · <a href="{link}">{html.escape(I18N[lang][source_action_key])}</a>'
+        elif detail_link:
+            action = f'<span>{html.escape(I18N[lang]["generate_html_first"])}</span> · <a href="{link}">{html.escape(I18N[lang][source_action_key])}</a>'
         else:
-            action = f'<a href="{link}">{html.escape(I18N[lang]["open_source"])}</a>'
+            action = f'<a href="{link}">{html.escape(I18N[lang][source_action_key])}</a>'
     else:
         action = f'<span>{html.escape(I18N[lang]["generate_first"])}</span>'
     return f"""

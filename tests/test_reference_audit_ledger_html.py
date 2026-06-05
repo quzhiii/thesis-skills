@@ -50,9 +50,37 @@ class ReferenceAuditLedgerHtmlTest(unittest.TestCase):
         self.assertIn("引用证据总表", html)
         self.assertIn("相关报告", html)
         self.assertIn("Related Reports", html)
+        self.assertIn("readiness-report.json", html)
         self.assertIn("final-audit-report.html", html)
         self.assertIn("claim-citation-triage.html", html)
         self.assertIn("data-lang-btn=\"zh\"", html)
+
+    def test_render_includes_raw_source_note_for_csv_truth(self) -> None:
+        html = render_reference_audit_ledger_html(
+            [
+                {
+                    "key": "ref1",
+                    "title": "Reference One",
+                    "authors": "Doe, Jane",
+                    "year": "2024",
+                    "venue": "J",
+                    "doi": "",
+                    "scope": "bibliography",
+                    "source_checked": "local_bib",
+                    "status": "present",
+                    "issue": "",
+                    "action_suggested": "Review only if flagged.",
+                    "is_final_reference": "true",
+                    "is_cited_in_tex": "true",
+                    "is_unused_bib_entry": "false",
+                }
+            ]
+        )
+
+        self.assertIn("本页面根据", html)
+        self.assertIn("This page is generated from", html)
+        self.assertIn('<a href="reference-audit-ledger.csv">reference-audit-ledger.csv</a>', html)
+        self.assertIn("regenerate this HTML page", html)
 
     def test_render_separates_final_references_from_unused_bibliography(self) -> None:
         rows = [

@@ -88,6 +88,26 @@ class FinalAuditFoundationDocsTest(unittest.TestCase):
             ],
         )
 
+    def test_public_overview_lists_all_local_html_surfaces(self) -> None:
+        self._assert_contains_all(
+            "README.md",
+            [
+                "**Static local report UX**: `reports/index.html`, `reports/final-audit-report.html`, `reports/reference-audit-ledger.html`, and `reports/claim-citation-triage.html`",
+            ],
+        )
+        self._assert_contains_all(
+            "README.zh-CN.md",
+            [
+                "**本地静态报告 UX**：新增 `reports/index.html`、`reports/final-audit-report.html`、`reports/reference-audit-ledger.html`、`reports/claim-citation-triage.html`",
+            ],
+        )
+        self._assert_contains_all(
+            "docs/roadmap.md",
+            [
+                "claim-citation detail page: `32-claim-citation-html/build_claim_citation_html.py`, writing `reports/claim-citation-triage.html` from `claim-citation-triage-report.json` as a local reading surface",
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

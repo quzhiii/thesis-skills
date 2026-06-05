@@ -2,6 +2,12 @@
 
 All notable changes to Thesis Skills are summarized here.
 
+## v3.4.1
+
+- Polished local HTML report navigation across `reports/index.html`, `reports/final-audit-report.html`, `reports/reference-audit-ledger.html`, and `reports/claim-citation-triage.html`.
+- Kept raw JSON / CSV artifacts explicit as source-of-truth links while improving local handoff UX.
+- Calibrated claim-citation support-risk heuristics to avoid duplicating `possible_overclaim` when a `PASS` reference is already flagged by the more specific `possible_topic_mismatch` signal.
+
 ## v3.4.0
 
 - Added final-audit foundation checkers for final cleanup residue, statistical notation consistency, and manual `\addcontentsline` / `\phantomsection` anchor review.
