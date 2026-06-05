@@ -10,6 +10,7 @@ from core.rules import load_rule_pack
 
 
 _PACK_ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
+_ALLOWED_KINDS = {"university-thesis", "journal"}
 
 
 def _rewrite_pack_file(path: Path, replacements: dict[str, str]) -> None:
@@ -37,6 +38,11 @@ def _validate_pack_segment(value: str, field: str) -> None:
         raise ValueError(f"{field} must contain only letters, numbers, underscores, or hyphens")
 
 
+def _validate_kind(kind: str) -> None:
+    if kind not in _ALLOWED_KINDS:
+        raise ValueError("kind must be one of: university-thesis, journal")
+
+
 def create_rule_pack(
     repo_root: str | Path,
     output_root: str | Path,
@@ -49,6 +55,7 @@ def create_rule_pack(
     output_root = Path(output_root)
     _validate_pack_segment(pack_id, "pack_id")
     _validate_pack_segment(starter, "starter")
+    _validate_kind(kind)
     starter_path = repo_root / "90-rules" / "packs" / starter
     if not starter_path.exists():
         raise FileNotFoundError(f"starter pack not found: {starter}")
