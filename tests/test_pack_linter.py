@@ -227,6 +227,8 @@ class PackLinterTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertEqual(payload["summary"]["checker"], "lint_pack")
         self.assertEqual(payload["summary"]["status"], "FAIL")
+        self.assertEqual(payload["summary"]["scorecard_status"], "FAIL")
+        self.assertEqual(payload["scorecard"]["required_files"]["status"], "FAIL")
         self.assertTrue(payload["findings"])
 
     def test_lint_pack_cli_writes_scorecard_summary(self) -> None:

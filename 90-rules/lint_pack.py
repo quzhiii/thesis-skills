@@ -33,7 +33,7 @@ def main() -> int:
         checker="lint_pack",
         ruleset=ruleset,
         findings=findings,
-        extra_summary={"pack_path": str(pack_path)},
+        extra_summary={"pack_path": str(pack_path), "scorecard_status": scorecard["overall_status"]},
         extra_payload={"scorecard": scorecard},
     )
     print(report_path.read_text(encoding="utf-8"))
