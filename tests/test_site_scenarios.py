@@ -100,6 +100,47 @@ class SiteScenarioPagesTest(unittest.TestCase):
             or 'artifact-gallery.html#before-after' in docs_home_text
         )
 
+    def test_current_site_pages_show_v341_not_stale_version_labels(self) -> None:
+        expected_by_page = {
+            "index.html": [
+                "Thesis Skills v3.4.1",
+                '<span class="issue-note">v3.4.1</span>',
+                "Thesis Skills v3.4.1 · CLI-first · MIT · Python 3.10+",
+                "Thesis Skills / v3.4.1",
+            ],
+            "quickstart.html": [
+                '<span class="issue-note">v3.4.1</span>',
+                "生成 v3.4.1 引用证据链",
+                "Thesis Skills / v3.4.1",
+            ],
+            "scenario-entry.html": [
+                '<span class="issue-note">v3.4.1</span>',
+                "运行 v3.4.1 evidence pipeline",
+            ],
+            "artifact-gallery.html": [
+                "输出样例 | Thesis Skills v3.4.1",
+                '<span class="issue-note">v3.4.1 / 输出样例</span>',
+                "Thesis Skills / v3.4.1 / output samples",
+            ],
+            "docs-home.html": [
+                "当前 v3.4.1 的公开输出样例",
+            ],
+        }
+        stale_snippets = [
+            "v3.3.0",
+            "v3.3 /",
+            "v3.3 引用",
+            "v3.3 evidence pipeline",
+            "v3.0.0",
+        ]
+        for page, expected_snippets in expected_by_page.items():
+            text = self._read(page)
+            with self.subTest(page=page):
+                for snippet in expected_snippets:
+                    self.assertIn(snippet, text)
+                for stale in stale_snippets:
+                    self.assertNotIn(stale, text)
+
 
 if __name__ == "__main__":
     unittest.main()
