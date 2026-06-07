@@ -56,6 +56,27 @@ class FinalCleanupDocsTest(unittest.TestCase):
             ],
         )
 
+    def test_readmes_describe_final_cleanup_as_current_final_audit_input(self) -> None:
+        self._assert_contains_all(
+            "README.md",
+            [
+                "The final-audit workflow can aggregate this JSON into `reports/final-audit-report.json`",
+                "render it through `reports/final-audit-report.html` and the local report index",
+            ],
+        )
+        self._assert_contains_all(
+            "README.zh-CN.md",
+            [
+                "当前终稿审计流程可以把这个 JSON artifact 并入 `reports/final-audit-report.json`",
+                "再通过 `reports/final-audit-report.html` 和本地报告索引展示",
+            ],
+        )
+
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme_zh = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+        self.assertNotIn("folded later into", readme)
+        self.assertNotIn("后续可以并入", readme_zh)
+
     def test_roadmap_marks_foundation_without_major_bump(self) -> None:
         self._assert_contains_all(
             "docs/roadmap.md",

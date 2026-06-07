@@ -349,7 +349,7 @@ python 23-check-final-cleanup/check_final_cleanup.py \
   --ruleset university-generic
 ```
 
-输出：`reports/final-cleanup-report.json`。它会扫描 `TODO`、`FIXME`、`???`、`\textcolor{blue}`、`\color{blue}`、`draft`、`debug`、`待修改`、`待核查` 等终稿残留，但只报告定位，不自动删除、不改写正文。这个 JSON artifact 后续可以并入 `reports/final-audit-report.json`，再由 static HTML report surfaces 展示。
+输出：`reports/final-cleanup-report.json`。它会扫描 `TODO`、`FIXME`、`???`、`\textcolor{blue}`、`\color{blue}`、`draft`、`debug`、`待修改`、`待核查` 等终稿残留，但只报告定位，不自动删除、不改写正文。当前终稿审计流程可以把这个 JSON artifact 并入 `reports/final-audit-report.json`，再通过 `reports/final-audit-report.html` 和本地报告索引展示。
 
 ### 8. 我需要检查统计表达和手工目录锚点
 

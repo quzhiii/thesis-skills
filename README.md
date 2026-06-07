@@ -320,7 +320,7 @@ python 23-check-final-cleanup/check_final_cleanup.py \
   --ruleset university-generic
 ```
 
-Output: `reports/final-cleanup-report.json`. This checker is report-only: it does not delete markers, rewrite prose, or change source files. The JSON artifact is designed to be folded later into `reports/final-audit-report.json` and static HTML report surfaces.
+Output: `reports/final-cleanup-report.json`. This checker is report-only: it does not delete markers, rewrite prose, or change source files. The final-audit workflow can aggregate this JSON into `reports/final-audit-report.json` and render it through `reports/final-audit-report.html` and the local report index.
 
 ### Statistical Consistency Checker
 
