@@ -556,6 +556,18 @@ python run_check_once.py \
 
 修改 → 重新运行 → 查看报告，通常 1-2 轮就能校准到位。
 
+**第 7 步：导出交接包**
+
+规则包通过 lint 后，可以导出一个最小版本化导出包，方便交给别人或带到另一个环境：
+
+```bash
+python 90-rules/export_pack.py \
+  --pack-path 90-rules/packs/my-university \
+  --output dist/my-university.zip
+```
+
+这会生成一个经过 lint 的 ZIP 规则包；当前仍然没有正式 registry 或发布命令。
+
 > **给非清华同学的建议**：如果你希望我们宣传你的学校规则包，欢迎提 PR 把校准好的规则包放到 `90-rules/packs/` 下。这样后来的同学就不需要从零开始。
 
 ---

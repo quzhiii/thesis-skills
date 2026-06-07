@@ -129,8 +129,8 @@ class CitationIntegrityDocsTest(unittest.TestCase):
                 "current v1.2.0 public contract",
             ],
             "90-rules/STARTER_PACK_BASELINE.md": [
-                "current v1.2.0 public contract",
-                "Current v1.2.0 baseline summary",
+                "current v3.4.1 public contract",
+                "Current v3.4.1 baseline summary",
             ],
             "02-latex-to-word/THESIS_LATEX_TO_WORD.md": [
                 "current v1.2.0 first-class export promise",

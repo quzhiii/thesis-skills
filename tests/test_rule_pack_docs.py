@@ -61,6 +61,55 @@ class RulePackDocsTest(unittest.TestCase):
             with self.subTest(path=relative_path):
                 self._assert_contains_none(relative_path, stale_snippets)
 
+    def test_rule_pack_export_bundle_is_discoverable_from_public_docs(self) -> None:
+        self._assert_contains_all(
+            "README.md",
+            [
+                "90-rules/export_pack.py",
+                "--pack-path 90-rules/packs/my-university",
+                "--output dist/my-university.zip",
+                "minimal versioned export bundle",
+                "no formal registry or publish command",
+            ],
+        )
+        self._assert_contains_all(
+            "README.zh-CN.md",
+            [
+                "90-rules/export_pack.py",
+                "--pack-path 90-rules/packs/my-university",
+                "--output dist/my-university.zip",
+                "最小版本化导出包",
+                "没有正式 registry 或发布命令",
+            ],
+        )
+        self._assert_contains_all(
+            "90-rules/THESIS_RULE_PACKS.md",
+            [
+                "python 90-rules/export_pack.py \\",
+                "--pack-path 90-rules/packs/<pack-id>",
+                "--output dist/<pack-id>.zip",
+                "manifest.json",
+            ],
+        )
+
+    def test_starter_pack_baseline_uses_current_release_contract_label(self) -> None:
+        self._assert_contains_all(
+            "90-rules/STARTER_PACK_BASELINE.md",
+            [
+                "current v3.4.1 public contract",
+                "Current v3.4.1 baseline summary",
+                "For the current v3.4.1 line",
+            ],
+        )
+        self._assert_contains_none(
+            "90-rules/STARTER_PACK_BASELINE.md",
+            [
+                "current v1.2.0 public contract",
+                "Current v1.2.0 baseline summary",
+                "For the current v1.2.0 line",
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

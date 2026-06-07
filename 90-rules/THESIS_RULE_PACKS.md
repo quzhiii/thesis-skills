@@ -34,6 +34,16 @@ python 90-rules/lint_pack.py --pack-path 90-rules/packs/<pack-id>
 
 The current lint report summarizes required files, metadata completeness, baseline completeness, schema consistency, overall status, and finding counts.
 
+Export a linted handoff bundle:
+
+```bash
+python 90-rules/export_pack.py \
+  --pack-path 90-rules/packs/<pack-id> \
+  --output dist/<pack-id>.zip
+```
+
+The bundle includes `manifest.json`, `pack.yaml`, `rules.yaml`, and `mappings.yaml`.
+
 When onboarding a new school or journal, copy the closest starter pack and then confirm ambiguous rules manually.
 
 Helper command:

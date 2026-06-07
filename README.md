@@ -623,6 +623,18 @@ After running, inspect the JSON reports under `reports/`. If you notice:
 
 Tweak → re-run → review reports. Most packs converge in 1–2 calibration rounds.
 
+**Step 7: Export a handoff bundle**
+
+After the pack passes lint, export a minimal versioned export bundle for handoff:
+
+```bash
+python 90-rules/export_pack.py \
+  --pack-path 90-rules/packs/my-university \
+  --output dist/my-university.zip
+```
+
+This creates a linted ZIP bundle for sharing the pack outside a local checkout. There is still no formal registry or publish command.
+
 > **For non-Tsinghua users**: If your calibrated rule pack is stable and you'd like it featured, PRs adding new packs to `90-rules/packs/` are welcome. Future students from your school won't have to start from scratch.
 
 ---
