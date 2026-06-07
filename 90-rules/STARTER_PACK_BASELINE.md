@@ -236,11 +236,11 @@ Treat the following as the documented baseline:
 
 ## 9. Remaining hardening implications
 
-The current baseline intentionally does not claim a full packaging ecosystem. Future hardening may still address:
+The current baseline intentionally does not claim a full packaging ecosystem. A minimal versioned export bundle exists through `90-rules/export_pack.py`. Future hardening may still address:
 
-1. A formal pack export bundle format.
+1. A richer formal pack export bundle format beyond the current minimal ZIP.
 2. A pack registry or publish command.
 3. A dedicated portability score beyond the current lint scorecard summary.
 4. A fully normalized internal mapping schema.
 
-Until those exist, public docs should describe the current bounded model: local packs, Git-tracked evolution, handoff file sets, and lint reports.
+Until those broader pieces exist, public docs should describe the current bounded model: local packs, Git-tracked evolution, linted export bundles, handoff file sets, and lint reports.

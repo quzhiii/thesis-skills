@@ -105,7 +105,7 @@ All listed workflow families remain part of the current `v3.4.1` public contract
 | External metadata verification | CrossRef / OpenAlex / Semantic Scholar evidence is advisory; unavailable networks degrade to `UNAVAILABLE` and do not rewrite local readiness blockers |
 | URL verification | HEAD / GET only; checks reachability, not authenticity or full-text content |
 | DOI candidates | Suggestions only; never auto-write to `.bib` |
-| Pack publishing ecosystem | Rule packs have local/Git/handoff workflows; there is no formal registry or versioned export bundle yet |
+| Pack publishing ecosystem | Rule packs have local/Git/handoff workflows and a minimal versioned export bundle; there is no formal registry or publish command yet |
 | AI writing | The repository checks, organizes, and fixes bounded issues; it does not generate or rewrite thesis content |
 
 ## Release History (Compact)
@@ -185,7 +185,7 @@ Rule packs are the distribution layer for schools, journals, and service workflo
 - add more concrete school/journal packs only when their assumptions are documented
 - improve pack lint coverage and completeness checks
 - extend scorecard dimensions where the existing schema allows
-- define a versioned export bundle for sharing rule packs outside a local checkout
+- maintain the minimal versioned export bundle for sharing rule packs outside a local checkout
 - keep policy in rule packs, not hard-coded into checkers
 
 ### Track D: Final-Audit And Evidence Handoff
