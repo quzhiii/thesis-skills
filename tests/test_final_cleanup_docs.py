@@ -69,6 +69,29 @@ class FinalCleanupDocsTest(unittest.TestCase):
             ],
         )
 
+    def test_roadmap_separates_shipped_v341_work_from_next_iteration(self) -> None:
+        text = (ROOT / "docs" / "roadmap.md").read_text(encoding="utf-8")
+        required_snippets = [
+            "The current final-audit foundation turns existing deterministic checks into clearer pre-submission deliverables.",
+            "## Recent Execution Status",
+            "**Build claim-citation HTML**: completed",
+            "**Polish cross-report navigation**: completed",
+            "**Calibrate support-risk heuristics**: completed",
+            "**Harden rule-pack packaging**: completed",
+            "**Run cross-release verification**: completed for the current hardening sequence",
+            "Next incremental work should focus on public-surface and generated-artifact consistency before opening a new product track.",
+        ]
+        for snippet in required_snippets:
+            self.assertIn(snippet, text, f"docs/roadmap.md missing {snippet!r}")
+        self.assertNotIn(
+            "The next missing product layer is a **final-audit workflow**",
+            text,
+        )
+        self.assertNotIn(
+            "Given the current repository state at `v3.4.1`, the next work should proceed in this order:",
+            text,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

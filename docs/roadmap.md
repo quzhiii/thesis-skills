@@ -190,7 +190,7 @@ Rule packs are the distribution layer for schools, journals, and service workflo
 
 ### Track D: Final-Audit And Evidence Handoff
 
-The next missing product layer is a **final-audit workflow** that turns the existing deterministic checks into a clearer pre-submission deliverable.
+The current final-audit foundation turns existing deterministic checks into clearer pre-submission deliverables.
 
 This track should absorb the highest-value parts of `thesis-skills-final-audit-rules.md` that fit the current product philosophy:
 
@@ -314,16 +314,18 @@ Showcase work must follow the same bounded philosophy as code: no marketing copy
 | Rule-pack and packaging ecosystem | Medium | High | Low-Medium | P1 |
 | Candidate reference support | High | Medium-High | High | P2 |
 
-## Suggested Execution Order
+## Recent Execution Status
 
-Given the current repository state at `v3.4.1`, the next work should proceed in this order:
+Given the current repository state at `v3.4.1`, the recent hardening sequence is:
 
-1. **Build claim-citation HTML**: add a static local `reports/claim-citation-triage.html` surface for support-review labels, risk signals, clusters, and citation-needed candidates.
-2. **Polish cross-report navigation**: link claim-citation, readiness, final-audit, reference ledger, and raw JSON / CSV artifacts consistently.
-3. **Calibrate support-risk heuristics**: add more fixtures for `possible_topic_mismatch`, `possible_outdated_support`, and `possible_overclaim` without turning them into truth claims.
-4. **Harden rule-pack packaging**: improve pack lint, completeness, scorecard, and export-bundle workflows so packs can be shared safely.
-5. **Evaluate candidate reference support later**: only start recommendation work after support-review presentation, final-audit, and handoff tracks are stable.
-6. **Run cross-release verification**: grep, link, command, and test verification remain mandatory before treating any roadmap item as complete.
+1. **Build claim-citation HTML**: completed with a static local `reports/claim-citation-triage.html` surface for support-review labels, risk signals, clusters, and citation-needed candidates.
+2. **Polish cross-report navigation**: completed across claim-citation, readiness, final-audit, reference ledger, and raw JSON / CSV artifacts.
+3. **Calibrate support-risk heuristics**: completed for duplicate support-risk signal calibration without turning findings into truth claims.
+4. **Harden rule-pack packaging**: completed across pack lint, completeness, scorecard, export-bundle workflow, and docs/test alignment.
+5. **Evaluate candidate reference support later**: still deferred; only start recommendation work after support-review presentation, final-audit, and handoff tracks are stable.
+6. **Run cross-release verification**: completed for the current hardening sequence; grep, link, command, and test verification remain mandatory before treating future roadmap items as complete.
+
+Next incremental work should focus on public-surface and generated-artifact consistency before opening a new product track.
 
 ## Cross-Release Acceptance Gates
 

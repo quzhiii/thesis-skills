@@ -78,6 +78,20 @@ class SiteScenarioPagesTest(unittest.TestCase):
         for snippet in required_snippets:
             self.assertIn(snippet, text)
 
+    def test_artifact_gallery_uses_existing_patch_preview_command(self) -> None:
+        text = self._read("artifact-gallery.html")
+        expected_command = (
+            "python 24-fix-language-deep/fix_language_deep.py "
+            "--project-root thesis "
+            "--report reports/check_language_deep-report.json "
+            "--apply false"
+        )
+        script_path = ROOT / "24-fix-language-deep" / "fix_language_deep.py"
+
+        self.assertTrue(script_path.exists(), f"{script_path} should exist")
+        self.assertIn(expected_command, text)
+        self.assertNotIn("python 15-fix-preview/generate_fix_preview.py", text)
+
     def test_index_or_docs_home_links_to_before_after_examples(self) -> None:
         index_text = self._read("index.html")
         docs_home_text = self._read("docs-home.html")
