@@ -30,9 +30,21 @@ class FinalCleanupDocsTest(unittest.TestCase):
                 "reports/final-cleanup-report.json",
                 "statistical-consistency-report.json",
                 "manual-anchor-report.json",
-                "future `reports/final-audit-report.json`",
             ],
         )
+
+    def test_examples_describe_final_cleanup_as_current_final_audit_input(self) -> None:
+        self._assert_contains_all(
+            "docs/examples.md",
+            [
+                "The JSON report can be aggregated as the `final_cleanup` section of `reports/final-audit-report.json`",
+                "rendered through the current static HTML report surfaces as issue cards grouped by risk level",
+            ],
+        )
+        examples = (ROOT / "docs" / "examples.md").read_text(encoding="utf-8")
+        self.assertNotIn("future `reports/final-audit-report.json`", examples)
+        self.assertNotIn("intended to become the `final_cleanup` section", examples)
+        self.assertNotIn("rendered later as static HTML issue cards", examples)
 
     def test_readmes_mention_final_cleanup_artifact(self) -> None:
         self._assert_contains_all(
