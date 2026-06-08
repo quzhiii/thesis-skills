@@ -633,7 +633,7 @@ python 90-rules/export_pack.py \
   --output dist/my-university.zip
 ```
 
-This creates a linted ZIP bundle for sharing the pack outside a local checkout. There is still no formal registry or publish command.
+This creates a linted ZIP bundle for sharing the pack outside a local checkout. The ZIP includes `manifest.json` with pack metadata and the lint scorecard summary. There is still no formal registry or publish command.
 
 > **For non-Tsinghua users**: If your calibrated rule pack is stable and you'd like it featured, PRs adding new packs to `90-rules/packs/` are welcome. Future students from your school won't have to start from scratch.
 

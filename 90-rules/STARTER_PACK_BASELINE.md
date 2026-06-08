@@ -95,6 +95,8 @@ The current scorecard summarizes:
 - `overall_status`
 - `finding_counts`
 
+When required files and metadata completeness pass, the lint report summary also includes `pack_version`, `pack_kind`, and `display_name`.
+
 ---
 
 ## 4. Starter-pack creation flow
@@ -236,7 +238,7 @@ Treat the following as the documented baseline:
 
 ## 9. Remaining hardening implications
 
-The current baseline intentionally does not claim a full packaging ecosystem. A minimal versioned export bundle exists through `90-rules/export_pack.py`. Future hardening may still address:
+The current baseline intentionally does not claim a full packaging ecosystem. A minimal versioned export bundle exists through `90-rules/export_pack.py`. Export bundle manifests carry pack identity metadata and the lint scorecard summary. Future hardening may still address:
 
 1. A richer formal pack export bundle format beyond the current minimal ZIP.
 2. A pack registry or publish command.

@@ -117,8 +117,8 @@ class CitationIntegrityDocsTest(unittest.TestCase):
     def test_current_supporting_docs_reference_v12_not_v10_as_current(self) -> None:
         checks = {
             "site/copy-source.md": [
-                "### v1.2.0 已包含",
-                "Thesis Skills v1.2.0 — MIT License — quzhiii/thesis-skills",
+                "### v3.4.1 已包含",
+                "Thesis Skills v3.4.1 — MIT License — quzhiii/thesis-skills",
             ],
             "site/README.md": [
                 "# Thesis Skills 静态站点",

@@ -155,6 +155,8 @@ The bundle contains:
 - `rules.yaml`
 - `mappings.yaml`
 
+`manifest.json` records `bundle_version`, `pack_id`, `pack_version`, `pack_kind`, `display_name`, `required_files`, and `scorecard_summary`.
+
 The exporter runs `lint_pack.py` before writing and refuses packs with error findings. This is still not a pack registry or publish pipeline.
 
 ### Minimum handoff set
@@ -174,6 +176,8 @@ With the lint report, they also know whether the pack currently passes:
 - metadata completeness checks
 - baseline completeness checks
 - schema consistency checks
+
+When required files and metadata completeness pass, the lint report summary also includes `pack_version`, `pack_kind`, and `display_name`.
 
 That makes the handoff inspectable instead of relying on “it worked on my machine.”
 

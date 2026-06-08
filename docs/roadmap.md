@@ -16,7 +16,7 @@ bibliography intake
 -> compile-log diagnostics
 -> readiness gate
 -> defense-prep artifacts
--> reusable rule-pack creation and linting
+-> reusable rule-pack creation, linting, and export handoff
 ```
 
 `v1.0.0` did not mean a broad new feature expansion. It marked the point where the public contract became stable: README, roadmap, docs, site pages, manifests, examples, and actual code paths described the same capabilities with the same names and limits.
@@ -39,7 +39,7 @@ It is a deterministic, inspectable, report-driven workflow system for academic w
 - repeatable deterministic checks
 - bounded report-driven fixes
 - reusable rule packs for schools and journals
-- starter-pack linting, baseline completeness checks, schema-consistency checks, and scorecard output
+- starter-pack linting, baseline completeness checks, schema-consistency checks, scorecard output, and linted export bundles
 
 Design rules that stay in effect:
 
@@ -92,6 +92,7 @@ All listed workflow families remain part of the current `v3.4.1` public contract
 | Rule-pack creation | Stable | `90-rules/create_pack.py` |
 | Draft rule-pack creation | Stable | `90-rules/create_draft_pack.py` |
 | Rule-pack lint / scorecard | Stable | `90-rules/lint_pack.py` |
+| Rule-pack export bundle | Stable | `90-rules/export_pack.py` |
 
 ### Current Boundaries
 

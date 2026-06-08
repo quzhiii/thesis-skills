@@ -566,7 +566,7 @@ python 90-rules/export_pack.py \
   --output dist/my-university.zip
 ```
 
-这会生成一个经过 lint 的 ZIP 规则包；当前仍然没有正式 registry 或发布命令。
+这会生成一个经过 lint 的 ZIP 规则包。ZIP 内的 `manifest.json` 会记录规则包元数据和 lint scorecard 摘要。当前仍然没有正式 registry 或发布命令。
 
 > **给非清华同学的建议**：如果你希望我们宣传你的学校规则包，欢迎提 PR 把校准好的规则包放到 `90-rules/packs/` 下。这样后来的同学就不需要从零开始。
 

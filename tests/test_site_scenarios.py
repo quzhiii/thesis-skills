@@ -100,6 +100,36 @@ class SiteScenarioPagesTest(unittest.TestCase):
             or 'artifact-gallery.html#before-after' in docs_home_text
         )
 
+    def test_index_rule_pack_entry_uses_existing_current_guidance(self) -> None:
+        text = self._read("index.html")
+        self.assertNotIn('href="rule-packs.html"', text)
+        self.assertIn(
+            'href="https://github.com/quzhiii/thesis-skills/blob/main/90-rules/THESIS_RULE_PACKS.md"',
+            text,
+        )
+        self.assertIn("lint、schema、scorecard、导出交接包", text)
+
+    def test_site_copy_surfaces_current_rule_pack_export_contract(self) -> None:
+        text = (SITE / "copy-source.md").read_text(encoding="utf-8")
+        for snippet in [
+            "规则包 lint、schema consistency、scorecard 和最小导出交接包。",
+            "rule-pack lint scorecard / export bundle",
+            "导出包 `manifest.json` 记录规则包元数据和 lint scorecard 摘要。",
+            "YAML 规则包创建、草稿脚手架、lint、schema consistency、scorecard 和最小导出交接包",
+            "正式规则包 registry、发布系统或安装器",
+        ]:
+            self.assertIn(snippet, text)
+
+    def test_site_copy_source_uses_current_version_framing(self) -> None:
+        text = (SITE / "copy-source.md").read_text(encoding="utf-8")
+        self.assertIn("### v3.4.1 已包含", text)
+        self.assertIn("final reference set、外部验证、DOI / URL advisory 和 hallucination risk", text)
+        self.assertIn("claim-citation support triage 和本地 HTML 报告界面", text)
+        self.assertIn("final-audit JSON / HTML、reference audit ledger 和报告索引", text)
+        self.assertIn("Thesis Skills v3.4.1 — MIT License — quzhiii/thesis-skills", text)
+        self.assertNotIn("v1.2.0 已包含", text)
+        self.assertNotIn("Thesis Skills v1.2.0", text)
+
     def test_current_site_pages_show_v341_not_stale_version_labels(self) -> None:
         expected_by_page = {
             "index.html": [
@@ -150,6 +180,19 @@ class SiteScenarioPagesTest(unittest.TestCase):
         historical_gallery = self._read("v1.1-showcase/artifact-gallery.html")
         self.assertIn("python 15-fix-preview/generate_fix_preview.py --project-root thesis --mode dry-run", historical_gallery)
         self.assertIn("Do not treat the commands on this page as current supported entrypoints.", historical_gallery)
+
+        historical_index = self._read("v1.1-showcase/index.html")
+        self.assertNotIn('href="rule-packs.html"', historical_index)
+        self.assertIn(
+            'href="https://github.com/quzhiii/thesis-skills/blob/main/90-rules/THESIS_RULE_PACKS.md"',
+            historical_index,
+        )
+        self.assertIn("lint、schema、scorecard、导出交接包", historical_index)
+
+        optimization_plan = self._read("v1.1-showcase/OPTIMIZATION-PLAN.md")
+        self.assertIn("Historical optimization plan kept for reference; proposed pages are not current site requirements.", optimization_plan)
+        self.assertIn("proposed rule-pack page", optimization_plan)
+        self.assertNotIn("rule-packs.html", optimization_plan)
 
 
 if __name__ == "__main__":

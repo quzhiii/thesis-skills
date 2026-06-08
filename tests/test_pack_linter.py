@@ -270,7 +270,11 @@ class PackLinterTest(unittest.TestCase):
             payload = json.loads(report_path.read_text(encoding="utf-8"))
 
         scorecard = payload["scorecard"]
+        summary = payload["summary"]
         self.assertEqual(result.returncode, 0)
+        self.assertEqual(summary["pack_version"], 1)
+        self.assertEqual(summary["pack_kind"], "university-thesis")
+        self.assertEqual(summary["display_name"], "Scorecard Pack")
         self.assertEqual(scorecard["required_files"]["status"], "PASS")
         self.assertEqual(scorecard["metadata_completeness"]["status"], "PASS")
         self.assertEqual(scorecard["baseline_completeness"]["status"], "PASS")

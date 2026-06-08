@@ -32,7 +32,7 @@ Quality gate before trusting or sharing a pack:
 python 90-rules/lint_pack.py --pack-path 90-rules/packs/<pack-id>
 ```
 
-The current lint report summarizes required files, metadata completeness, baseline completeness, schema consistency, overall status, and finding counts.
+The current lint report summarizes required files, metadata completeness, baseline completeness, schema consistency, overall status, and finding counts. When required files and metadata completeness pass, the lint report summary also includes `pack_version`, `pack_kind`, and `display_name`.
 
 Export a linted handoff bundle:
 
@@ -42,7 +42,7 @@ python 90-rules/export_pack.py \
   --output dist/<pack-id>.zip
 ```
 
-The bundle includes `manifest.json`, `pack.yaml`, `rules.yaml`, and `mappings.yaml`.
+The bundle includes `manifest.json`, `pack.yaml`, `rules.yaml`, and `mappings.yaml`. `manifest.json` records `bundle_version`, `pack_id`, `pack_version`, `pack_kind`, `display_name`, `required_files`, and `scorecard_summary`.
 
 When onboarding a new school or journal, copy the closest starter pack and then confirm ambiguous rules manually.
 

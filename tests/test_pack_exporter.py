@@ -39,6 +39,16 @@ class PackExporterTest(unittest.TestCase):
         )
         self.assertEqual(manifest["bundle_version"], 1)
         self.assertEqual(manifest["pack_id"], "journal-generic")
+        self.assertEqual(manifest["pack_version"], 1)
+        self.assertEqual(manifest["pack_kind"], "journal")
+        self.assertEqual(manifest["display_name"], "Generic Journal Submission Pack")
+        self.assertEqual(
+            manifest["scorecard_summary"],
+            {
+                "overall_status": "PASS",
+                "finding_counts": {"errors": 0, "warnings": 0, "infos": 0},
+            },
+        )
         self.assertEqual(manifest["required_files"], ["pack.yaml", "rules.yaml", "mappings.yaml"])
 
     def test_export_rule_pack_bundle_rejects_pack_that_fails_lint_before_writing(self) -> None:
@@ -81,10 +91,16 @@ class PackExporterTest(unittest.TestCase):
 
             with zipfile.ZipFile(output, "r") as archive:
                 names = set(archive.namelist())
+                manifest = json.loads(archive.read("manifest.json").decode("utf-8"))
 
         self.assertEqual(result.returncode, 0)
         self.assertIn(output.as_posix(), result.stdout)
         self.assertIn("manifest.json", names)
+        self.assertEqual(manifest["pack_version"], 1)
+        self.assertEqual(manifest["pack_kind"], "journal")
+        self.assertEqual(manifest["display_name"], "Generic Journal Submission Pack")
+        self.assertEqual(manifest["scorecard_summary"]["overall_status"], "PASS")
+        self.assertEqual(manifest["scorecard_summary"]["finding_counts"]["errors"], 0)
 
     def test_export_pack_cli_rejects_pack_that_fails_lint_without_writing(self) -> None:
         with workspace_tempdir("pack-export-cli-") as tmp:
