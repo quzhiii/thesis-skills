@@ -113,7 +113,16 @@ def _lint_pack_metadata(pack_path: Path, directory_name: str) -> list[Finding]:
             )
 
     pack_id = pack_data.get("id")
-    if isinstance(pack_id, str):
+    if pack_id is not None and not isinstance(pack_id, str):
+        findings.append(
+            Finding(
+                severity="error",
+                code="invalid_pack_field",
+                message="pack.yaml field 'id' must be a non-empty string",
+                file="pack.yaml",
+            )
+        )
+    elif isinstance(pack_id, str):
         if not pack_id.strip():
             findings.append(
                 Finding(
