@@ -1,6 +1,6 @@
 # Starter Pack Baseline
 
-This document records the **current repository baseline** for rule-pack starters in the current v1.2.0 public contract.
+This document records the **current repository baseline** for rule-pack starters in the current v3.4.1 public contract.
 
 It is intentionally descriptive, not aspirational: the goal is to state what a starter pack currently means in this repo, which assumptions are explicit, and which assumptions are checked by the current lint / completeness / schema-consistency tooling.
 
@@ -95,6 +95,8 @@ The current scorecard summarizes:
 - `overall_status`
 - `finding_counts`
 
+When required files and metadata completeness pass, the lint report summary also includes `pack_version`, `pack_kind`, and `display_name`.
+
 ---
 
 ## 4. Starter-pack creation flow
@@ -177,7 +179,7 @@ The current `pack.yaml` starter baseline visibly includes:
 - `precedence`
 - `starter`
 
-For the current v1.2.0 line, a third-party pack should treat these fields as part of the practical baseline. Missing fields are lint errors.
+For the current v3.4.1 line, a third-party pack should treat these fields as part of the practical baseline. Missing fields are lint errors.
 
 ---
 
@@ -211,7 +213,7 @@ Extending from a starter is therefore a policy inheritance decision, not just a 
 
 ---
 
-## 8. Current v1.2.0 baseline summary
+## 8. Current v3.4.1 baseline summary
 
 Treat the following as the documented baseline:
 
@@ -236,11 +238,11 @@ Treat the following as the documented baseline:
 
 ## 9. Remaining hardening implications
 
-The current baseline intentionally does not claim a full packaging ecosystem. Future hardening may still address:
+The current baseline intentionally does not claim a full packaging ecosystem. A minimal versioned export bundle exists through `90-rules/export_pack.py`. Export bundle manifests carry pack identity metadata and the lint scorecard summary. Future hardening may still address:
 
-1. A formal pack export bundle format.
+1. A richer formal pack export bundle format beyond the current minimal ZIP.
 2. A pack registry or publish command.
 3. A dedicated portability score beyond the current lint scorecard summary.
 4. A fully normalized internal mapping schema.
 
-Until those exist, public docs should describe the current bounded model: local packs, Git-tracked evolution, handoff file sets, and lint reports.
+Until those broader pieces exist, public docs should describe the current bounded model: local packs, Git-tracked evolution, linted export bundles, handoff file sets, and lint reports.

@@ -105,20 +105,20 @@ class CitationIntegrityDocsTest(unittest.TestCase):
             ],
         )
 
-    def test_primary_site_pages_show_v33_version_line(self) -> None:
+    def test_primary_site_pages_show_v341_version_line(self) -> None:
         for relative_path in [
             "site/index.html",
             "site/quickstart.html",
             "site/scenario-entry.html",
         ]:
             with self.subTest(path=relative_path):
-                self._assert_contains_all(relative_path, ["v3.3.0"])
+                self._assert_contains_all(relative_path, ["v3.4.1"])
 
     def test_current_supporting_docs_reference_v12_not_v10_as_current(self) -> None:
         checks = {
             "site/copy-source.md": [
-                "### v1.2.0 已包含",
-                "Thesis Skills v1.2.0 — MIT License — quzhiii/thesis-skills",
+                "### v3.4.1 已包含",
+                "Thesis Skills v3.4.1 — MIT License — quzhiii/thesis-skills",
             ],
             "site/README.md": [
                 "# Thesis Skills 静态站点",
@@ -126,18 +126,18 @@ class CitationIntegrityDocsTest(unittest.TestCase):
                 "历史 v1.1 设计迭代目录（保留参考）",
             ],
             "docs/architecture.md": [
-                "current v1.2.0 public contract",
+                "current v3.4.1 public contract",
             ],
             "90-rules/STARTER_PACK_BASELINE.md": [
-                "current v1.2.0 public contract",
-                "Current v1.2.0 baseline summary",
+                "current v3.4.1 public contract",
+                "Current v3.4.1 baseline summary",
             ],
             "02-latex-to-word/THESIS_LATEX_TO_WORD.md": [
-                "current v1.2.0 first-class export promise",
+                "current v3.4.1 first-class export promise",
             ],
             "site/index-product-redraft.html": [
-                "current v3.3.0 public story",
-                "当前 v3.3.0 公开入口请看正式首页",
+                "Use `site/index.html` for the current public story.",
+                "当前公开入口请看正式首页",
                 "当前版本已包含",
             ],
         }

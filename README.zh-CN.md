@@ -349,7 +349,7 @@ python 23-check-final-cleanup/check_final_cleanup.py \
   --ruleset university-generic
 ```
 
-输出：`reports/final-cleanup-report.json`。它会扫描 `TODO`、`FIXME`、`???`、`\textcolor{blue}`、`\color{blue}`、`draft`、`debug`、`待修改`、`待核查` 等终稿残留，但只报告定位，不自动删除、不改写正文。这个 JSON artifact 后续可以并入 `reports/final-audit-report.json`，再由 static HTML report surfaces 展示。
+输出：`reports/final-cleanup-report.json`。它会扫描 `TODO`、`FIXME`、`???`、`\textcolor{blue}`、`\color{blue}`、`draft`、`debug`、`待修改`、`待核查` 等终稿残留，但只报告定位，不自动删除、不改写正文。当前终稿审计流程可以把这个 JSON artifact 并入 `reports/final-audit-report.json`，再通过 `reports/final-audit-report.html` 和本地报告索引展示。
 
 ### 8. 我需要检查统计表达和手工目录锚点
 
@@ -555,6 +555,18 @@ python run_check_once.py \
 - **项目发现失败** → 调整 `main_tex_candidates` 或 `chapter_globs`
 
 修改 → 重新运行 → 查看报告，通常 1-2 轮就能校准到位。
+
+**第 7 步：导出交接包**
+
+规则包通过 lint 后，可以导出一个最小版本化导出包，方便交给别人或带到另一个环境：
+
+```bash
+python 90-rules/export_pack.py \
+  --pack-path 90-rules/packs/my-university \
+  --output dist/my-university.zip
+```
+
+这会生成一个经过 lint 的 ZIP 规则包。ZIP 内的 `manifest.json` 会记录规则包元数据和 lint scorecard 摘要。当前仍然没有正式 registry 或发布命令。
 
 > **给非清华同学的建议**：如果你希望我们宣传你的学校规则包，欢迎提 PR 把校准好的规则包放到 `90-rules/packs/` 下。这样后来的同学就不需要从零开始。
 

@@ -88,6 +88,21 @@ _STRONG_CLAIM_PATTERNS = (
     "without trade-offs",
 )
 
+_GENERIC_OVERLAP_TOKENS = {
+    "approach",
+    "approaches",
+    "framework",
+    "frameworks",
+    "method",
+    "methods",
+    "model",
+    "models",
+    "study",
+    "studies",
+    "system",
+    "systems",
+}
+
 LABEL_THRESHOLDS: list[tuple[float, str]] = [
     (0.0, "WELL_SUPPORTED"),
     (0.25, "SUPPORTED"),
@@ -132,7 +147,7 @@ def _claim_type(context: str) -> str:
 
 def _contains_any(text: str, patterns: tuple[str, ...]) -> bool:
     lowered = text.lower()
-    return any(pattern in lowered for pattern in patterns)
+    return any(re.search(rf"(?<![A-Za-z0-9_-]){re.escape(pattern.lower())}(?![A-Za-z0-9_-])", lowered) for pattern in patterns)
 
 
 def _reference_year(bib_entry: BibEntry | None) -> int | None:
@@ -212,6 +227,22 @@ def _append_unique(entry: dict[str, object], key: str, value: str) -> None:
         existing.append(value)
 
 
+def _has_substantive_metadata_overlap(metadata_overlap: dict[str, object]) -> bool:
+    nested = metadata_overlap.get("metadata_overlap")
+    if not isinstance(nested, dict):
+        return False
+    overlap_tokens = nested.get("overlap_tokens")
+    if not isinstance(overlap_tokens, dict):
+        return False
+    for values in overlap_tokens.values():
+        if not isinstance(values, list):
+            continue
+        for token in values:
+            if str(token).lower() not in _GENERIC_OVERLAP_TOKENS:
+                return True
+    return False
+
+
 def _support_review(
     label: str,
     hallucination_label: str | None,
@@ -249,6 +280,7 @@ def _support_review(
     abstract_overlap_score = float(metadata_overlap.get("abstract_token_overlap") or 0.0)
     keyword_overlap_score = float(metadata_overlap.get("keyword_token_overlap") or 0.0)
     max_metadata_overlap = max(title_overlap_score, abstract_overlap_score, keyword_overlap_score)
+    has_substantive_overlap = _has_substantive_metadata_overlap(metadata_overlap)
     if title_overlap_score > 0:
         support_signals.append("metadata_title_overlap")
     if abstract_overlap_score > 0:
@@ -260,7 +292,7 @@ def _support_review(
         risk_signals.append("empirical_claim_without_metadata_overlap")
 
     strong_claim = _contains_any(context, _STRONG_CLAIM_PATTERNS)
-    if claim_type in {"empirical_result", "method_claim"} and strong_claim and max_metadata_overlap == 0.0:
+    if claim_type in {"empirical_result", "method_claim"} and strong_claim and not has_substantive_overlap:
         risk_signals.append("possible_topic_mismatch")
         next_actions.append("Check whether the cited source is on the same topic as the nearby claim; lexical metadata overlap is absent.")
 
@@ -270,7 +302,8 @@ def _support_review(
         risk_signals.append("possible_outdated_support")
         next_actions.append("Check whether newer evidence is needed or soften current/latest wording.")
 
-    if strong_claim and hallucination_label not in {"PASS", None}:
+    suppress_pass_topic_mismatch_duplicate = hallucination_label == "PASS" and "possible_topic_mismatch" in risk_signals
+    if strong_claim and ((hallucination_label not in {"PASS", None}) or not has_substantive_overlap) and not suppress_pass_topic_mismatch_duplicate:
         risk_signals.append("possible_overclaim")
         next_actions.append("Verify whether the cited source supports the strength of the claim before final submission.")
 

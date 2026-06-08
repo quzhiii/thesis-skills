@@ -103,8 +103,8 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Fix | `22-fix-format-structure/` | `fix_format_structure.py` | Preview and apply format-structure patches |
 | Fix | `24-fix-language-deep/` | `fix_language_deep.py` | Preview deeper language patch candidates |
 | Rules | `90-rules/` | `create_pack.py` | Create institution- or journal-specific rule packs |
-| Rules | `90-rules/` | `lint_pack.py` | Validate rule-pack structure |
-| Rules | `90-rules/` | `scorecard.py` | Summarize rule-pack completeness |
+| Rules | `90-rules/` | `lint_pack.py` | Validate rule-pack structure and write scorecard summaries |
+| Rules | `90-rules/` | `export_pack.py` | Export linted rule-pack handoff bundles |
 | Runner | repository root | `run_check_once.py` | Run the deterministic check pipeline once |
 | Runner | repository root | `run_evidence_pipeline.py` | Orchestrate final reference set plus all citation evidence layers in sequence |
 | Runner | repository root | `run_fix_cycle.py` | Preview or apply report-driven fix cycles |

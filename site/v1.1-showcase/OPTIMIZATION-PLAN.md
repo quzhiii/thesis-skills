@@ -1,5 +1,7 @@
 # Thesis Skills 展示页 v1.1 优化计划
 
+Historical optimization plan kept for reference; proposed pages are not current site requirements.
+
 ## 1. 当前状态诊断
 
 ### 1.1 已具备的基础（保留）
@@ -47,7 +49,7 @@ site/v1.1-showcase/
 ├── quickstart.html              # 【新增】3分钟跑通最小示例
 ├── scenario-entry.html          # 按论文阶段进入（增强：增加输入-命令-输出）
 ├── artifact-gallery.html        # 【改版】全流程artifact gallery（6类输出）
-├── rule-packs.html              # 【新增】规则包说明与贡献入口
+├── proposed rule-pack page      # historical proposal: 规则包说明与贡献入口
 ├── boundaries.html              # 【新增】边界与不承诺（独立页面提高可信度）
 ├── docs-home.html               # 文档入口（退到二级，简化首屏）
 ├── advisor-handoff.html         # 交导师场景（保留，从scenario引流）
@@ -96,7 +98,7 @@ site/v1.1-showcase/
 ```
 我正在写论文 → 按阶段找流程（去scenario-entry）
 我准备提交/送审 → 看readiness gate和final packet（去submission-prep）
-我想改造/贡献规则包 → 看rule pack和模块结构（去rule-packs）
+我想改造/贡献规则包 → 看 rule pack 和模块结构（去 proposed rule-pack page）
 ```
 
 **第三屏：核心workflow流程**
@@ -231,7 +233,7 @@ Intake → Convert/Handoff → Check → Fix Preview → Gate → Defense/Submit
 
 ---
 
-### 4.5 规则包页 (rule-packs.html) 【新增】
+### 4.5 规则包页（proposed rule-pack page）【历史提议】
 
 页面目标：解释规则包是什么、适合谁、如何扩展。
 
@@ -366,7 +368,7 @@ Intake → Convert/Handoff → Check → Fix Preview → Gate → Defense/Submit
 
 ### P2：扩展与传播（可做可不做）
 
-1. **新增 rule-packs.html** - 规则包说明与贡献
+1. **新增 proposed rule-pack page** - 规则包说明与贡献
 2. **新增 boundaries.html** - 独立边界页面
 3. **简化 docs-home.html** - 退到二级入口
 4. **准备英文首页草稿** - 仅翻译首页和artifact gallery核心内容
@@ -411,7 +413,7 @@ cp site/docs-home.html site/v1.1-showcase/docs-home.html
 # ...然后简化
 
 # 4. 新增页面
-# quickstart.html, rule-packs.html, boundaries.html
+# quickstart.html, proposed rule-pack page, boundaries.html
 ```
 
 ### 9.2 本地预览

@@ -236,7 +236,7 @@ Expected output:
 
 - `reports/final-cleanup-report.json`
 
-Boundary: this checker is deterministic and report-only. It does not delete markers, rewrite prose, or change source files. The JSON report is intended to become the `final_cleanup` section of a future `reports/final-audit-report.json` and can be rendered later as static HTML issue cards grouped by risk level.
+Boundary: this checker is deterministic and report-only. It does not delete markers, rewrite prose, or change source files. The JSON report can be aggregated as the `final_cleanup` section of `reports/final-audit-report.json` and rendered through the current static HTML report surfaces as issue cards grouped by risk level.
 
 ## Statistical consistency checker
 

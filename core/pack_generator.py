@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 from pathlib import Path
 from typing import Any
 
 from core.rules import load_rule_pack
+
+
+_PACK_ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
+_ALLOWED_KINDS = {"university-thesis", "journal"}
 
 
 def _rewrite_pack_file(path: Path, replacements: dict[str, str]) -> None:
@@ -28,6 +33,37 @@ def _load_intake(path: str | Path) -> dict[str, Any]:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+def _validate_pack_segment(value: str, field: str) -> None:
+    if not _PACK_ID_PATTERN.fullmatch(value):
+        raise ValueError(f"{field} must contain only letters, numbers, underscores, or hyphens")
+
+
+def _validate_kind(kind: str) -> None:
+    if kind not in _ALLOWED_KINDS:
+        raise ValueError("kind must be one of: university-thesis, journal")
+
+
+def _validate_non_empty(value: str, field: str) -> None:
+    if not value.strip():
+        raise ValueError(f"{field} must be a non-empty string")
+
+
+def _validate_optional_list(value: object, field: str) -> None:
+    if value is not None and not isinstance(value, list):
+        raise ValueError(f"{field} must be a list")
+
+
+def _validate_mapping_items(items: object, field: str, required_fields: tuple[str, ...]) -> None:
+    if not isinstance(items, list):
+        return
+    for item in items:
+        if not isinstance(item, dict):
+            raise ValueError(f"{field} entries must be mappings")
+        for required in required_fields:
+            if not str(item.get(required, "")).strip():
+                raise ValueError(f"{field} entries must include non-empty {required}")
+
+
 def create_rule_pack(
     repo_root: str | Path,
     output_root: str | Path,
@@ -38,6 +74,10 @@ def create_rule_pack(
 ) -> Path:
     repo_root = Path(repo_root)
     output_root = Path(output_root)
+    _validate_pack_segment(pack_id, "pack_id")
+    _validate_pack_segment(starter, "starter")
+    _validate_kind(kind)
+    _validate_non_empty(display_name, "display_name")
     starter_path = repo_root / "90-rules" / "packs" / starter
     if not starter_path.exists():
         raise FileNotFoundError(f"starter pack not found: {starter}")
@@ -68,6 +108,10 @@ def create_draft_pack(
     display_name = str(intake["display_name"])
     starter = str(intake.get("starter", "university-generic"))
     kind = str(intake.get("kind", "university-thesis"))
+    for field in ("guide_sources", "template_sources", "sample_sources"):
+        _validate_optional_list(intake.get(field), field)
+    _validate_mapping_items(intake.get("word_style_mappings", []), "word_style_mappings", ("style", "role", "latex_command"))
+    _validate_mapping_items(intake.get("chapter_role_mappings", []), "chapter_role_mappings", ("source", "role", "target"))
     destination = create_rule_pack(
         repo_root, output_root, pack_id, display_name, starter, kind
     )

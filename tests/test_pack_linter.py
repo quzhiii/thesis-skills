@@ -197,6 +197,29 @@ class PackLinterTest(unittest.TestCase):
         codes = {item.code for item in findings}
         self.assertIn("invalid_rules_section_type", codes)
 
+    def test_lint_pack_rejects_non_string_pack_id(self) -> None:
+        from core.pack_linter import lint_pack
+
+        with workspace_tempdir("pack-lint-") as tmp:
+            pack_root = materialize_project(
+                tmp / "numeric-id-pack",
+                {
+                    "pack.yaml": "id: 123\nkind: journal\ndisplay_name: Numeric Id Pack\nversion: 1\nprecedence: guide_over_template\nstarter: false\n",
+                    "rules.yaml": "project:\n  main_tex_candidates:\n    - manuscript.tex\nreference:\n  missing_key:\n    severity: error\nlanguage:\n  cjk_latin_spacing:\n    enabled: true\n    severity: warning\n",
+                    "mappings.yaml": "mappings:\n  source_styles:\n    title: Title\n",
+                },
+            )
+
+            findings = lint_pack(pack_root)
+
+        self.assertTrue(
+            any(
+                item.code == "invalid_pack_field"
+                and item.message == "pack.yaml field 'id' must be a non-empty string"
+                for item in findings
+            )
+        )
+
     def test_lint_pack_cli_writes_fail_report(self) -> None:
         with workspace_tempdir("pack-lint-cli-") as tmp:
             pack_root = materialize_project(
@@ -227,6 +250,8 @@ class PackLinterTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertEqual(payload["summary"]["checker"], "lint_pack")
         self.assertEqual(payload["summary"]["status"], "FAIL")
+        self.assertEqual(payload["summary"]["scorecard_status"], "FAIL")
+        self.assertEqual(payload["scorecard"]["required_files"]["status"], "FAIL")
         self.assertTrue(payload["findings"])
 
     def test_lint_pack_cli_writes_scorecard_summary(self) -> None:
@@ -268,7 +293,11 @@ class PackLinterTest(unittest.TestCase):
             payload = json.loads(report_path.read_text(encoding="utf-8"))
 
         scorecard = payload["scorecard"]
+        summary = payload["summary"]
         self.assertEqual(result.returncode, 0)
+        self.assertEqual(summary["pack_version"], 1)
+        self.assertEqual(summary["pack_kind"], "university-thesis")
+        self.assertEqual(summary["display_name"], "Scorecard Pack")
         self.assertEqual(scorecard["required_files"]["status"], "PASS")
         self.assertEqual(scorecard["metadata_completeness"]["status"], "PASS")
         self.assertEqual(scorecard["baseline_completeness"]["status"], "PASS")

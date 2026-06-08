@@ -6,7 +6,7 @@ This document describes the **current practical workflows** for maintaining rule
 2. Git-tracked pack evolution
 3. export / handoff packaging
 
-It is intentionally narrow and grounded in the repo as it exists now. It does not introduce a new packaging layer or claim a registry / release system that the repository does not yet implement.
+It is intentionally narrow and grounded in the repo as it exists now. It documents the current minimal export bundle without claiming a registry / release system that the repository does not yet implement.
 
 ---
 
@@ -134,31 +134,50 @@ Git is the right workflow once you care about:
 - how a pack diverged from its original starter
 - whether a mapping-shape change was intentional or accidental
 
-At the current repo stage, Git is the system of record for pack evolution; there is no separate pack registry or release pipeline yet.
+At the current repo stage, Git is the system of record for pack evolution; the export bundle is a handoff artifact, not a separate pack registry or release pipeline.
 
 ---
 
 ## 4. Export / handoff workflow
 
-The repository does not yet implement a dedicated pack exporter, so “export” currently means **handoff as a bounded file set**.
+The repository now implements a minimal pack exporter for linted bundles. Use it when you need a portable ZIP, and keep any human context notes beside the bundle when the pack needs explanation.
+
+```bash
+python 90-rules/export_pack.py \
+  --pack-path 90-rules/packs/<pack-id> \
+  --output dist/<pack-id>.zip
+```
+
+The bundle contains:
+
+- `manifest.json`
+- `pack.yaml`
+- `rules.yaml`
+- `mappings.yaml`
+
+`manifest.json` records `bundle_version`, `pack_id`, `pack_version`, `pack_kind`, `display_name`, `required_files`, and `scorecard_summary`.
+
+The exporter runs `lint_pack.py` before writing and refuses packs with error findings. This is still not a pack registry or publish pipeline.
 
 ### Minimum handoff set
 
 If you need to hand a pack to someone else, include at least:
 
-- the pack directory under `90-rules/packs/<pack-id>/`
+- the exported ZIP from `90-rules/export_pack.py`
 - the latest lint report JSON from `90-rules/lint_pack.py`
 - any `draft-notes.md` or equivalent context notes if the pack came from intake scaffolding
 
 ### Why the lint report matters
 
-Without the lint report, a receiver only knows the files exist.
+Without the lint report, a receiver only knows the bundle exists.
 With the lint report, they also know whether the pack currently passes:
 
 - required-file checks
 - metadata completeness checks
 - baseline completeness checks
 - schema consistency checks
+
+When required files and metadata completeness pass, the lint report summary also includes `pack_version`, `pack_kind`, and `display_name`.
 
 That makes the handoff inspectable instead of relying on “it worked on my machine.”
 
@@ -206,7 +225,6 @@ But there is **not yet**:
 
 - a formal pack publish command
 - a pack registry
-- a versioned export bundle format
 - a dedicated portability score beyond the current lint scorecard summary
 
-So keep workflow guidance bounded: use the existing files, existing lint, and Git history rather than inventing an ecosystem process the repo does not yet support.
+So keep workflow guidance bounded: use the existing files, existing lint, minimal export bundle, and Git history rather than inventing an ecosystem process the repo does not yet support.

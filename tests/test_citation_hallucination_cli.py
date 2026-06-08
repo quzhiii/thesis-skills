@@ -6,7 +6,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from tests.helpers import materialize_project, workspace_tempdir
+from tests.helpers import materialize_project, workspace_project_copy, workspace_tempdir
 
 ROOT = Path(__file__).resolve().parents[1]
 CLI_SCRIPT = ROOT / "19-check-hallucination-risk" / "check_hallucination_risk.py"
@@ -127,41 +127,58 @@ class HallucinationRiskCLITest(unittest.TestCase):
 
 
 class HallucinationRiskDemoTest(unittest.TestCase):
+    def test_demo_cli_tests_do_not_mutate_tracked_reports(self) -> None:
+        watched_reports = [
+            ROOT / "examples" / "citation-hallucination-field-mismatch" / "reports" / "high-risk-references.csv",
+            ROOT / "examples" / "citation-hallucination-fabricated" / "reports" / "high-risk-references.csv",
+        ]
+        before = {path: path.read_text(encoding="utf-8") for path in watched_reports}
+
+        self.test_field_mismatch_demo_produces_review()
+        self.test_fabricated_demo_produces_high_risk()
+
+        after = {path: path.read_text(encoding="utf-8") for path in watched_reports}
+        self.assertEqual(after, before)
+
     def test_field_mismatch_demo_produces_review(self) -> None:
-        demo = ROOT / "examples" / "citation-hallucination-field-mismatch"
-        result = subprocess.run(
-            [sys.executable, str(CLI_SCRIPT), "--project-root", str(demo), "--ruleset", "university-generic"],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-        )
-        report = json.loads((demo / "reports" / "hallucination-risk-report.json").read_text(encoding="utf-8"))
+        source_demo = ROOT / "examples" / "citation-hallucination-field-mismatch"
+        with workspace_project_copy(source_demo, "hrisk-demo-field-") as demo:
+            result = subprocess.run(
+                [sys.executable, str(CLI_SCRIPT), "--project-root", str(demo), "--ruleset", "university-generic"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+            report = json.loads((demo / "reports" / "hallucination-risk-report.json").read_text(encoding="utf-8"))
         labels = [e["risk_label"] for e in report["entries"]]
         self.assertTrue(any(label in {"REVIEW", "HIGH_RISK"} for label in labels))
 
     def test_fabricated_demo_produces_high_risk(self) -> None:
-        demo = ROOT / "examples" / "citation-hallucination-fabricated"
-        result = subprocess.run(
-            [sys.executable, str(CLI_SCRIPT), "--project-root", str(demo), "--ruleset", "university-generic"],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-        )
-        report = json.loads((demo / "reports" / "hallucination-risk-report.json").read_text(encoding="utf-8"))
-        csv_path = demo / "reports" / "high-risk-references.csv"
+        source_demo = ROOT / "examples" / "citation-hallucination-fabricated"
+        with workspace_project_copy(source_demo, "hrisk-demo-fabricated-") as demo:
+            result = subprocess.run(
+                [sys.executable, str(CLI_SCRIPT), "--project-root", str(demo), "--ruleset", "university-generic"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+            report = json.loads((demo / "reports" / "hallucination-risk-report.json").read_text(encoding="utf-8"))
+            csv_path = demo / "reports" / "high-risk-references.csv"
+            csv_exists = csv_path.exists()
         self.assertEqual(result.returncode, 1)
         self.assertEqual(report["status"], "HIGH_RISK")
-        self.assertTrue(csv_path.exists())
+        self.assertTrue(csv_exists)
 
     def test_chinese_unsupported_demo_produces_unsupported_not_high_risk(self) -> None:
-        demo = ROOT / "examples" / "citation-hallucination-chinese-unsupported"
-        result = subprocess.run(
-            [sys.executable, str(CLI_SCRIPT), "--project-root", str(demo), "--ruleset", "university-generic"],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-        )
-        report = json.loads((demo / "reports" / "hallucination-risk-report.json").read_text(encoding="utf-8"))
+        source_demo = ROOT / "examples" / "citation-hallucination-chinese-unsupported"
+        with workspace_project_copy(source_demo, "hrisk-demo-chinese-") as demo:
+            result = subprocess.run(
+                [sys.executable, str(CLI_SCRIPT), "--project-root", str(demo), "--ruleset", "university-generic"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+            report = json.loads((demo / "reports" / "hallucination-risk-report.json").read_text(encoding="utf-8"))
         labels = [e["risk_label"] for e in report["entries"]]
         self.assertNotIn("HIGH_RISK", labels)
         self.assertIn("UNSUPPORTED", labels)

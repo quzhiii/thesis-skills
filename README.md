@@ -320,7 +320,7 @@ python 23-check-final-cleanup/check_final_cleanup.py \
   --ruleset university-generic
 ```
 
-Output: `reports/final-cleanup-report.json`. This checker is report-only: it does not delete markers, rewrite prose, or change source files. The JSON artifact is designed to be folded later into `reports/final-audit-report.json` and static HTML report surfaces.
+Output: `reports/final-cleanup-report.json`. This checker is report-only: it does not delete markers, rewrite prose, or change source files. The final-audit workflow can aggregate this JSON into `reports/final-audit-report.json` and render it through `reports/final-audit-report.html` and the local report index.
 
 ### Statistical Consistency Checker
 
@@ -622,6 +622,18 @@ After running, inspect the JSON reports under `reports/`. If you notice:
 - **Project discovery failed** → adjust `main_tex_candidates` or `chapter_globs`
 
 Tweak → re-run → review reports. Most packs converge in 1–2 calibration rounds.
+
+**Step 7: Export a handoff bundle**
+
+After the pack passes lint, export a minimal versioned export bundle for handoff:
+
+```bash
+python 90-rules/export_pack.py \
+  --pack-path 90-rules/packs/my-university \
+  --output dist/my-university.zip
+```
+
+This creates a linted ZIP bundle for sharing the pack outside a local checkout. The ZIP includes `manifest.json` with pack metadata and the lint scorecard summary. There is still no formal registry or publish command.
 
 > **For non-Tsinghua users**: If your calibrated rule pack is stable and you'd like it featured, PRs adding new packs to `90-rules/packs/` are welcome. Future students from your school won't have to start from scratch.
 
