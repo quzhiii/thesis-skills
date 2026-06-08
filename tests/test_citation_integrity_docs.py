@@ -126,14 +126,14 @@ class CitationIntegrityDocsTest(unittest.TestCase):
                 "历史 v1.1 设计迭代目录（保留参考）",
             ],
             "docs/architecture.md": [
-                "current v1.2.0 public contract",
+                "current v3.4.1 public contract",
             ],
             "90-rules/STARTER_PACK_BASELINE.md": [
                 "current v3.4.1 public contract",
                 "Current v3.4.1 baseline summary",
             ],
             "02-latex-to-word/THESIS_LATEX_TO_WORD.md": [
-                "current v1.2.0 first-class export promise",
+                "current v3.4.1 first-class export promise",
             ],
             "site/index-product-redraft.html": [
                 "Use `site/index.html` for the current public story.",
