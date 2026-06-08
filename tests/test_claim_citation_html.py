@@ -75,6 +75,102 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         self.assertIn("final-audit-report.html", html)
         self.assertIn("reference-audit-ledger.html", html)
         self.assertIn("possible_overclaim", html)
+        self.assertIn("NEEDS_MANUAL_REVIEW", html)
+        self.assertIn("possible_overclaim", html)
+        self.assertIn("ref1, ref2", html)
+        self.assertIn("Review the grouped citations together.", html)
+        self.assertIn("uncited_empirical_result", html)
+
+    def test_render_surfaces_review_aggregates_before_entry_cards(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {
+                    "claim_citation_pairs": 2,
+                    "weak_pairs": 1,
+                    "supported_pairs": 1,
+                    "citation_needed_candidates": 1,
+                    "unique_references_never_cited": 0,
+                },
+                "entries": [
+                    {
+                        "citation_key": "ref1",
+                        "triage_label": "WEAK",
+                        "support_review_label": "NEEDS_MANUAL_REVIEW",
+                        "support_review_reason": "Manual review needed.",
+                        "claim_type": "empirical_result",
+                        "file": "main.tex",
+                        "line": 10,
+                        "hallucination_risk_label": "REVIEW",
+                        "cluster_keys": ["ref1", "ref2"],
+                        "cluster_review_reason": "Review the grouped citations together.",
+                        "risk_signals": ["possible_overclaim"],
+                        "support_signals": ["complete_metadata"],
+                        "next_actions": ["Review grouped support."],
+                        "claim_context": "Claim one.",
+                    },
+                    {
+                        "citation_key": "ref3",
+                        "triage_label": "SUPPORTED",
+                        "support_review_label": "NEEDS_MANUAL_REVIEW",
+                        "support_review_reason": "Second manual review.",
+                        "claim_type": "background_fact",
+                        "file": "main.tex",
+                        "line": 18,
+                        "hallucination_risk_label": "PASS",
+                        "cluster_keys": ["ref1", "ref2"],
+                        "cluster_review_reason": "Repeated cluster.",
+                        "risk_signals": ["possible_overclaim"],
+                        "support_signals": ["title_overlap"],
+                        "next_actions": ["Review again."],
+                        "claim_context": "Claim two.",
+                    },
+                    {
+                        "citation_key": "ref4",
+                        "triage_label": "SUPPORTED",
+                        "support_review_label": "SUPPORTED_DIRECTLY",
+                        "support_review_reason": "Direct support found.",
+                        "claim_type": "background_fact",
+                        "file": "main.tex",
+                        "line": 30,
+                        "hallucination_risk_label": "PASS",
+                        "cluster_keys": ["ref4"],
+                        "cluster_review_reason": "Single-citation cluster.",
+                        "risk_signals": [],
+                        "support_signals": ["title_overlap"],
+                        "next_actions": ["No action needed."],
+                        "claim_context": "Claim three.",
+                    },
+                ],
+                "citation_needed_candidates": [
+                    {
+                        "file": "main.tex",
+                        "line": 22,
+                        "claim_type": "empirical_result",
+                        "risk_signal": "uncited_empirical_result",
+                        "sentence": "Needs citation.",
+                    }
+                ],
+                "uncited_references": [],
+            }
+        )
+
+        self.assertIn("Review Aggregates", html)
+        self.assertIn("复核聚合", html)
+        self.assertIn("Top review focus", html)
+        self.assertIn("优先复核焦点", html)
+        self.assertIn('href="#triage-weak"', html)
+        self.assertIn("support_review_label", html)
+        self.assertIn("risk_signal", html)
+        self.assertIn("cluster", html)
+        self.assertIn("NEEDS_MANUAL_REVIEW (2)", html)
+        self.assertIn("SUPPORTED_DIRECTLY", html)
+        self.assertIn("possible_overclaim (2)", html)
+        self.assertIn("uncited_empirical_result (1)", html)
+        self.assertIn("ref1, ref2 (2)", html)
+        self.assertIn("Single-citation cluster.", html)
+        self.assertLess(html.index("NEEDS_MANUAL_REVIEW (2)"), html.index("SUPPORTED_DIRECTLY (1)"))
+        self.assertLess(html.index("possible_overclaim (2)"), html.index("uncited_empirical_result (1)"))
 
     def test_write_and_cli_generate_html(self) -> None:
         with workspace_tempdir("claim-citation-html-") as base:

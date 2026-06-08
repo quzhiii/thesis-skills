@@ -3,6 +3,7 @@ from __future__ import annotations
 import html
 import json
 from collections import defaultdict
+from collections import Counter
 from pathlib import Path
 
 
@@ -18,6 +19,8 @@ I18N = {
         "citation_needed": "待补引用",
         "uncited_refs": "未被引用参考文献",
         "summary": "摘要",
+        "review_aggregates": "复核聚合",
+        "top_review_focus": "优先复核焦点",
         "triage_groups": "按 triage_label 查看",
         "citation_needed_section": "Citation-needed 候选句",
         "uncited_section": "未被引用参考文献",
@@ -38,6 +41,8 @@ I18N = {
         "support_signals": "支撑信号",
         "next_actions": "下一步动作",
         "cluster": "引用簇",
+        "risk_signal_key": "risk_signal",
+        "support_review_label_key": "support_review_label",
         "cluster_reason": "簇级说明",
         "context": "claim 上下文",
         "file": "文件",
@@ -65,6 +70,8 @@ I18N = {
         "citation_needed": "citation-needed",
         "uncited_refs": "uncited refs",
         "summary": "Summary",
+        "review_aggregates": "Review Aggregates",
+        "top_review_focus": "Top review focus",
         "triage_groups": "Browse by triage label",
         "citation_needed_section": "Citation-Needed Candidates",
         "uncited_section": "Uncited References",
@@ -85,6 +92,8 @@ I18N = {
         "support_signals": "support signals",
         "next_actions": "next actions",
         "cluster": "cluster",
+        "risk_signal_key": "risk_signal",
+        "support_review_label_key": "support_review_label",
         "cluster_reason": "cluster reason",
         "context": "claim context",
         "file": "file",
@@ -158,6 +167,98 @@ def _summary_rows(summary: dict[str, object], lang: str) -> str:
     return "".join(rows)
 
 
+def _aggregate_rows(entries: list[dict[str, object]], citation_needed: list[dict[str, object]], lang: str) -> str:
+    support_review_counts = Counter(
+        str(entry.get("support_review_label", ""))
+        for entry in entries
+        if entry.get("support_review_label")
+    )
+    risk_signal_counts = Counter()
+    for entry in entries:
+        signals = entry.get("risk_signals")
+        if isinstance(signals, list):
+            risk_signal_counts.update(str(item) for item in signals if item)
+    citation_needed_counts = Counter(
+        str(item.get("risk_signal", ""))
+        for item in citation_needed
+        if item.get("risk_signal")
+    )
+    cluster_counts = Counter()
+    for entry in entries:
+        cluster_keys = entry.get("cluster_keys")
+        if isinstance(cluster_keys, list) and cluster_keys:
+            cluster_counts.update([", ".join(str(key) for key in cluster_keys)])
+
+    sections = [
+        (I18N[lang]["support_review_label_key"], support_review_counts),
+        (I18N[lang]["risk_signal_key"], risk_signal_counts),
+        (I18N[lang]["citation_needed"], citation_needed_counts),
+        (I18N[lang]["cluster"], cluster_counts),
+    ]
+    rows: list[str] = []
+    for name, counts in sections:
+        if counts:
+            value = "<ul>" + "".join(
+                f"<li>{_e(label, lang)} ({count})</li>" for label, count in sorted(counts.items())
+            ) + "</ul>"
+        else:
+            value = f'<span class="muted">{_e("", lang)}</span>'
+        rows.append(f"<tr><th>{_e(name, lang)}</th><td>{value}</td></tr>")
+    return "".join(rows)
+
+
+def _top_focus_line(entries: list[dict[str, object]], citation_needed: list[dict[str, object]], lang: str) -> str:
+    triage_counts = Counter(
+        str(entry.get("triage_label", ""))
+        for entry in entries
+        if entry.get("triage_label")
+    )
+    support_review_counts = Counter(
+        str(entry.get("support_review_label", ""))
+        for entry in entries
+        if entry.get("support_review_label")
+    )
+    risk_signal_counts = Counter()
+    for entry in entries:
+        signals = entry.get("risk_signals")
+        if isinstance(signals, list):
+            risk_signal_counts.update(str(item) for item in signals if item)
+    cluster_counts = Counter()
+    for entry in entries:
+        cluster_keys = entry.get("cluster_keys")
+        if isinstance(cluster_keys, list) and cluster_keys:
+            cluster_counts.update([", ".join(str(key) for key in cluster_keys)])
+
+    focus_parts: list[str] = []
+    if triage_counts:
+        for triage_label in TRIAGE_ORDER:
+            triage_count = triage_counts.get(triage_label, 0)
+            if triage_count:
+                focus_parts.append(
+                    f'<a href="#triage-{html.escape(triage_label.lower())}">{html.escape(f"{triage_label} ({triage_count})")}</a>'
+                )
+                break
+    if support_review_counts:
+        label, count = support_review_counts.most_common(1)[0]
+        focus_parts.append(f"{label} ({count})")
+    if risk_signal_counts:
+        label, count = risk_signal_counts.most_common(1)[0]
+        focus_parts.append(f"{label} ({count})")
+    if cluster_counts:
+        label, count = cluster_counts.most_common(1)[0]
+        focus_parts.append(f"{label} ({count})")
+    if not focus_parts and citation_needed:
+        signal_counts = Counter(
+            str(item.get("risk_signal", "")) for item in citation_needed if item.get("risk_signal")
+        )
+        if signal_counts:
+            label, count = signal_counts.most_common(1)[0]
+            focus_parts.append(f"{label} ({count})")
+    if not focus_parts:
+        return f'<p class="meta-copy">{_e("", lang)}</p>'
+    return f'<p class="meta-copy"><strong>{_e(I18N[lang]["top_review_focus"], lang)}</strong>: {" · ".join(focus_parts)}</p>'
+
+
 def _entry_card(entry: dict[str, object], lang: str) -> str:
     cluster_keys = entry.get("cluster_keys")
     cluster_html = ", ".join(_e(item, lang) for item in cluster_keys) if isinstance(cluster_keys, list) and cluster_keys else _e("", lang)
@@ -194,7 +295,7 @@ def _triage_sections(entries: list[dict[str, object]], lang: str) -> str:
             cards = f"<div class=\"empty\">{_e(I18N[lang]['no_entries'], lang)}</div>"
         blocks.append(
             f"""
-      <section class="section">
+      <section class="section" id="triage-{html.escape(label.lower())}">
         <div class="section-head"><h2>{_e(label, lang)}</h2><span class="meta">{len(group)}</span></div>
         <div class="entry-grid">{cards}</div>
       </section>
@@ -263,6 +364,11 @@ def _lang_block(report: dict[str, object], lang: str) -> str:
       <section class="section">
         <div class="section-head"><h2>{_e(I18N[lang]['summary'], lang)}</h2></div>
         <table><tbody>{_summary_rows(summary, lang)}</tbody></table>
+      </section>
+      <section class="section">
+        <div class="section-head"><h2>{_e(I18N[lang]['review_aggregates'], lang)}</h2></div>
+        {_top_focus_line(entries, citation_needed, lang)}
+        <table><tbody>{_aggregate_rows(entries, citation_needed, lang)}</tbody></table>
       </section>
       <section class="section">
         <div class="section-head"><h2>{_e(I18N[lang]['citation_needed_section'], lang)}</h2></div>
