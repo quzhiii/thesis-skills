@@ -21,6 +21,7 @@ I18N = {
         "summary": "摘要",
         "review_aggregates": "复核聚合",
         "top_review_focus": "优先复核焦点",
+        "review_sequence": "先看最高优先 triage 分组，再看 citation-needed 候选句，最后确认未被引用参考文献。",
         "triage_groups": "按 triage_label 查看",
         "citation_needed_section": "Citation-needed 候选句",
         "uncited_section": "未被引用参考文献",
@@ -30,6 +31,7 @@ I18N = {
         "open_md": "打开 Markdown 源文件",
         "open_csv": "打开 CSV 源文件",
         "related_reports": "相关报告",
+        "quick_jumps": "快速跳转",
         "related_note": "在报告入口、readiness 门禁、终稿审计和引用审计台账之间跳转。",
         "report_index": "报告入口页",
         "readiness_json": "readiness JSON",
@@ -72,6 +74,7 @@ I18N = {
         "summary": "Summary",
         "review_aggregates": "Review Aggregates",
         "top_review_focus": "Top review focus",
+        "review_sequence": "Start with the top triage group, then review citation-needed candidates, then confirm uncited references.",
         "triage_groups": "Browse by triage label",
         "citation_needed_section": "Citation-Needed Candidates",
         "uncited_section": "Uncited References",
@@ -81,6 +84,7 @@ I18N = {
         "open_md": "Open Markdown source",
         "open_csv": "Open CSV source",
         "related_reports": "Related Reports",
+        "quick_jumps": "Quick jumps",
         "related_note": "Jump between the report index, readiness gate, final-audit detail, and reference-ledger review surfaces.",
         "report_index": "Report index",
         "readiness_json": "Readiness JSON",
@@ -340,6 +344,16 @@ def _related_reports(lang: str) -> str:
 """
 
 
+def _quick_jumps(lang: str) -> str:
+    links = [
+        ("#citation-needed", I18N[lang]["citation_needed_section"]),
+        ("#uncited-references", I18N[lang]["uncited_section"]),
+        ("#triage-groups", I18N[lang]["triage_groups"]),
+    ]
+    pills = "".join(f'<a class="nav-pill" href="{html.escape(path)}">{html.escape(label)}</a>' for path, label in links)
+    return f'<div class="nav-pills quick-jumps"><span class="meta-copy">{_e(I18N[lang]["quick_jumps"], lang)}</span>{pills}</div>'
+
+
 def _lang_block(report: dict[str, object], lang: str) -> str:
     summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
     entries = report.get("entries") if isinstance(report.get("entries"), list) else []
@@ -368,17 +382,19 @@ def _lang_block(report: dict[str, object], lang: str) -> str:
       <section class="section">
         <div class="section-head"><h2>{_e(I18N[lang]['review_aggregates'], lang)}</h2></div>
         {_top_focus_line(entries, citation_needed, lang)}
+        <p class="meta-copy">{_e(I18N[lang]['review_sequence'], lang)}</p>
+        {_quick_jumps(lang)}
         <table><tbody>{_aggregate_rows(entries, citation_needed, lang)}</tbody></table>
       </section>
-      <section class="section">
+      <section class="section" id="citation-needed">
         <div class="section-head"><h2>{_e(I18N[lang]['citation_needed_section'], lang)}</h2></div>
         {_candidate_rows(citation_needed, lang)}
       </section>
-      <section class="section">
+      <section class="section" id="uncited-references">
         <div class="section-head"><h2>{_e(I18N[lang]['uncited_section'], lang)}</h2></div>
         {_uncited_rows(uncited, lang)}
       </section>
-      <section class="section">
+      <section class="section" id="triage-groups">
         <div class="section-head"><h2>{_e(I18N[lang]['triage_groups'], lang)}</h2></div>
       </section>
       {_triage_sections(entries, lang)}
