@@ -141,6 +141,19 @@ class SiteScenarioPagesTest(unittest.TestCase):
                 for stale in stale_snippets:
                     self.assertNotIn(stale, text)
 
+    def test_historical_site_pages_use_archive_disclaimers_not_current_story_wording(self) -> None:
+        redraft = self._read("index-product-redraft.html")
+        self.assertIn("Historical draft page kept for internal reference.", redraft)
+        self.assertIn("Use `site/index.html` for the current public story.", redraft)
+        self.assertIn("当前公开入口请看正式首页", redraft)
+        self.assertNotIn("current v3.3.0 public story", redraft)
+        self.assertNotIn("当前 v3.3.0 公开入口请看正式首页", redraft)
+
+        historical_gallery = self._read("v1.1-showcase/artifact-gallery.html")
+        self.assertIn("historical artifact gallery reference", historical_gallery)
+        self.assertIn("Do not treat the commands on this page as current supported entrypoints.", historical_gallery)
+        self.assertNotIn("python 15-fix-preview/generate_fix_preview.py", historical_gallery)
+
 
 if __name__ == "__main__":
     unittest.main()

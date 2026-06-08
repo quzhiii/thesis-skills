@@ -136,8 +136,8 @@ class CitationIntegrityDocsTest(unittest.TestCase):
                 "current v1.2.0 first-class export promise",
             ],
             "site/index-product-redraft.html": [
-                "current v3.3.0 public story",
-                "当前 v3.3.0 公开入口请看正式首页",
+                "Use `site/index.html` for the current public story.",
+                "当前公开入口请看正式首页",
                 "当前版本已包含",
             ],
         }
