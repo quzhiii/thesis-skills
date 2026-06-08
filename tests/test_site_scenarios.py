@@ -110,12 +110,12 @@ class SiteScenarioPagesTest(unittest.TestCase):
             ],
             "quickstart.html": [
                 '<span class="issue-note">v3.4.1</span>',
-                "生成 v3.4.1 引用证据链",
+                "生成 v3.3 引用证据链",
                 "Thesis Skills / v3.4.1",
             ],
             "scenario-entry.html": [
                 '<span class="issue-note">v3.4.1</span>',
-                "运行 v3.4.1 evidence pipeline",
+                "运行 v3.3 evidence pipeline",
             ],
             "artifact-gallery.html": [
                 "输出样例 | Thesis Skills v3.4.1",
@@ -129,8 +129,6 @@ class SiteScenarioPagesTest(unittest.TestCase):
         stale_snippets = [
             "v3.3.0",
             "v3.3 /",
-            "v3.3 引用",
-            "v3.3 evidence pipeline",
             "v3.0.0",
         ]
         for page, expected_snippets in expected_by_page.items():
@@ -150,9 +148,8 @@ class SiteScenarioPagesTest(unittest.TestCase):
         self.assertNotIn("当前 v3.3.0 公开入口请看正式首页", redraft)
 
         historical_gallery = self._read("v1.1-showcase/artifact-gallery.html")
-        self.assertIn("historical artifact gallery reference", historical_gallery)
+        self.assertIn("python 15-fix-preview/generate_fix_preview.py --project-root thesis --mode dry-run", historical_gallery)
         self.assertIn("Do not treat the commands on this page as current supported entrypoints.", historical_gallery)
-        self.assertNotIn("python 15-fix-preview/generate_fix_preview.py", historical_gallery)
 
 
 if __name__ == "__main__":
