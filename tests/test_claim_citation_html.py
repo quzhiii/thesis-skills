@@ -65,9 +65,9 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         self.assertIn("声明-引用<br>支撑分级", html)
         self.assertIn("Claim-Citation<br>Triage", html)
         self.assertIn("Citation-Needed Candidates", html)
-        self.assertIn("Citation-needed 候选句", html)
+        self.assertIn("待补引用候选句", html)
         self.assertIn("Browse by triage label", html)
-        self.assertIn("按 triage_label 查看", html)
+        self.assertIn("按分级标签查看", html)
         self.assertIn("Related Reports", html)
         self.assertIn("相关报告", html)
         self.assertIn("readiness-report.json", html)
@@ -160,7 +160,7 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         self.assertIn("Top review focus", html)
         self.assertIn("优先复核焦点", html)
         self.assertIn("Start with the top triage group, then review citation-needed candidates, then confirm uncited references.", html)
-        self.assertIn("先看最高优先 triage 分组，再看 citation-needed 候选句，最后确认未被引用参考文献。", html)
+        self.assertIn("先看最高优先分级分组，再看待补引用候选句，最后确认未被引用参考文献。", html)
         self.assertIn('href="#triage-weak"', html)
         self.assertIn('href="#citation-needed"', html)
         self.assertIn('href="#uncited-references"', html)
@@ -254,12 +254,301 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         self.assertIn("Review queue", html)
         self.assertIn("复核队列", html)
         self.assertIn("Open the highest-priority triage entries first, then review citation-needed candidates in source order.", html)
-        self.assertIn("先打开最高优先 triage 条目，再按源码顺序检查 citation-needed 候选句。", html)
+        self.assertIn("先打开最高优先分级条目，再按源码顺序检查待补引用候选句。", html)
         self.assertIn('href="#entry-unverifiable-ref-orphaned-8"', html)
         self.assertIn('href="#entry-weak-ref-weak-14"', html)
         self.assertIn('id="entry-unverifiable-ref-orphaned-8"', html)
         self.assertIn('id="entry-weak-ref-weak-14"', html)
         self.assertLess(html.index('href="#entry-unverifiable-ref-orphaned-8"'), html.index('href="#entry-weak-ref-weak-14"'))
+
+    def test_render_adds_triage_group_jump_pills_for_non_empty_groups(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {
+                    "claim_citation_pairs": 2,
+                    "weak_pairs": 1,
+                    "unverifiable_pairs": 1,
+                    "citation_needed_candidates": 0,
+                    "unique_references_never_cited": 0,
+                },
+                "entries": [
+                    {
+                        "citation_key": "ref-unverifiable",
+                        "triage_label": "UNVERIFIABLE",
+                        "support_review_label": "NEEDS_MANUAL_REVIEW",
+                        "support_review_reason": "Missing support details.",
+                        "claim_type": "empirical_result",
+                        "file": "chapters/results.tex",
+                        "line": 8,
+                        "hallucination_risk_label": "REVIEW",
+                        "cluster_keys": ["ref-unverifiable"],
+                        "cluster_review_reason": "Review support.",
+                        "risk_signals": ["possible_topic_mismatch"],
+                        "support_signals": ["complete_metadata"],
+                        "next_actions": ["Open cited source and compare claim scope."],
+                        "claim_context": "The intervention outperforms all baselines.",
+                    },
+                    {
+                        "citation_key": "ref-weak",
+                        "triage_label": "WEAK",
+                        "support_review_label": "NEEDS_MANUAL_REVIEW",
+                        "support_review_reason": "Weak support pattern.",
+                        "claim_type": "background_fact",
+                        "file": "chapters/discussion.tex",
+                        "line": 14,
+                        "hallucination_risk_label": "WARN",
+                        "cluster_keys": ["ref-weak"],
+                        "cluster_review_reason": "Single review.",
+                        "risk_signals": ["possible_overclaim"],
+                        "support_signals": ["title_overlap"],
+                        "next_actions": ["Confirm whether the citation supports the stronger wording."],
+                        "claim_context": "This result establishes a universal mechanism.",
+                    },
+                ],
+                "citation_needed_candidates": [],
+                "uncited_references": [],
+            }
+        )
+
+        self.assertIn('class="nav-pill" href="#triage-unverifiable">UNVERIFIABLE (1)</a>', html)
+        self.assertIn('class="nav-pill" href="#triage-weak">WEAK (1)</a>', html)
+        self.assertNotIn('class="nav-pill" href="#triage-orphaned">', html)
+        self.assertNotIn('class="nav-pill" href="#triage-supported">', html)
+        self.assertNotIn('class="nav-pill" href="#triage-well-supported">', html)
+
+    def test_render_adds_citation_needed_row_anchors_and_source_order_jump_links(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {
+                    "claim_citation_pairs": 0,
+                    "weak_pairs": 0,
+                    "citation_needed_candidates": 2,
+                    "unique_references_never_cited": 0,
+                },
+                "entries": [],
+                "citation_needed_candidates": [
+                    {
+                        "file": "chapters/discussion.tex",
+                        "line": 22,
+                        "claim_type": "background_fact",
+                        "risk_signal": "uncited_background_fact",
+                        "sentence": "This observation remains understudied.",
+                    },
+                    {
+                        "file": "chapters/results.tex",
+                        "line": 16,
+                        "claim_type": "empirical_result",
+                        "risk_signal": "uncited_empirical_result",
+                        "sentence": "The intervention reduces variance by 50%.",
+                    },
+                ],
+                "uncited_references": [],
+            }
+        )
+
+        self.assertIn('id="citation-needed-chapters-discussion-tex-22"', html)
+        self.assertIn('id="citation-needed-chapters-results-tex-16"', html)
+        self.assertIn('class="nav-pill" href="#citation-needed-chapters-discussion-tex-22"', html)
+        self.assertIn('class="nav-pill" href="#citation-needed-chapters-results-tex-16"', html)
+        citation_needed_section = html.split('<section class="section" id="citation-needed">', 1)[1].split('</section>', 1)[0]
+        self.assertLess(
+            citation_needed_section.index('href="#citation-needed-chapters-discussion-tex-22"'),
+            citation_needed_section.index('<table>'),
+        )
+        self.assertLess(
+            html.index('href="#citation-needed-chapters-discussion-tex-22"'),
+            html.index('href="#citation-needed-chapters-results-tex-16"'),
+        )
+
+    def test_render_disambiguates_citation_needed_row_anchors_for_same_file_and_line(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {
+                    "claim_citation_pairs": 0,
+                    "weak_pairs": 0,
+                    "citation_needed_candidates": 2,
+                    "unique_references_never_cited": 0,
+                },
+                "entries": [],
+                "citation_needed_candidates": [
+                    {
+                        "file": "chapters/results.tex",
+                        "line": 16,
+                        "claim_type": "empirical_result",
+                        "risk_signal": "uncited_empirical_result",
+                        "sentence": "The intervention reduces variance by 50%.",
+                    },
+                    {
+                        "file": "chapters/results.tex",
+                        "line": 16,
+                        "claim_type": "empirical_result",
+                        "risk_signal": "uncited_empirical_result",
+                        "sentence": "The ablation improves calibration by 12%.",
+                    },
+                ],
+                "uncited_references": [],
+            }
+        )
+
+        self.assertIn('id="citation-needed-chapters-results-tex-16"', html)
+        self.assertIn('id="citation-needed-chapters-results-tex-16-2"', html)
+        self.assertIn('class="nav-pill" href="#citation-needed-chapters-results-tex-16"', html)
+        self.assertIn('class="nav-pill" href="#citation-needed-chapters-results-tex-16-2"', html)
+        self.assertLess(
+            html.index('href="#citation-needed-chapters-results-tex-16"'),
+            html.index('href="#citation-needed-chapters-results-tex-16-2"'),
+        )
+        self.assertLess(
+            html.index("The intervention reduces variance by 50%."),
+            html.index("The ablation improves calibration by 12%."),
+        )
+
+    def test_render_localizes_zh_labels_with_english_in_parentheses(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "UNVERIFIABLE",
+                "summary": {
+                    "claim_citation_pairs": 1,
+                    "unverifiable_pairs": 1,
+                    "citation_needed_candidates": 1,
+                    "unique_references_never_cited": 1,
+                },
+                "entries": [
+                    {
+                        "citation_key": "ref-unverifiable",
+                        "triage_label": "UNVERIFIABLE",
+                        "support_review_label": "NEEDS_MANUAL_REVIEW",
+                        "support_review_reason": "Missing support details.",
+                        "claim_type": "empirical_result",
+                        "file": "chapters/results.tex",
+                        "line": 8,
+                        "hallucination_risk_label": "REVIEW",
+                        "cluster_keys": ["ref-unverifiable"],
+                        "cluster_review_reason": "Review support.",
+                        "risk_signals": ["possible_topic_mismatch"],
+                        "support_signals": ["complete_metadata"],
+                        "next_actions": ["Open cited source and compare claim scope."],
+                        "claim_context": "The intervention outperforms all baselines.",
+                    }
+                ],
+                "citation_needed_candidates": [
+                    {
+                        "file": "chapters/results.tex",
+                        "line": 16,
+                        "claim_type": "empirical_result",
+                        "risk_signal": "uncited_empirical_result",
+                        "sentence": "The intervention reduces variance by 50%.",
+                    }
+                ],
+                "uncited_references": [
+                    {
+                        "citation_key": "unused2024",
+                        "title": "Unused Reference",
+                        "hallucination_risk_label": "HIGH_RISK",
+                    }
+                ],
+            }
+        )
+
+        zh_section = html.split('<section class="lang-panel" data-lang-panel="zh">', 1)[1].split('<section class="lang-panel" data-lang-panel="en">', 1)[0]
+
+        self.assertIn("不可核验（UNVERIFIABLE）", zh_section)
+        self.assertIn("需要人工复核（NEEDS_MANUAL_REVIEW）", zh_section)
+        self.assertIn("实证结果（empirical_result）", zh_section)
+        self.assertIn("需复核（REVIEW）", zh_section)
+        self.assertIn("可能存在主题错配（possible_topic_mismatch）", zh_section)
+        self.assertIn("实证结果缺少引用（uncited_empirical_result）", zh_section)
+        self.assertIn("高风险（HIGH_RISK）", zh_section)
+        self.assertIn("相关报告", zh_section)
+        self.assertIn("终稿审计页面", zh_section)
+        self.assertIn("引用审计台账页面", zh_section)
+        self.assertIn("当前缺少足够的支撑细节。", zh_section)
+        self.assertIn("成组引用说明需复核。", zh_section)
+        self.assertIn("请打开引用来源，并核对其支撑范围是否覆盖当前声明。", zh_section)
+        self.assertIn("元数据完整", zh_section)
+        self.assertNotIn("Citation-needed 候选句", zh_section)
+        self.assertNotIn("claim 类型", zh_section)
+        self.assertNotIn("authoritative source", zh_section)
+
+    def test_render_localizes_zh_grouped_entry_heading_reason_and_context(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {
+                    "claim_citation_pairs": 2,
+                    "weak_pairs": 2,
+                    "citation_needed_candidates": 0,
+                    "unique_references_never_cited": 0,
+                },
+                "entries": [
+                    {
+                        "citation_key": "supported1",
+                        "triage_label": "WEAK",
+                        "support_review_label": "NEEDS_MANUAL_REVIEW",
+                        "support_review_reason": "Cited reference carries HIGH_RISK hallucination evidence.",
+                        "claim_type": "background",
+                        "file": "main.tex",
+                        "line": 12,
+                        "hallucination_risk_label": "HIGH_RISK",
+                        "cluster_keys": ["supported1", "weak1"],
+                        "cluster_review_reason": "This citation appears in a grouped cluster with risk signals; review the grouped citations together.",
+                        "risk_signals": ["high_risk_reference", "mixed_cluster_risk", "cluster_high_risk_reference", "cluster_weak_reference"],
+                        "support_signals": ["has_claim_context", "grouped_citation_cluster"],
+                        "next_actions": [
+                            "Verify the cited source against DOI, publisher, database, or original document evidence.",
+                            "Review this citation cluster as a group because at least one grouped citation has risk signals.",
+                        ],
+                        "claim_context": "Multiple studies provide evidence for this hypothesis.",
+                    }
+                ],
+                "citation_needed_candidates": [],
+                "uncited_references": [],
+            }
+        )
+
+        zh_section = html.split('<section class="lang-panel" data-lang-panel="zh">', 1)[1].split('<section class="lang-panel" data-lang-panel="en">', 1)[0]
+
+        self.assertIn("引用键：supported1", zh_section)
+        self.assertIn("该引用出现在带有风险信号的成组引用簇中，建议将成组引用一起复核。", zh_section)
+        self.assertIn("多项研究为这一假设提供了证据。", zh_section)
+
+    def test_render_localizes_zh_summary_rows(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {
+                    "claim_citation_pairs": 8,
+                    "well_supported_pairs": 0,
+                    "supported_pairs": 0,
+                    "weak_pairs": 6,
+                    "orphaned_pairs": 1,
+                    "unverifiable_pairs": 1,
+                    "unique_references_cited": 6,
+                    "unique_references_never_cited": 0,
+                    "citation_needed_candidates": 0,
+                },
+                "entries": [],
+                "citation_needed_candidates": [],
+                "uncited_references": [],
+            }
+        )
+
+        zh_section = html.split('<section class="lang-panel" data-lang-panel="zh">', 1)[1].split('<section class="lang-panel" data-lang-panel="en">', 1)[0]
+
+        self.assertIn("待补引用候选句", zh_section)
+        self.assertIn("声明-引用对", zh_section)
+        self.assertIn("孤立引用对", zh_section)
+        self.assertIn("基本支撑引用对", zh_section)
+        self.assertIn("已引用唯一参考文献数", zh_section)
+        self.assertIn("未被引用唯一参考文献数", zh_section)
+        self.assertIn("不可核验引用对", zh_section)
+        self.assertIn("支撑偏弱引用对", zh_section)
+        self.assertIn("支撑充分引用对", zh_section)
+        self.assertNotIn("CLAIM_CITATION_PAIRS", zh_section)
+        self.assertNotIn("UNIQUE_REFERENCES_NEVER_CITED", zh_section)
 
     def test_write_and_cli_generate_html(self) -> None:
         with workspace_tempdir("claim-citation-html-") as base:
