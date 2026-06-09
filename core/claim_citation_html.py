@@ -60,7 +60,7 @@ I18N = {
         "title_label": "标题",
         "headline": "状态概览",
         "no_entries": "当前没有该分组条目。",
-        "no_candidates": "当前没有 citation-needed 候选句。",
+        "no_candidates": "当前没有待补引用候选句。",
         "no_uncited": "当前没有未被引用的参考文献。",
         "generated_from": "本页面根据",
         "regenerate_note": "生成。请先更新 claim-citation JSON 报告，再重新生成本 HTML 页面。",

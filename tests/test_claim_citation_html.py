@@ -547,6 +547,7 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         self.assertIn("不可核验引用对", zh_section)
         self.assertIn("支撑偏弱引用对", zh_section)
         self.assertIn("支撑充分引用对", zh_section)
+        self.assertIn("当前没有待补引用候选句。", zh_section)
         self.assertNotIn("CLAIM_CITATION_PAIRS", zh_section)
         self.assertNotIn("UNIQUE_REFERENCES_NEVER_CITED", zh_section)
 
