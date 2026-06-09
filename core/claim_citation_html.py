@@ -321,20 +321,27 @@ def _slug_fragment(value: object) -> str:
     return slug or "item"
 
 
-def _entry_anchor_id(entry: dict[str, object]) -> str:
+def _panel_anchor_id(lang: str, suffix: str) -> str:
+    return f"{lang}-{suffix}"
+
+
+def _entry_anchor_id(entry: dict[str, object], lang: str) -> str:
     return "-".join(
         [
+            lang,
             "entry",
             _slug_fragment(entry.get("triage_label", "entry")),
+            _slug_fragment(entry.get("file", "item")),
             _slug_fragment(entry.get("citation_key", "item")),
             _slug_fragment(entry.get("line", "0")),
         ]
     )
 
 
-def _citation_needed_anchor_id(candidate: dict[str, object], occurrence: int = 1) -> str:
+def _citation_needed_anchor_id(candidate: dict[str, object], lang: str, occurrence: int = 1) -> str:
     anchor = "-".join(
         [
+            lang,
             "citation-needed",
             _slug_fragment(candidate.get("file", "item")),
             _slug_fragment(candidate.get("line", "0")),
@@ -347,13 +354,14 @@ def _citation_needed_anchor_id(candidate: dict[str, object], occurrence: int = 1
 
 def _citation_needed_candidates_with_anchor_ids(
     candidates: list[dict[str, object]],
+    lang: str,
 ) -> list[tuple[dict[str, object], str]]:
     seen: Counter[str] = Counter()
     anchored: list[tuple[dict[str, object], str]] = []
     for candidate in sorted(candidates, key=_candidate_sort_key):
-        base_anchor = _citation_needed_anchor_id(candidate)
+        base_anchor = _citation_needed_anchor_id(candidate, lang)
         seen[base_anchor] += 1
-        anchored.append((candidate, _citation_needed_anchor_id(candidate, seen[base_anchor])))
+        anchored.append((candidate, _citation_needed_anchor_id(candidate, lang, seen[base_anchor])))
     return anchored
 
 
@@ -474,7 +482,7 @@ def _top_focus_line(entries: list[dict[str, object]], citation_needed: list[dict
             triage_count = triage_counts.get(triage_label, 0)
             if triage_count:
                 focus_parts.append(
-                    f'<a href="#triage-{html.escape(triage_label.lower())}">{_display_value(triage_label, lang)} ({triage_count})</a>'
+                    f'<a href="#{html.escape(_panel_anchor_id(lang, f"triage-{triage_label.lower()}"))}">{_display_value(triage_label, lang)} ({triage_count})</a>'
                 )
                 break
     if support_review_counts:
@@ -511,7 +519,7 @@ def _review_queue(entries: list[dict[str, object]], lang: str) -> str:
         return ""
     order = {label: index for index, label in enumerate(TRIAGE_ORDER)}
     pills = "".join(
-        f'<a class="nav-pill" href="#{html.escape(_entry_anchor_id(entry))}">{_display_value(entry.get("triage_label", ""), lang)} · {_e(entry.get("citation_key", ""), lang)} · {_e(entry.get("file", ""), lang)}:{_e(entry.get("line", ""), lang)}</a>'
+        f'<a class="nav-pill" href="#{html.escape(_entry_anchor_id(entry, lang))}">{_display_value(entry.get("triage_label", ""), lang)} · {_e(entry.get("citation_key", ""), lang)} · {_e(entry.get("file", ""), lang)}:{_e(entry.get("line", ""), lang)}</a>'
         for entry in sorted(
             queue,
             key=lambda item: (
@@ -532,7 +540,7 @@ def _triage_group_pills(entries: list[dict[str, object]], lang: str) -> str:
         if entry.get("triage_label")
     )
     pills = "".join(
-        f'<a class="nav-pill" href="#triage-{html.escape(label.lower())}">{_display_value(label, lang)} ({triage_counts[label]})</a>'
+        f'<a class="nav-pill" href="#{html.escape(_panel_anchor_id(lang, f"triage-{label.lower()}"))}">{_display_value(label, lang)} ({triage_counts[label]})</a>'
         for label in TRIAGE_ORDER
         if triage_counts.get(label, 0)
     )
@@ -546,7 +554,7 @@ def _citation_needed_jump_pills(candidates: list[dict[str, object]], lang: str) 
         return ""
     pills = "".join(
         f'<a class="nav-pill" href="#{html.escape(anchor_id)}">{_e(item.get("file", ""), lang)}:{_e(item.get("line", ""), lang)}</a>'
-        for item, anchor_id in _citation_needed_candidates_with_anchor_ids(candidates)
+        for item, anchor_id in _citation_needed_candidates_with_anchor_ids(candidates, lang)
     )
     return f'<div class="nav-pills">{pills}</div>'
 
@@ -555,7 +563,7 @@ def _entry_card(entry: dict[str, object], lang: str) -> str:
     cluster_keys = entry.get("cluster_keys")
     cluster_html = ", ".join(_e(item, lang) for item in cluster_keys) if isinstance(cluster_keys, list) and cluster_keys else _e("", lang)
     return f"""
-      <article id="{html.escape(_entry_anchor_id(entry))}" class="entry-card status-{_e(entry.get('triage_label', ''), lang).lower()}">
+      <article id="{html.escape(_entry_anchor_id(entry, lang))}" class="entry-card status-{_e(entry.get('triage_label', ''), lang).lower()}">
         <div class="entry-top">
           <span class="pill">{_display_value(entry.get('triage_label', ''), lang)}</span>
           <span class="pill muted">{_display_value(entry.get('support_review_label', ''), lang)}</span>
@@ -587,7 +595,7 @@ def _triage_sections(entries: list[dict[str, object]], lang: str) -> str:
             cards = f"<div class=\"empty\">{_e(I18N[lang]['no_entries'], lang)}</div>"
         blocks.append(
             f"""
-      <section class="section" id="triage-{html.escape(label.lower())}">
+      <section class="section" id="{html.escape(_panel_anchor_id(lang, f'triage-{label.lower()}'))}">
         <div class="section-head"><h2>{_display_value(label, lang)}</h2><span class="meta">{len(group)}</span></div>
         <div class="entry-grid">{cards}</div>
       </section>
@@ -600,7 +608,7 @@ def _candidate_rows(candidates: list[dict[str, object]], lang: str) -> str:
     if not candidates:
         return f"<div class=\"empty\">{_e(I18N[lang]['no_candidates'], lang)}</div>"
     rows = []
-    for item, anchor_id in _citation_needed_candidates_with_anchor_ids(candidates):
+    for item, anchor_id in _citation_needed_candidates_with_anchor_ids(candidates, lang):
         rows.append(
             f"<tr id=\"{html.escape(anchor_id)}\"><td>{_e(item.get('file', ''), lang)}:{_e(item.get('line', ''), lang)}</td><td>{_display_value(item.get('claim_type', ''), lang)}</td><td>{_display_value(item.get('risk_signal', ''), lang)}</td><td>{_e(item.get('sentence', ''), lang)}</td></tr>"
         )
@@ -634,9 +642,9 @@ def _related_reports(lang: str) -> str:
 
 def _quick_jumps(lang: str) -> str:
     links = [
-        ("#citation-needed", I18N[lang]["citation_needed_section"]),
-        ("#uncited-references", I18N[lang]["uncited_section"]),
-        ("#triage-groups", I18N[lang]["triage_groups"]),
+        (f"#{_panel_anchor_id(lang, 'citation-needed')}", I18N[lang]["citation_needed_section"]),
+        (f"#{_panel_anchor_id(lang, 'uncited-references')}", I18N[lang]["uncited_section"]),
+        (f"#{_panel_anchor_id(lang, 'triage-groups')}", I18N[lang]["triage_groups"]),
     ]
     pills = "".join(f'<a class="nav-pill" href="{html.escape(path)}">{html.escape(label)}</a>' for path, label in links)
     return f'<div class="nav-pills quick-jumps"><span class="meta-copy">{_e(I18N[lang]["quick_jumps"], lang)}</span>{pills}</div>'
@@ -675,16 +683,16 @@ def _lang_block(report: dict[str, object], lang: str) -> str:
         {_quick_jumps(lang)}
         <table><tbody>{_aggregate_rows(entries, citation_needed, lang)}</tbody></table>
       </section>
-      <section class="section" id="citation-needed">
+      <section class="section" id="{html.escape(_panel_anchor_id(lang, 'citation-needed'))}">
         <div class="section-head"><h2>{_e(I18N[lang]['citation_needed_section'], lang)}</h2></div>
         {_citation_needed_jump_pills(citation_needed, lang)}
         {_candidate_rows(citation_needed, lang)}
       </section>
-      <section class="section" id="uncited-references">
+      <section class="section" id="{html.escape(_panel_anchor_id(lang, 'uncited-references'))}">
         <div class="section-head"><h2>{_e(I18N[lang]['uncited_section'], lang)}</h2></div>
         {_uncited_rows(uncited, lang)}
       </section>
-      <section class="section" id="triage-groups">
+      <section class="section" id="{html.escape(_panel_anchor_id(lang, 'triage-groups'))}">
         <div class="section-head"><h2>{_e(I18N[lang]['triage_groups'], lang)}</h2></div>
         {_triage_group_pills(entries, lang)}
       </section>
