@@ -177,6 +177,90 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         self.assertLess(html.index("NEEDS_MANUAL_REVIEW (2)"), html.index("SUPPORTED_DIRECTLY (1)"))
         self.assertLess(html.index("possible_overclaim (2)"), html.index("uncited_empirical_result (1)"))
 
+    def test_render_adds_review_queue_with_entry_jump_links(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {
+                    "claim_citation_pairs": 3,
+                    "weak_pairs": 1,
+                    "unverifiable_pairs": 1,
+                    "citation_needed_candidates": 1,
+                    "unique_references_never_cited": 0,
+                },
+                "entries": [
+                    {
+                        "citation_key": "ref-orphaned",
+                        "triage_label": "UNVERIFIABLE",
+                        "support_review_label": "NEEDS_MANUAL_REVIEW",
+                        "support_review_reason": "Missing support details.",
+                        "claim_type": "empirical_result",
+                        "file": "chapters/results.tex",
+                        "line": 8,
+                        "hallucination_risk_label": "REVIEW",
+                        "cluster_keys": ["ref-orphaned", "ref-other"],
+                        "cluster_review_reason": "Review cluster together.",
+                        "risk_signals": ["possible_topic_mismatch"],
+                        "support_signals": ["complete_metadata"],
+                        "next_actions": ["Open cited source and compare claim scope."],
+                        "claim_context": "The intervention outperforms all baselines.",
+                    },
+                    {
+                        "citation_key": "ref-weak",
+                        "triage_label": "WEAK",
+                        "support_review_label": "NEEDS_MANUAL_REVIEW",
+                        "support_review_reason": "Weak support pattern.",
+                        "claim_type": "background_fact",
+                        "file": "chapters/discussion.tex",
+                        "line": 14,
+                        "hallucination_risk_label": "WARN",
+                        "cluster_keys": ["ref-weak"],
+                        "cluster_review_reason": "Single review.",
+                        "risk_signals": ["possible_overclaim"],
+                        "support_signals": ["title_overlap"],
+                        "next_actions": ["Confirm whether the citation supports the stronger wording."],
+                        "claim_context": "This result establishes a universal mechanism.",
+                    },
+                    {
+                        "citation_key": "ref-supported",
+                        "triage_label": "SUPPORTED",
+                        "support_review_label": "SUPPORTED_DIRECTLY",
+                        "support_review_reason": "Direct support found.",
+                        "claim_type": "background_fact",
+                        "file": "chapters/intro.tex",
+                        "line": 3,
+                        "hallucination_risk_label": "PASS",
+                        "cluster_keys": ["ref-supported"],
+                        "cluster_review_reason": "Single support.",
+                        "risk_signals": [],
+                        "support_signals": ["title_overlap"],
+                        "next_actions": ["No action needed."],
+                        "claim_context": "A supported background statement.",
+                    },
+                ],
+                "citation_needed_candidates": [
+                    {
+                        "file": "chapters/results.tex",
+                        "line": 16,
+                        "claim_type": "empirical_result",
+                        "risk_signal": "uncited_empirical_result",
+                        "sentence": "The intervention reduces variance by 50%.",
+                    }
+                ],
+                "uncited_references": [],
+            }
+        )
+
+        self.assertIn("Review queue", html)
+        self.assertIn("复核队列", html)
+        self.assertIn("Open the highest-priority triage entries first, then review citation-needed candidates in source order.", html)
+        self.assertIn("先打开最高优先 triage 条目，再按源码顺序检查 citation-needed 候选句。", html)
+        self.assertIn('href="#entry-unverifiable-ref-orphaned-8"', html)
+        self.assertIn('href="#entry-weak-ref-weak-14"', html)
+        self.assertIn('id="entry-unverifiable-ref-orphaned-8"', html)
+        self.assertIn('id="entry-weak-ref-weak-14"', html)
+        self.assertLess(html.index('href="#entry-unverifiable-ref-orphaned-8"'), html.index('href="#entry-weak-ref-weak-14"'))
+
     def test_write_and_cli_generate_html(self) -> None:
         with workspace_tempdir("claim-citation-html-") as base:
             project = materialize_project(

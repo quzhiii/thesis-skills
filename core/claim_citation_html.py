@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 from collections import defaultdict
 from collections import Counter
 from pathlib import Path
@@ -21,6 +22,8 @@ I18N = {
         "summary": "摘要",
         "review_aggregates": "复核聚合",
         "top_review_focus": "优先复核焦点",
+        "review_queue": "复核队列",
+        "review_queue_note": "先打开最高优先 triage 条目，再按源码顺序检查 citation-needed 候选句。",
         "review_sequence": "先看最高优先 triage 分组，再看 citation-needed 候选句，最后确认未被引用参考文献。",
         "triage_groups": "按 triage_label 查看",
         "citation_needed_section": "Citation-needed 候选句",
@@ -74,6 +77,8 @@ I18N = {
         "summary": "Summary",
         "review_aggregates": "Review Aggregates",
         "top_review_focus": "Top review focus",
+        "review_queue": "Review queue",
+        "review_queue_note": "Open the highest-priority triage entries first, then review citation-needed candidates in source order.",
         "review_sequence": "Start with the top triage group, then review citation-needed candidates, then confirm uncited references.",
         "triage_groups": "Browse by triage label",
         "citation_needed_section": "Citation-Needed Candidates",
@@ -130,6 +135,22 @@ def _load_json(path: str | Path) -> dict[str, object]:
 def _e(value: object, lang: str = "en") -> str:
     fallback = I18N[lang]["no_value"]
     return html.escape(str(value if value not in (None, "", []) else fallback))
+
+
+def _slug_fragment(value: object) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", str(value).lower()).strip("-")
+    return slug or "item"
+
+
+def _entry_anchor_id(entry: dict[str, object]) -> str:
+    return "-".join(
+        [
+            "entry",
+            _slug_fragment(entry.get("triage_label", "entry")),
+            _slug_fragment(entry.get("citation_key", "item")),
+            _slug_fragment(entry.get("line", "0")),
+        ]
+    )
 
 
 def _lang_switch() -> str:
@@ -263,11 +284,38 @@ def _top_focus_line(entries: list[dict[str, object]], citation_needed: list[dict
     return f'<p class="meta-copy"><strong>{_e(I18N[lang]["top_review_focus"], lang)}</strong>: {" · ".join(focus_parts)}</p>'
 
 
+def _review_queue(entries: list[dict[str, object]], lang: str) -> str:
+    queue = [
+        entry
+        for entry in entries
+        if not (
+            str(entry.get("triage_label", "")) in {"SUPPORTED", "WELL_SUPPORTED"}
+            and str(entry.get("support_review_label", "")) == "SUPPORTED_DIRECTLY"
+        )
+    ]
+    if not queue:
+        return ""
+    order = {label: index for index, label in enumerate(TRIAGE_ORDER)}
+    pills = "".join(
+        f'<a class="nav-pill" href="#{html.escape(_entry_anchor_id(entry))}">{_e(entry.get("triage_label", ""), lang)} · {_e(entry.get("citation_key", ""), lang)} · {_e(entry.get("file", ""), lang)}:{_e(entry.get("line", ""), lang)}</a>'
+        for entry in sorted(
+            queue,
+            key=lambda item: (
+                order.get(str(item.get("triage_label", "")), len(TRIAGE_ORDER)),
+                str(item.get("file", "")),
+                int(item.get("line") or 0),
+                str(item.get("citation_key", "")),
+            ),
+        )
+    )
+    return f'<div class="review-queue"><p class="meta-copy"><strong>{_e(I18N[lang]["review_queue"], lang)}</strong></p><p class="meta-copy">{_e(I18N[lang]["review_queue_note"], lang)}</p><div class="nav-pills">{pills}</div></div>'
+
+
 def _entry_card(entry: dict[str, object], lang: str) -> str:
     cluster_keys = entry.get("cluster_keys")
     cluster_html = ", ".join(_e(item, lang) for item in cluster_keys) if isinstance(cluster_keys, list) and cluster_keys else _e("", lang)
     return f"""
-      <article class="entry-card status-{_e(entry.get('triage_label', ''), lang).lower()}">
+      <article id="{html.escape(_entry_anchor_id(entry))}" class="entry-card status-{_e(entry.get('triage_label', ''), lang).lower()}">
         <div class="entry-top">
           <span class="pill">{_e(entry.get('triage_label', ''), lang)}</span>
           <span class="pill muted">{_e(entry.get('support_review_label', ''), lang)}</span>
@@ -382,6 +430,7 @@ def _lang_block(report: dict[str, object], lang: str) -> str:
       <section class="section">
         <div class="section-head"><h2>{_e(I18N[lang]['review_aggregates'], lang)}</h2></div>
         {_top_focus_line(entries, citation_needed, lang)}
+        {_review_queue(entries, lang)}
         <p class="meta-copy">{_e(I18N[lang]['review_sequence'], lang)}</p>
         {_quick_jumps(lang)}
         <table><tbody>{_aggregate_rows(entries, citation_needed, lang)}</tbody></table>
@@ -443,6 +492,7 @@ def render_claim_citation_html(report: dict[str, object]) -> str:
     .nav-pills {{ display:flex; flex-wrap:wrap; gap:10px; }}
     .nav-pill {{ display:inline-block; padding:10px 12px; border:1px solid var(--grey-2); background:#fff; }}
     .meta-copy {{ color:var(--grey-3); font-size:14px; }}
+    .review-queue {{ display:flex; flex-direction:column; gap:10px; margin:14px 0 18px; }}
     h3 {{ margin:0; font-size:24px; font-weight:420; letter-spacing:-.03em; }}
     p {{ margin:0; color:var(--grey-3); line-height:1.5; }}
     .meta {{ font-family:"IBM Plex Mono", Consolas, monospace; font-size:12px; }}
