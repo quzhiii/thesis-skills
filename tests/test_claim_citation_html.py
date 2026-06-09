@@ -269,6 +269,135 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         self.assertIn('id="en-entry-weak-chapters-discussion-tex-ref-weak-14"', html)
         self.assertLess(html.index('href="#zh-entry-unverifiable-chapters-results-tex-ref-orphaned-8"'), html.index('href="#zh-entry-weak-chapters-discussion-tex-ref-weak-14"'))
 
+    def test_render_adds_conservative_review_groups_with_entry_links(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {
+                    "claim_citation_pairs": 4,
+                    "weak_pairs": 1,
+                    "supported_pairs": 2,
+                    "well_supported_pairs": 1,
+                    "citation_needed_candidates": 0,
+                    "unique_references_never_cited": 0,
+                },
+                "entries": [
+                    {
+                        "citation_key": "ref-high",
+                        "triage_label": "SUPPORTED",
+                        "support_review_label": "NEEDS_MANUAL_REVIEW",
+                        "support_review_reason": "Cited reference carries HIGH_RISK hallucination evidence.",
+                        "claim_type": "background_fact",
+                        "file": "chapters/risk.tex",
+                        "line": 3,
+                        "hallucination_risk_label": "HIGH_RISK",
+                        "cluster_keys": ["ref-high"],
+                        "cluster_review_reason": "Single-citation cluster.",
+                        "risk_signals": ["high_risk_reference"],
+                        "support_signals": ["title_overlap"],
+                        "next_actions": ["Verify the cited source against DOI, publisher, database, or original document evidence."],
+                        "claim_context": "High-risk source supports this claim.",
+                    },
+                    {
+                        "citation_key": "ref-weak",
+                        "triage_label": "WEAK",
+                        "support_review_label": "NEEDS_MANUAL_REVIEW",
+                        "support_review_reason": "Weak support pattern.",
+                        "claim_type": "empirical_result",
+                        "file": "chapters/results.tex",
+                        "line": 12,
+                        "hallucination_risk_label": "WARN",
+                        "cluster_keys": ["ref-weak"],
+                        "cluster_review_reason": "Single-citation cluster.",
+                        "risk_signals": ["possible_overclaim"],
+                        "support_signals": ["complete_metadata"],
+                        "next_actions": ["Confirm whether the citation supports the stronger wording."],
+                        "claim_context": "The result establishes a universal mechanism.",
+                    },
+                    {
+                        "citation_key": "ref-adequate",
+                        "triage_label": "SUPPORTED",
+                        "support_review_label": "ADEQUATE_REVIEW",
+                        "support_review_reason": "Evidence appears adequate with minor caveats.",
+                        "claim_type": "background_fact",
+                        "file": "chapters/intro.tex",
+                        "line": 8,
+                        "hallucination_risk_label": "PASS",
+                        "cluster_keys": ["ref-adequate"],
+                        "cluster_review_reason": "Single-citation cluster.",
+                        "risk_signals": [],
+                        "support_signals": ["title_overlap"],
+                        "next_actions": ["No immediate action; keep available for final human review."],
+                        "claim_context": "Prior work explored similar architectures.",
+                    },
+                    {
+                        "citation_key": "ref-direct",
+                        "triage_label": "WELL_SUPPORTED",
+                        "support_review_label": "STRONG_REVIEW",
+                        "support_review_reason": "Evidence is structurally strong and low-risk.",
+                        "claim_type": "background_fact",
+                        "file": "chapters/intro.tex",
+                        "line": 20,
+                        "hallucination_risk_label": "PASS",
+                        "cluster_keys": ["ref-direct"],
+                        "cluster_review_reason": "Single-citation cluster.",
+                        "risk_signals": [],
+                        "support_signals": ["title_overlap"],
+                        "next_actions": ["No action needed."],
+                        "claim_context": "A directly supported background statement.",
+                    },
+                ],
+                "citation_needed_candidates": [],
+                "uncited_references": [],
+            }
+        )
+
+        self.assertIn("Review Groups", html)
+        self.assertIn("复核分组", html)
+        self.assertIn("P0 · Must review first", html)
+        self.assertIn("P0 · 必须先处理", html)
+        self.assertIn("P1 · High-priority review", html)
+        self.assertIn("P1 · 高优先复核", html)
+        self.assertIn("P2 · Regular review", html)
+        self.assertIn("P2 · 常规复核", html)
+        self.assertIn("P3 · Archive-only view", html)
+        self.assertIn("P3 · 仅留档查看", html)
+        self.assertIn('href="#zh-review-groups"', html)
+        self.assertIn('href="#zh-review-group-p0"', html)
+        self.assertIn("P0 · Must review first (1)", html)
+        self.assertIn("P1 · High-priority review (1)", html)
+        self.assertIn("P2 · Regular review (1)", html)
+        self.assertIn("P3 · Archive-only view (1)", html)
+        self.assertIn('href="#en-review-group-p0"', html)
+        self.assertIn('href="#en-review-groups"', html)
+        zh_p0 = html.split('id="zh-review-group-p0"', 1)[1].split("</article>", 1)[0]
+        zh_p1 = html.split('id="zh-review-group-p1"', 1)[1].split("</article>", 1)[0]
+        zh_p2 = html.split('id="zh-review-group-p2"', 1)[1].split("</article>", 1)[0]
+        zh_p3 = html.split('id="zh-review-group-p3"', 1)[1].split("</article>", 1)[0]
+        en_p0 = html.split('id="en-review-group-p0"', 1)[1].split("</article>", 1)[0]
+        self.assertIn('href="#zh-entry-supported-chapters-risk-tex-ref-high-3"', zh_p0)
+        self.assertIn('href="#zh-entry-weak-chapters-results-tex-ref-weak-12"', zh_p1)
+        self.assertIn('href="#zh-entry-supported-chapters-intro-tex-ref-adequate-8"', zh_p2)
+        self.assertIn('href="#zh-entry-well-supported-chapters-intro-tex-ref-direct-20"', zh_p3)
+        self.assertIn("证据摘要", zh_p0)
+        self.assertIn("判断依据", zh_p0)
+        self.assertIn("建议动作", zh_p0)
+        self.assertIn("高风险（HIGH_RISK）", zh_p0)
+        self.assertIn("高风险参考文献（high_risk_reference）", zh_p0)
+        self.assertIn("该引用携带 HIGH_RISK 幻觉风险证据，需要人工复核。", zh_p0)
+        self.assertIn("请结合 DOI、出版方、数据库或原始文档证据核对该引用来源。", zh_p0)
+        self.assertIn("Evidence", en_p0)
+        self.assertIn("Rationale", en_p0)
+        self.assertIn("Suggested action", en_p0)
+        self.assertIn("HIGH_RISK", en_p0)
+        self.assertIn("high_risk_reference", en_p0)
+        self.assertIn("Cited reference carries HIGH_RISK hallucination evidence.", en_p0)
+        self.assertIn("Verify the cited source against DOI, publisher, database, or original document evidence.", en_p0)
+        self.assertLess(html.index("P0 · Must review first"), html.index("P1 · High-priority review"))
+        self.assertLess(html.index("P1 · High-priority review"), html.index("P2 · Regular review"))
+        self.assertLess(html.index("P2 · Regular review"), html.index("P3 · Archive-only view"))
+        self.assertLess(html.index("Review Groups"), html.index("Review queue"))
+
     def test_render_adds_triage_group_jump_pills_for_non_empty_groups(self) -> None:
         html = render_claim_citation_html(
             {
@@ -532,6 +661,53 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         self.assertIn("该引用出现在带有风险信号的成组引用簇中，建议将成组引用一起复核。", zh_section)
         self.assertIn("多项研究为这一假设提供了证据。", zh_section)
 
+    def test_render_adds_entry_review_summary_before_detail_blocks(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {
+                    "claim_citation_pairs": 1,
+                    "weak_pairs": 1,
+                    "citation_needed_candidates": 0,
+                    "unique_references_never_cited": 0,
+                },
+                "entries": [
+                    {
+                        "citation_key": "ref-summary",
+                        "triage_label": "WEAK",
+                        "support_review_label": "NEEDS_MANUAL_REVIEW",
+                        "support_review_reason": "Weak support pattern.",
+                        "claim_type": "empirical_result",
+                        "file": "chapters/results.tex",
+                        "line": 12,
+                        "hallucination_risk_label": "WARN",
+                        "cluster_keys": ["ref-summary"],
+                        "cluster_review_reason": "Single-citation cluster.",
+                        "risk_signals": ["possible_overclaim"],
+                        "support_signals": ["complete_metadata"],
+                        "next_actions": ["Confirm whether the citation supports the stronger wording."],
+                        "claim_context": "The result establishes a universal mechanism.",
+                    }
+                ],
+                "citation_needed_candidates": [],
+                "uncited_references": [],
+            }
+        )
+
+        zh_entry = html.split('id="zh-entry-weak-chapters-results-tex-ref-summary-12"', 1)[1].split("</article>", 1)[0]
+        en_entry = html.split('id="en-entry-weak-chapters-results-tex-ref-summary-12"', 1)[1].split("</article>", 1)[0]
+        self.assertIn("复核摘要", zh_entry)
+        self.assertIn("支撑偏弱（WEAK）", zh_entry)
+        self.assertIn("警告（WARN）", zh_entry)
+        self.assertIn("建议动作", zh_entry)
+        self.assertIn("请确认该引用是否足以支撑当前较强表述", zh_entry)
+        self.assertIn("Review summary", en_entry)
+        self.assertIn("WEAK", en_entry)
+        self.assertIn("WARN", en_entry)
+        self.assertIn("Suggested action: Confirm whether the citation supports the stronger wording.", en_entry)
+        self.assertLess(zh_entry.index("复核摘要"), zh_entry.index("风险信号"))
+        self.assertLess(en_entry.index("Review summary"), en_entry.index("risk signals"))
+
     def test_render_localizes_zh_summary_rows(self) -> None:
         html = render_claim_citation_html(
             {
@@ -615,6 +791,54 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         self.assertIn('href="#en-citation-needed"', html)
         self.assertIn('id="zh-triage-weak"', html)
         self.assertIn('id="en-triage-weak"', html)
+
+    def test_render_adds_mobile_readability_rules_for_dense_review_surfaces(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {
+                    "claim_citation_pairs": 1,
+                    "weak_pairs": 1,
+                    "citation_needed_candidates": 1,
+                    "unique_references_never_cited": 0,
+                },
+                "entries": [
+                    {
+                        "citation_key": "ref1",
+                        "triage_label": "WEAK",
+                        "support_review_label": "NEEDS_MANUAL_REVIEW",
+                        "support_review_reason": "Manual review needed.",
+                        "claim_type": "empirical_result",
+                        "file": "main.tex",
+                        "line": 10,
+                        "hallucination_risk_label": "REVIEW",
+                        "cluster_keys": ["ref1"],
+                        "cluster_review_reason": "Single-citation cluster.",
+                        "risk_signals": ["possible_overclaim"],
+                        "support_signals": ["complete_metadata"],
+                        "next_actions": ["Review again."],
+                        "claim_context": "Claim one.",
+                    }
+                ],
+                "citation_needed_candidates": [
+                    {
+                        "file": "main.tex",
+                        "line": 22,
+                        "claim_type": "empirical_result",
+                        "risk_signal": "uncited_empirical_result",
+                        "sentence": "Needs citation.",
+                    }
+                ],
+                "uncited_references": [],
+            }
+        )
+
+        self.assertIn("@media (max-width:560px)", html)
+        self.assertIn(".nav-pill { width:100%; }", html)
+        self.assertIn(".detail { grid-template-columns:1fr; }", html)
+        self.assertIn(".review-group-card { padding:12px; }", html)
+        self.assertIn(".entry-card { min-height:0; }", html)
+        self.assertIn(".quick-jumps { flex-direction:column; align-items:stretch; }", html)
 
     def test_render_includes_file_slug_in_entry_anchors(self) -> None:
         html = render_claim_citation_html(

@@ -22,6 +22,12 @@ I18N = {
         "summary": "摘要",
         "review_aggregates": "复核聚合",
         "top_review_focus": "优先复核焦点",
+        "review_groups": "复核分组",
+        "review_groups_note": "仅基于现有 triage_label、support_review_label、risk_signals 和 hallucination_risk_label 的显示层优先级分组，不改变 JSON / Markdown / CSV 判断。",
+        "group_evidence": "证据摘要",
+        "group_rationale": "判断依据",
+        "group_action": "建议动作",
+        "entry_review_summary": "复核摘要",
         "review_queue": "复核队列",
         "review_queue_note": "先打开最高优先分级条目，再按源码顺序检查待补引用候选句。",
         "review_sequence": "先看最高优先分级分组，再看待补引用候选句，最后确认未被引用参考文献。",
@@ -79,6 +85,12 @@ I18N = {
         "summary": "Summary",
         "review_aggregates": "Review Aggregates",
         "top_review_focus": "Top review focus",
+        "review_groups": "Review Groups",
+        "review_groups_note": "Display-only priority buckets based only on existing triage_label, support_review_label, risk_signals, and hallucination_risk_label; JSON / Markdown / CSV judgments do not change.",
+        "group_evidence": "Evidence",
+        "group_rationale": "Rationale",
+        "group_action": "Suggested action",
+        "entry_review_summary": "Review summary",
         "review_queue": "Review queue",
         "review_queue_note": "Open the highest-priority triage entries first, then review citation-needed candidates in source order.",
         "review_sequence": "Start with the top triage group, then review citation-needed candidates, then confirm uncited references.",
@@ -125,6 +137,41 @@ I18N = {
 
 
 TRIAGE_ORDER = ["ORPHANED", "UNVERIFIABLE", "WEAK", "SUPPORTED", "WELL_SUPPORTED"]
+
+REVIEW_GROUPS = [
+    {
+        "key": "p0",
+        "labels": {"zh": "P0 · 必须先处理", "en": "P0 · Must review first"},
+        "notes": {
+            "zh": "孤立/不可核验引用、高风险参考文献信号，或 HIGH_RISK 幻觉风险标签。",
+            "en": "ORPHANED / UNVERIFIABLE entries, high-risk reference signals, or HIGH_RISK hallucination labels.",
+        },
+    },
+    {
+        "key": "p1",
+        "labels": {"zh": "P1 · 高优先复核", "en": "P1 · High-priority review"},
+        "notes": {
+            "zh": "支撑偏弱、需要人工复核、WARN/REVIEW 风险标签，或仍有风险信号的条目。",
+            "en": "WEAK support, manual-review labels, WARN/REVIEW risk labels, or remaining risk signals.",
+        },
+    },
+    {
+        "key": "p2",
+        "labels": {"zh": "P2 · 常规复核", "en": "P2 · Regular review"},
+        "notes": {
+            "zh": "未触发 P0/P1，但仍建议人工确认的常规支撑复核条目。",
+            "en": "Entries that do not trigger P0/P1 but still deserve normal human confirmation.",
+        },
+    },
+    {
+        "key": "p3",
+        "labels": {"zh": "P3 · 仅留档查看", "en": "P3 · Archive-only view"},
+        "notes": {
+            "zh": "SUPPORTED_DIRECTLY、PASS 且没有风险信号的条目，主要用于最终留档查看。",
+            "en": "SUPPORTED_DIRECTLY, PASS, and no risk signals; kept mainly for final archive review.",
+        },
+    },
+]
 
 ZH_LABELS = {
     "ORPHANED": "孤立引用",
@@ -214,6 +261,7 @@ ZH_TEXT_REWRITES = {
     "Fix the citation key or add the missing bibliography entry after manual confirmation.": "请在人工确认后修复引用键，或补入缺失的参考文献条目。",
     "Manually verify the source because current evidence cannot automatically assess it.": "请人工核验该来源，因为当前自动证据无法完成判断。",
     "Check whether this reference directly supports the nearby claim or add a closer source.": "请核对这条参考文献是否直接支撑邻近声明，或补充更贴近的来源。",
+    "Confirm whether the citation supports the stronger wording.": "请确认该引用是否足以支撑当前较强表述。",
     "Review the citation context and metadata before final submission.": "请在最终提交前复核引用上下文和元数据。",
     "No immediate action; keep available for final human review.": "当前无需立即处理，但请保留到最终人工复核阶段。",
     "The method achieves state-of-the-art results.": "该方法取得了当前最先进的结果。",
@@ -533,6 +581,67 @@ def _review_queue(entries: list[dict[str, object]], lang: str) -> str:
     return f'<div class="review-queue"><p class="meta-copy"><strong>{_e(I18N[lang]["review_queue"], lang)}</strong></p><p class="meta-copy">{_e(I18N[lang]["review_queue_note"], lang)}</p><div class="nav-pills">{pills}</div></div>'
 
 
+def _review_group_key(entry: dict[str, object]) -> str:
+    triage_label = str(entry.get("triage_label", ""))
+    support_review_label = str(entry.get("support_review_label", ""))
+    risk_label = str(entry.get("hallucination_risk_label", ""))
+    risk_signals = entry.get("risk_signals")
+    signal_values = {str(item) for item in risk_signals if item} if isinstance(risk_signals, list) else set()
+    if triage_label in {"ORPHANED", "UNVERIFIABLE"} or risk_label == "HIGH_RISK" or any(
+        signal in signal_values for signal in {"high_risk_reference", "cluster_high_risk_reference"}
+    ):
+        return "p0"
+    if (
+        triage_label == "WEAK"
+        or support_review_label in {"NEEDS_MANUAL_REVIEW", "WEAK_REVIEW"}
+        or risk_label in {"WARN", "REVIEW"}
+        or bool(signal_values)
+    ):
+        return "p1"
+    if support_review_label in {"SUPPORTED_DIRECTLY", "STRONG_REVIEW"} and risk_label == "PASS" and not signal_values:
+        return "p3"
+    return "p2"
+
+
+def _review_groups(entries: list[dict[str, object]], lang: str) -> str:
+    if not entries:
+        return ""
+    grouped: dict[str, list[dict[str, object]]] = defaultdict(list)
+    for entry in entries:
+        grouped[_review_group_key(entry)].append(entry)
+
+    group_nav = "".join(
+        f'<a class="nav-pill" href="#{html.escape(_panel_anchor_id(lang, f"review-group-{group_key}"))}">{html.escape(group["labels"][lang])} ({len(grouped[group_key])})</a>'
+        for group in REVIEW_GROUPS
+        for group_key in [str(group["key"])]
+        if grouped.get(group_key, [])
+    )
+    cards: list[str] = []
+    for group in REVIEW_GROUPS:
+        key = str(group["key"])
+        group_entries = sorted(
+            grouped.get(key, []),
+            key=lambda item: (str(item.get("file", "")), int(item.get("line") or 0), str(item.get("citation_key", ""))),
+        )
+        if not group_entries:
+            continue
+        lead_entry = group_entries[0]
+        lead_risk_signals = lead_entry.get("risk_signals") if isinstance(lead_entry.get("risk_signals"), list) else []
+        lead_evidence = [
+            _display_value(lead_entry.get("hallucination_risk_label", ""), lang),
+            _display_list_item(lead_risk_signals[0], lang) if lead_risk_signals else "",
+        ]
+        lead_evidence = " · ".join(item for item in lead_evidence if item and item != _e("", lang))
+        links = "".join(
+            f'<a class="nav-pill" href="#{html.escape(_entry_anchor_id(entry, lang))}">{_display_value(entry.get("triage_label", ""), lang)} · {_e(entry.get("citation_key", ""), lang)} · {_e(entry.get("file", ""), lang)}:{_e(entry.get("line", ""), lang)}</a>'
+            for entry in group_entries
+        )
+        cards.append(
+            f'<article class="review-group-card" id="{html.escape(_panel_anchor_id(lang, f"review-group-{key}"))}"><h3>{html.escape(group["labels"][lang])}</h3><p class="meta-copy">{html.escape(group["notes"][lang])}</p><div class="detail"><strong>{_e(I18N[lang]["group_evidence"], lang)}</strong><span>{lead_evidence or _e("", lang)}</span></div><div class="detail"><strong>{_e(I18N[lang]["group_rationale"], lang)}</strong><span>{_display_free_text(lead_entry.get("support_review_reason", ""), lang)}</span></div><div class="detail"><strong>{_e(I18N[lang]["group_action"], lang)}</strong><span>{_display_free_text((lead_entry.get("next_actions") or [""])[0], lang)}</span></div><div class="nav-pills">{links}</div></article>'
+        )
+    return f'<div class="review-groups" id="{html.escape(_panel_anchor_id(lang, "review-groups"))}"><p class="meta-copy"><strong>{_e(I18N[lang]["review_groups"], lang)}</strong></p><p class="meta-copy">{_e(I18N[lang]["review_groups_note"], lang)}</p><div class="nav-pills">{group_nav}</div><div class="review-group-grid">{"".join(cards)}</div></div>'
+
+
 def _triage_group_pills(entries: list[dict[str, object]], lang: str) -> str:
     triage_counts = Counter(
         str(entry.get("triage_label", ""))
@@ -562,6 +671,15 @@ def _citation_needed_jump_pills(candidates: list[dict[str, object]], lang: str) 
 def _entry_card(entry: dict[str, object], lang: str) -> str:
     cluster_keys = entry.get("cluster_keys")
     cluster_html = ", ".join(_e(item, lang) for item in cluster_keys) if isinstance(cluster_keys, list) and cluster_keys else _e("", lang)
+    next_actions = entry.get("next_actions") if isinstance(entry.get("next_actions"), list) else []
+    summary_parts = [
+        _display_value(entry.get("triage_label", ""), lang),
+        _display_value(entry.get("hallucination_risk_label", ""), lang),
+    ]
+    if next_actions:
+        action_label = "建议动作" if lang == "zh" else "Suggested action"
+        summary_parts.append(f"{action_label}: {_display_free_text(next_actions[0], lang)}")
+    review_summary = " · ".join(part for part in summary_parts if part and part != _e("", lang))
     return f"""
       <article id="{html.escape(_entry_anchor_id(entry, lang))}" class="entry-card status-{_e(entry.get('triage_label', ''), lang).lower()}">
         <div class="entry-top">
@@ -571,6 +689,7 @@ def _entry_card(entry: dict[str, object], lang: str) -> str:
         <h3>{_display_citation_heading(entry.get('citation_key', ''), lang)}</h3>
         <p class="meta">{_e(I18N[lang]['file'], lang)}: {_e(entry.get('file', ''), lang)} · {_e(I18N[lang]['line'], lang)}: {_e(entry.get('line', ''), lang)}</p>
         <p>{_display_free_text(entry.get('support_review_reason', ''), lang)}</p>
+        <p class="meta-copy"><strong>{_e(I18N[lang]['entry_review_summary'], lang)}</strong>: {review_summary}</p>
         <div class="detail"><strong>{_e(I18N[lang]['claim_type'], lang)}</strong><span>{_display_value(entry.get('claim_type', ''), lang)}</span></div>
         <div class="detail"><strong>{_e(I18N[lang]['risk'], lang)}</strong><span>{_display_value(entry.get('hallucination_risk_label', ''), lang)}</span></div>
         <div class="detail"><strong>{_e(I18N[lang]['cluster'], lang)}</strong><span>{cluster_html}</span></div>
@@ -642,6 +761,7 @@ def _related_reports(lang: str) -> str:
 
 def _quick_jumps(lang: str) -> str:
     links = [
+        (f"#{_panel_anchor_id(lang, 'review-groups')}", I18N[lang]["review_groups"]),
         (f"#{_panel_anchor_id(lang, 'citation-needed')}", I18N[lang]["citation_needed_section"]),
         (f"#{_panel_anchor_id(lang, 'uncited-references')}", I18N[lang]["uncited_section"]),
         (f"#{_panel_anchor_id(lang, 'triage-groups')}", I18N[lang]["triage_groups"]),
@@ -678,6 +798,7 @@ def _lang_block(report: dict[str, object], lang: str) -> str:
       <section class="section">
         <div class="section-head"><h2>{_e(I18N[lang]['review_aggregates'], lang)}</h2></div>
         {_top_focus_line(entries, citation_needed, lang)}
+        {_review_groups(entries, lang)}
         {_review_queue(entries, lang)}
         <p class="meta-copy">{_e(I18N[lang]['review_sequence'], lang)}</p>
         {_quick_jumps(lang)}
@@ -742,6 +863,9 @@ def render_claim_citation_html(report: dict[str, object]) -> str:
     .nav-pills {{ display:flex; flex-wrap:wrap; gap:10px; }}
     .nav-pill {{ display:inline-block; padding:10px 12px; border:1px solid var(--grey-2); background:#fff; }}
     .meta-copy {{ color:var(--grey-3); font-size:14px; }}
+    .review-groups {{ display:flex; flex-direction:column; gap:12px; margin:16px 0 18px; }}
+    .review-group-grid {{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }}
+    .review-group-card {{ background:#fff; border:1px solid var(--grey-2); padding:14px; display:flex; flex-direction:column; gap:10px; }}
     .review-queue {{ display:flex; flex-direction:column; gap:10px; margin:14px 0 18px; }}
     h3 {{ margin:0; font-size:24px; font-weight:420; letter-spacing:-.03em; }}
     p {{ margin:0; color:var(--grey-3); line-height:1.5; }}
@@ -759,8 +883,8 @@ def render_claim_citation_html(report: dict[str, object]) -> str:
     .raw-note {{ margin-top:24px; padding:16px; border:1px solid var(--grey-2); background:var(--grey-1); color:var(--grey-3); }}
     a {{ color:var(--accent); font-weight:700; text-decoration:none; }}
     a:hover {{ text-decoration:underline; }}
-    @media (max-width:980px) {{ header, .entry-grid {{ grid-template-columns:1fr; }} .stats {{ grid-template-columns:repeat(2,1fr); }} }}
-    @media (max-width:560px) {{ .stats {{ grid-template-columns:1fr; }} .page {{ padding:18px 14px 40px; }} }}
+    @media (max-width:980px) {{ header, .entry-grid, .review-group-grid {{ grid-template-columns:1fr; }} .stats {{ grid-template-columns:repeat(2,1fr); }} }}
+    @media (max-width:560px) {{ .stats {{ grid-template-columns:1fr; }} .page {{ padding:18px 14px 40px; }} .nav-pill {{ width:100%; }} .detail {{ grid-template-columns:1fr; }} .quick-jumps {{ flex-direction:column; align-items:stretch; }} .review-group-card {{ padding:12px; }} .entry-card {{ min-height:0; }} }}
   </style>
 </head>
 <body>
