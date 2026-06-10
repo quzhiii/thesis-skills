@@ -61,6 +61,7 @@ LaTeX 项目 ───────┤                                           
 - **终稿审计界面**：新增 final cleanup、statistical consistency、manual anchor 三个确定性检查，并聚合到 `reports/final-audit-report.json`。
 - **引用审计交付表**：`28-reference-audit-ledger/build_reference_audit_ledger.py` 从已有引用证据生成表格友好的 `reports/reference-audit-ledger.csv`。
 - **本地静态报告 UX**：新增 `reports/index.html`、`reports/final-audit-report.html`、`reports/reference-audit-ledger.html`、`reports/claim-citation-triage.html`，方便阅读，但 JSON / CSV 仍然是 source of truth。
+- **声明-引用 HTML 复核**：`reports/claim-citation-triage.html` 现在展示 P0 / P1 / P2 / P3 复核分组、issue-card 风格摘要，并在 readiness / references / claim-citation / final-audit 之间提供更深的报告链接。JSON / CSV 仍然是 source of truth；HTML 只是手机窄屏可读的本地 HTML bundle。
 - **声明-引用支撑复核**：新增 `possible_topic_mismatch`、`possible_outdated_support`、`possible_overclaim` 等保守 advisory 风险信号。
 - **V3.3 引用验证加固** 继续保留：final reference set、DOI 候选、URL 验证、可限定范围/可续跑外部验证，以及统一证据流水线 runner `run_evidence_pipeline.py`。
 
@@ -419,7 +420,7 @@ python 32-claim-citation-html/build_claim_citation_html.py \
   --project-root thesis
 ```
 
-输出：`reports/claim-citation-triage.html`。它从 `claim-citation-triage-report.json` 生成，展示 triage 分组、citation-needed candidates、uncited references、引用簇复核信息，以及 support/risk signals 和 next actions。JSON 仍然是 authoritative source，不会被 HTML 替代。
+输出：`reports/claim-citation-triage.html`。它从 `claim-citation-triage-report.json` 生成，展示 P0 / P1 / P2 / P3 复核分组、issue-card 风格摘要、citation-needed candidates、uncited references、引用簇复核信息，以及 support/risk signals 和 next actions。页面会在 readiness / references / claim-citation / final-audit 报告界面之间提供 deep links，方便从总览跳到引用台账、声明-引用明细和终稿审计明细。JSON 仍然是 authoritative source，不会被 HTML 替代，也不改变 Markdown / CSV 输出。
 
 如果你想先看外部元数据层面的风险分值，可先运行 `19-check-hallucination-risk/check_hallucination_risk.py`，查看每条文献的 `hallucination_risk_score`。
 

@@ -61,6 +61,7 @@ For repetitive finishing work, the expected time savings are concrete:
 - **Final-audit surfaces**: new deterministic final cleanup, statistical consistency, and manual-anchor checks feed `reports/final-audit-report.json`.
 - **Reference audit handoff**: `28-reference-audit-ledger/build_reference_audit_ledger.py` writes a spreadsheet-friendly `reports/reference-audit-ledger.csv` from existing reference evidence.
 - **Static local report UX**: `reports/index.html`, `reports/final-audit-report.html`, `reports/reference-audit-ledger.html`, and `reports/claim-citation-triage.html` make JSON / CSV artifacts easier to review without replacing them as source of truth.
+- **Claim-citation HTML review**: `reports/claim-citation-triage.html` now surfaces P0 / P1 / P2 / P3 review groups, issue-card style summaries, and cross-report links across readiness / references / claim-citation / final-audit. JSON / CSV remain the source of truth; the HTML is a mobile-readable local HTML bundle for manual review.
 - **Claim-citation support review** now includes conservative advisory signals such as `possible_topic_mismatch`, `possible_outdated_support`, and `possible_overclaim`.
 - **V3.3 reference verification hardening** remains in place: final reference set parsing, DOI candidates, URL verification, scoped/resumable external verification, and the unified evidence pipeline runner `run_evidence_pipeline.py`.
 
@@ -412,7 +413,7 @@ python 32-claim-citation-html/build_claim_citation_html.py \
   --project-root thesis
 ```
 
-Output: `reports/claim-citation-triage.html`. This static page is generated from `claim-citation-triage-report.json` and shows triage groups, citation-needed candidates, uncited references, cluster review details, support/risk signals, and next actions. JSON remains authoritative.
+Output: `reports/claim-citation-triage.html`. This static page is generated from `claim-citation-triage-report.json` and shows P0 / P1 / P2 / P3 review groups, issue-card style summaries, citation-needed candidates, uncited references, cluster review details, support/risk signals, and next actions. It also deep-links the local readiness / references / claim-citation / final-audit report surfaces so reviewers can move between summary, reference ledger, and detail pages. JSON remains authoritative and CSV / Markdown outputs remain unchanged.
 
 ## Scenarios
 

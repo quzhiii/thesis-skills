@@ -252,6 +252,14 @@ Initial HTML surface now available:
 - reference ledger detail page: `31-reference-ledger-html/build_reference_audit_ledger_html.py`, writing `reports/reference-audit-ledger.html` from `reference-audit-ledger.csv` as a local reading surface
 - claim-citation detail page: `32-claim-citation-html/build_claim_citation_html.py`, writing `reports/claim-citation-triage.html` from `claim-citation-triage-report.json` as a local reading surface
 
+Current shipped HTML behavior:
+
+- claim-citation P0 / P1 / P2 / P3 review groups for manual review order
+- issue-card summaries with evidence, rationale, and suggested action
+- symmetric deep links between readiness, references, claim-citation, and final-audit report surfaces
+- narrow-screen readability improvements for local HTML review
+- JSON / CSV remain the machine-readable source of truth; HTML remains a local reading layer only
+
 ### Track F: Public Surface And Verification Discipline
 
 Every roadmap item must keep the public surface aligned with shipped behavior:
