@@ -332,8 +332,8 @@ def _related_reports(lang: str) -> str:
     links = [
         ("index.html", _text("report_index", lang)),
         ("readiness-report.json", _text("readiness_json", lang)),
-        ("reference-audit-ledger.html", _text("reference_ledger_html", lang)),
-        ("claim-citation-triage.html", _text("claim_citation_html", lang)),
+        (f"reference-audit-ledger.html#evidence-rows-{lang}", _text("reference_ledger_html", lang)),
+        (f"claim-citation-triage.html#{lang}-review-groups", _text("claim_citation_html", lang)),
     ]
     pills = "".join(f'<a class="nav-pill" href="{_e(path)}">{_e(label)}</a>' for path, label in links)
     return f"""
@@ -395,7 +395,7 @@ def _render_lang_block(report: dict[str, object], lang: str) -> str:
         <div class="issue-grid">{blocker_cards}</div>
       </section>
 
-      <section class="section">
+      <section class="section" id="warning-issues-{lang}">
         <div class="section-head"><h2>{_e(_text('warning_issues', lang))}</h2><span class="meta">{_e(_text('manual_review', lang))}</span></div>
         <div class="issue-grid">{warning_cards}</div>
       </section>

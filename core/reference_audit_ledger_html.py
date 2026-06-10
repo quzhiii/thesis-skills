@@ -332,8 +332,8 @@ def _related_reports(lang: str) -> str:
     links = [
         ("index.html", I18N[lang]["report_index"]),
         ("readiness-report.json", I18N[lang]["readiness_json"]),
-        ("final-audit-report.html", I18N[lang]["final_audit"]),
-        ("claim-citation-triage.html", I18N[lang]["claim_citation"]),
+        (f"final-audit-report.html#warning-issues-{lang}", I18N[lang]["final_audit"]),
+        (f"claim-citation-triage.html#{lang}-review-groups", I18N[lang]["claim_citation"]),
     ]
     pills = "".join(f'<a class="nav-pill" href="{html.escape(path)}">{html.escape(label)}</a>' for path, label in links)
     return f"""

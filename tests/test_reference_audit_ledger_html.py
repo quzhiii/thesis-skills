@@ -51,8 +51,10 @@ class ReferenceAuditLedgerHtmlTest(unittest.TestCase):
         self.assertIn("相关报告", html)
         self.assertIn("Related Reports", html)
         self.assertIn("readiness-report.json", html)
-        self.assertIn("final-audit-report.html", html)
-        self.assertIn("claim-citation-triage.html", html)
+        self.assertIn("final-audit-report.html#warning-issues-zh", html)
+        self.assertIn("final-audit-report.html#warning-issues-en", html)
+        self.assertIn("claim-citation-triage.html#zh-review-groups", html)
+        self.assertIn("claim-citation-triage.html#en-review-groups", html)
         self.assertIn("data-lang-btn=\"zh\"", html)
 
     def test_render_includes_raw_source_note_for_csv_truth(self) -> None:
