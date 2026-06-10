@@ -111,6 +111,7 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Rules | `90-rules/` | `export_pack.py` | Export linted rule-pack handoff bundles |
 | Runner | repository root | `run_check_once.py` | Run the deterministic check pipeline once |
 | Runner | repository root | `run_evidence_pipeline.py` | Orchestrate final reference set plus all citation evidence layers in sequence |
+| Workflow | `33-final-delivery/` | `run_final_delivery.py` | Run final delivery workflow: evidence, checks, optional fixes, bundle rebuild |
 | Runner | repository root | `run_fix_cycle.py` | Preview or apply report-driven fix cycles; modes: `safe`, `suggest`, `mixed`, `final-audit`, `all` |
 
 ## How to choose a module

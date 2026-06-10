@@ -44,6 +44,7 @@
     {"id": "24-fix-language-deep", "entry": "24-fix-language-deep/THESIS_FIX_LANGUAGE_DEEP.md", "type": "fixer"},
     {"id": "90-rules", "entry": "90-rules/THESIS_RULE_PACKS.md", "type": "ruleset", "runner": "90-rules/create_pack.py", "draft_runner": "90-rules/create_draft_pack.py", "lint_runner": "90-rules/lint_pack.py"},
     {"id": "run-evidence-pipeline", "entry": "run_evidence_pipeline.py", "type": "runner"},
+    {"id": "33-final-delivery", "entry": "33-final-delivery/THESIS_FINAL_DELIVERY.md", "type": "workflow", "runner": "33-final-delivery/run_final_delivery.py"},
     {"id": "99-runner", "entry": "99-runner/README.md", "type": "runner"}
   ]
 }
