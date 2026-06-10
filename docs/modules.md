@@ -101,6 +101,7 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Fix | `20-fix-references/` | `fix_references.py` | Preview and apply reference-related patches |
 | Fix | `21-fix-language-style/` | `fix_language_style.py` | Preview and apply deterministic language style patches |
 | Fix | `22-fix-format-structure/` | `fix_format_structure.py` | Preview and apply format-structure patches |
+| Fix | `23-fix-final-cleanup/` | `fix_final_cleanup.py` | Preview and apply safe final cleanup marker removals |
 | Fix | `24-fix-language-deep/` | `fix_language_deep.py` | Preview deeper language patch candidates |
 | Rules | `90-rules/` | `create_pack.py` | Create institution- or journal-specific rule packs |
 | Rules | `90-rules/` | `lint_pack.py` | Validate rule-pack structure and write scorecard summaries |

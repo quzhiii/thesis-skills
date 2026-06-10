@@ -26,6 +26,7 @@
     {"id": "19-check-hallucination-risk", "entry": "19-check-hallucination-risk/THESIS_HALLUCINATION_RISK.md", "type": "checker", "runner": "19-check-hallucination-risk/check_hallucination_risk.py"},
     {"id": "20-check-claim-citation", "entry": "20-check-claim-citation/THESIS_CLAIM_CITATION.md", "type": "checker", "runner": "20-check-claim-citation/check_claim_citation.py"},
     {"id": "23-check-final-cleanup", "entry": "23-check-final-cleanup/THESIS_FINAL_CLEANUP.md", "type": "checker", "runner": "23-check-final-cleanup/check_final_cleanup.py"},
+    {"id": "23-fix-final-cleanup", "entry": "23-fix-final-cleanup/THESIS_FIX_FINAL_CLEANUP.md", "type": "fixer", "runner": "23-fix-final-cleanup/fix_final_cleanup.py"},
     {"id": "25-check-statistical-consistency", "entry": "25-check-statistical-consistency/THESIS_STATISTICAL_CONSISTENCY.md", "type": "checker", "runner": "25-check-statistical-consistency/check_statistical_consistency.py"},
     {"id": "26-check-manual-anchor", "entry": "26-check-manual-anchor/THESIS_MANUAL_ANCHOR.md", "type": "checker", "runner": "26-check-manual-anchor/check_manual_anchor.py"},
     {"id": "27-final-audit-report", "entry": "27-final-audit-report/THESIS_FINAL_AUDIT_REPORT.md", "type": "checker", "runner": "27-final-audit-report/build_final_audit_report.py"},

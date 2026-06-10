@@ -4,10 +4,48 @@ import json
 import unittest
 
 from core.fixers import apply_format_fixes, apply_language_fixes, apply_review_patches
-from tests.helpers import workspace_tempdir
+from tests.helpers import materialize_project, workspace_tempdir
 
 
 class FixerTest(unittest.TestCase):
+    def test_final_cleanup_fixer_previews_and_applies_exact_marker_removals(self) -> None:
+        from core.final_cleanup import run_final_cleanup_check
+        from core.fixers import apply_final_cleanup_fixes
+        from core.project import ThesisProject
+        from core.rules import load_rule_pack
+        from tests.test_rules import PACK_ROOT
+
+        with workspace_tempdir("fixers-") as base:
+            pack = load_rule_pack(PACK_ROOT / "university-generic")
+            materialize_project(
+                base,
+                {
+                    "main.tex": "\\documentclass{article}\n\\begin{document}\n\\input{chapters/ch1}\n\\end{document}\n",
+                    "chapters/ch1.tex": "TODO FIXME ??? debug draft\nKeep this sentence.\n",
+                },
+            )
+            project = ThesisProject.discover(
+                base,
+                pack.rules["project"]["main_tex_candidates"],
+                pack.rules["project"]["chapter_globs"],
+                pack.rules["project"]["bibliography_files"],
+            )
+            report = base / "reports" / "final-cleanup-report.json"
+            run_final_cleanup_check(project, pack, report)
+            tex = base / "chapters" / "ch1.tex"
+            original = tex.read_text(encoding="utf-8")
+
+            preview = apply_final_cleanup_fixes(base, report, apply=False)
+            self.assertEqual(preview["preview_count"], 5)
+            self.assertEqual(tex.read_text(encoding="utf-8"), original)
+
+            applied = apply_final_cleanup_fixes(base, report, apply=True)
+            content = tex.read_text(encoding="utf-8")
+
+        self.assertEqual(applied["changed_files"], 1)
+        self.assertEqual(len(applied["applied_patches"]), 5)
+        self.assertEqual(content, "    \nKeep this sentence.\n")
+
     def test_language_fixer_applies_safe_phase1_fixes(self) -> None:
         with workspace_tempdir("fixers-") as base:
             tex = base / "chapter.tex"
