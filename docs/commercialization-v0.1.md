@@ -323,7 +323,7 @@ That includes:
 - reference ledger HTML
 - claim-citation HTML
 - conservative support-risk signals
-- v3.4.0 public alignment
+- v3.4.1 public alignment
 
 ### Better held for future private layers
 

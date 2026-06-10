@@ -48,14 +48,27 @@ thesis-skills/
 ├── 02-latex-to-word/         Bounded LaTeX-to-Word export workflow
 ├── 03-latex-review-diff/      Review package and triage workflow
 ├── 04-word-review-ingest/     Bounded feedback normalization workflow
+├── 10-check-references/       Deterministic reference checks
+├── 11-check-language/         Baseline language checks
+├── 12-check-format/           Format checks
+├── 13-check-content/          Content checks
+├── 14-check-language-deep/    Report-only deep language review
 ├── 15-check-compile/          Compile-log diagnostics
 ├── 16-check-readiness/        Pre-submission readiness gate
+├── 17-final-reference-set/    Final reference-set scope evidence
+├── 18-verify-references/      CrossRef/OpenAlex/Semantic Scholar advisory verification
+├── 19-check-hallucination-risk/ Deterministic hallucination-risk scoring
+├── 20-check-claim-citation/   Claim-citation support triage
 ├── 17-defense-pack/           Bounded defense-prep artifact generators
-├── 10-check-references/       Deterministic reference checks
-├── 11-check-language/        Baseline language checks
-├── 12-check-format/          Format checks
-├── 13-check-content/         Content checks
-├── 14-check-language-deep/   Report-only deep language review
+├── 23-check-final-cleanup/    Final cleanup residue scan
+├── 25-check-statistical-consistency/ Statistical notation consistency evidence
+├── 26-check-manual-anchor/    Manual contents-anchor checks
+├── 27-final-audit-report/     Final-audit JSON aggregation
+├── 28-reference-audit-ledger/ Reference evidence CSV ledger
+├── 29-report-index/           Local report landing page
+├── 30-final-audit-html/       Final-audit HTML detail surface
+├── 31-reference-ledger-html/  Reference-ledger HTML detail surface
+├── 32-claim-citation-html/    Claim-citation HTML detail surface
 ├── 20-fix-references/        Reference fixes
 ├── 21-fix-language-style/    Low-risk language fixes
 ├── 22-fix-format-structure/  Format fixes
@@ -66,6 +79,7 @@ thesis-skills/
 ├── examples/                 Example LaTeX projects
 ├── tests/                    Unit and workflow regression tests
 ├── run_check_once.py         One-pass checker runner
+├── run_evidence_pipeline.py  Citation-evidence pipeline runner
 └── run_fix_cycle.py          Fix-cycle runner
 ```
 
@@ -266,6 +280,37 @@ Important boundary:
 - `14-check-language-deep` is a structured screening layer for higher-order
   language issues
 - deep findings are intentionally not equivalent to final editorial judgment
+
+### 8.5 Citation-Evidence And Report Surfaces
+
+Purpose:
+
+- extend local reference checking into layered citation evidence and final-audit handoff
+- keep aggregated JSON / CSV source artifacts explicit before any HTML reading surface
+- improve local review readability without changing machine-readable contracts
+
+Main entrypoints:
+
+- `17-final-reference-set/build_final_reference_set.py`
+- `18-verify-references/verify_external_references.py`
+- `19-check-hallucination-risk/check_hallucination_risk.py`
+- `20-check-claim-citation/check_claim_citation.py`
+- `23-check-final-cleanup/check_final_cleanup.py`
+- `25-check-statistical-consistency/check_statistical_consistency.py`
+- `26-check-manual-anchor/check_manual_anchor.py`
+- `27-final-audit-report/build_final_audit_report.py`
+- `28-reference-audit-ledger/build_reference_audit_ledger.py`
+- `29-report-index/build_report_index.py`
+- `30-final-audit-html/build_final_audit_html.py`
+- `31-reference-ledger-html/build_reference_audit_ledger_html.py`
+- `32-claim-citation-html/build_claim_citation_html.py`
+- `run_evidence_pipeline.py`
+
+Important boundary:
+
+- local References blockers remain distinct from final reference set, external verification, hallucination risk, and claim-citation advisory evidence
+- HTML surfaces are local reading layers only; JSON / CSV remain the source of truth
+- no automatic bibliography insertion, no automatic citation rewrite, and no hidden CLI contract changes
 
 ### 9. Report-Driven Fixing
 

@@ -22,10 +22,15 @@ python 31-reference-ledger-html/build_reference_audit_ledger_html.py \
 ## Current Surface
 
 - summary stats
+- Final references only
+- All bibliography entries
+- Unused bibliography entries
+- Evidence rows
 - browse by scope
-- browse by citation key
+- related report links across readiness / references / claim-citation / final-audit surfaces
 - full table
 - Chinese default with English switch
+- narrow-screen responsive reading layout
 
 ## Boundaries
 
