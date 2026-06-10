@@ -46,6 +46,44 @@ class FixerTest(unittest.TestCase):
         self.assertEqual(len(applied["applied_patches"]), 5)
         self.assertEqual(content, "    \nKeep this sentence.\n")
 
+    def test_statistical_consistency_fixer_previews_and_applies_dominant_normalization(self) -> None:
+        from core.fixers import apply_statistical_consistency_fixes
+        from core.project import ThesisProject
+        from core.rules import load_rule_pack
+        from core.statistical_consistency import run_statistical_consistency_check
+        from tests.test_rules import PACK_ROOT
+
+        with workspace_tempdir("fixers-") as base:
+            pack = load_rule_pack(PACK_ROOT / "university-generic")
+            materialize_project(
+                base,
+                {
+                    "main.tex": "\\documentclass{article}\n\\begin{document}\n\\input{chapters/ch1}\n\\end{document}\n",
+                    "chapters/ch1.tex": "p值 and p值 and p值 and P值 here.\n",
+                },
+            )
+            project = ThesisProject.discover(
+                base,
+                pack.rules["project"]["main_tex_candidates"],
+                pack.rules["project"]["chapter_globs"],
+                pack.rules["project"]["bibliography_files"],
+            )
+            report = base / "reports" / "statistical-consistency-report.json"
+            run_statistical_consistency_check(project, pack, report)
+            tex = base / "chapters" / "ch1.tex"
+            original = tex.read_text(encoding="utf-8")
+
+            preview = apply_statistical_consistency_fixes(base, report, apply=False)
+            self.assertEqual(preview["preview_count"], 1)
+            self.assertEqual(tex.read_text(encoding="utf-8"), original)
+
+            applied = apply_statistical_consistency_fixes(base, report, apply=True)
+            content = tex.read_text(encoding="utf-8")
+
+        self.assertEqual(applied["changed_files"], 1)
+        self.assertEqual(len(applied["applied_patches"]), 1)
+        self.assertEqual(content, "p值 and p值 and p值 and p值 here.\n")
+
     def test_language_fixer_applies_safe_phase1_fixes(self) -> None:
         with workspace_tempdir("fixers-") as base:
             tex = base / "chapter.tex"

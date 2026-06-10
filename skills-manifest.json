@@ -28,6 +28,7 @@
     {"id": "23-check-final-cleanup", "entry": "23-check-final-cleanup/THESIS_FINAL_CLEANUP.md", "type": "checker", "runner": "23-check-final-cleanup/check_final_cleanup.py"},
     {"id": "23-fix-final-cleanup", "entry": "23-fix-final-cleanup/THESIS_FIX_FINAL_CLEANUP.md", "type": "fixer", "runner": "23-fix-final-cleanup/fix_final_cleanup.py"},
     {"id": "25-check-statistical-consistency", "entry": "25-check-statistical-consistency/THESIS_STATISTICAL_CONSISTENCY.md", "type": "checker", "runner": "25-check-statistical-consistency/check_statistical_consistency.py"},
+    {"id": "25-fix-statistical-consistency", "entry": "25-fix-statistical-consistency/THESIS_FIX_STATISTICAL_CONSISTENCY.md", "type": "fixer", "runner": "25-fix-statistical-consistency/fix_statistical_consistency.py"},
     {"id": "26-check-manual-anchor", "entry": "26-check-manual-anchor/THESIS_MANUAL_ANCHOR.md", "type": "checker", "runner": "26-check-manual-anchor/check_manual_anchor.py"},
     {"id": "27-final-audit-report", "entry": "27-final-audit-report/THESIS_FINAL_AUDIT_REPORT.md", "type": "checker", "runner": "27-final-audit-report/build_final_audit_report.py"},
     {"id": "28-reference-audit-ledger", "entry": "28-reference-audit-ledger/THESIS_REFERENCE_AUDIT_LEDGER.md", "type": "checker", "runner": "28-reference-audit-ledger/build_reference_audit_ledger.py"},
