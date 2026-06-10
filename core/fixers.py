@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from core.patches import (
+    TextPatch,
     apply_patch_to_text,
     build_patch_from_finding,
     build_patch_from_review_item,
@@ -533,6 +534,115 @@ def apply_statistical_consistency_fixes(
     applied_patches: list[dict[str, object]] = []
     if apply and conflict_free_patches:
         by_file: dict[str, list[Any]] = {}
+        for patch in conflict_free_patches:
+            by_file.setdefault(patch.file, []).append(patch)
+        for file_name, patches in by_file.items():
+            path = project_root / file_name
+            text = path.read_text(encoding="utf-8")
+            ordered = sorted(
+                patches,
+                key=lambda item: (item.start["line"], item.start["column"], item.end["line"], item.end["column"]),
+                reverse=True,
+            )
+            new_text = text
+            for patch in ordered:
+                if not validate_patch_text(new_text, patch):
+                    mismatches.append({"reason": "old_text_mismatch_after_rewrite", "patch": patch.as_dict()})
+                    continue
+                new_text = apply_patch_to_text(new_text, patch)
+                applied_patches.append(patch.as_dict())
+            if new_text != text:
+                path.write_text(new_text, encoding="utf-8")
+                changed_files.add(file_name)
+
+    return {
+        "applied": apply,
+        "preview_only": not apply,
+        "preview_count": len(preview),
+        "patches": preview,
+        "applied_patches": applied_patches,
+        "changed_files": len(changed_files),
+        "changed": sorted(changed_files),
+        "skipped_generation": skipped_generation,
+        "conflicts": conflicts,
+        "mismatches": mismatches,
+    }
+
+
+def apply_manual_anchor_fixes(
+    project_root: str | Path, report_path: str | Path, apply: bool
+) -> dict[str, object]:
+    project_root = Path(project_root)
+    report = _load_report(report_path)
+    findings: list[Any] = report.get("findings", [])
+    if not isinstance(findings, list):
+        findings = []
+
+    generated_patches: list[TextPatch] = []
+    skipped_generation: list[dict[str, object]] = []
+    for finding in findings:
+        if not isinstance(finding, dict):
+            continue
+        code = finding.get("code")
+        if not isinstance(code, str) or code != "ANCHOR_MISSING_PHANTOMSECTION":
+            continue
+        if bool(finding.get("review_required", True)):
+            skipped_generation.append(
+                {"reason": "review_required", "code": code, "file": finding.get("file", ""), "line": finding.get("line", 0)}
+            )
+            continue
+
+        file_name = finding.get("file")
+        line_no = finding.get("line")
+        suggestions = finding.get("suggestions", [])
+        if not (isinstance(file_name, str) and file_name and isinstance(line_no, int)):
+            skipped_generation.append({"reason": "unsupported_finding_shape", "code": code})
+            continue
+        if not isinstance(suggestions, list) or not suggestions:
+            skipped_generation.append({"reason": "missing_suggestions", "code": code})
+            continue
+
+        path = project_root / file_name
+        if not path.exists():
+            skipped_generation.append({"reason": "missing_file", "code": code})
+            continue
+
+        confidence = finding.get("confidence", 0.0)
+        try:
+            confidence = float(confidence)
+        except (TypeError, ValueError):
+            confidence = 0.0
+
+        patch = TextPatch(
+            file=file_name,
+            start={"line": line_no, "column": 1},
+            end={"line": line_no, "column": 0},
+            old_text="",
+            new_text=str(suggestions[0]) + "\n",
+            issue_code=code,
+            confidence=confidence,
+            review_required=False,
+            category=str(finding.get("category", "")),
+        )
+        generated_patches.append(patch)
+
+    valid_patches: list[TextPatch] = []
+    mismatches: list[dict[str, object]] = []
+    for patch in generated_patches:
+        path = project_root / patch.file
+        text = path.read_text(encoding="utf-8")
+        if not validate_patch_text(text, patch):
+            mismatches.append({"reason": "old_text_mismatch", "patch": patch.as_dict()})
+            continue
+        valid_patches.append(patch)
+
+    conflict_free_patches, conflicts = detect_patch_conflicts(project_root, valid_patches)
+    preview = [patch.as_dict() for patch in conflict_free_patches]
+
+    changed_files: set[str] = set()
+    applied_patches: list[dict[str, object]] = []
+    if apply and conflict_free_patches:
+        by_file: dict[str, list[TextPatch]] = {}
         for patch in conflict_free_patches:
             by_file.setdefault(patch.file, []).append(patch)
         for file_name, patches in by_file.items():
