@@ -104,6 +104,7 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Fix | `23-fix-final-cleanup/` | `fix_final_cleanup.py` | Preview and apply safe final cleanup marker removals |
 | Fix | `25-fix-statistical-consistency/` | `fix_statistical_consistency.py` | Preview and apply safe statistical notation normalization |
 | Fix | `26-fix-manual-anchor/` | `fix_manual_anchor.py` | Preview and apply safe manual anchor insertion |
+| Fix | `28-fix-reference-audit-ledger/` | `fix_reference_audit_ledger.py` | Preview and apply safe removal of truly unused bibliography entries |
 | Fix | `24-fix-language-deep/` | `fix_language_deep.py` | Preview deeper language patch candidates |
 | Rules | `90-rules/` | `create_pack.py` | Create institution- or journal-specific rule packs |
 | Rules | `90-rules/` | `lint_pack.py` | Validate rule-pack structure and write scorecard summaries |

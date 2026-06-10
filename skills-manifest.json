@@ -33,6 +33,7 @@
     {"id": "26-fix-manual-anchor", "entry": "26-fix-manual-anchor/THESIS_FIX_MANUAL_ANCHOR.md", "type": "fixer", "runner": "26-fix-manual-anchor/fix_manual_anchor.py"},
     {"id": "27-final-audit-report", "entry": "27-final-audit-report/THESIS_FINAL_AUDIT_REPORT.md", "type": "checker", "runner": "27-final-audit-report/build_final_audit_report.py"},
     {"id": "28-reference-audit-ledger", "entry": "28-reference-audit-ledger/THESIS_REFERENCE_AUDIT_LEDGER.md", "type": "checker", "runner": "28-reference-audit-ledger/build_reference_audit_ledger.py"},
+    {"id": "28-fix-reference-audit-ledger", "entry": "28-fix-reference-audit-ledger/THESIS_FIX_REFERENCE_AUDIT_LEDGER.md", "type": "fixer", "runner": "28-fix-reference-audit-ledger/fix_reference_audit_ledger.py"},
     {"id": "29-report-index", "entry": "29-report-index/THESIS_REPORT_INDEX.md", "type": "report", "runner": "29-report-index/build_report_index.py"},
     {"id": "30-final-audit-html", "entry": "30-final-audit-html/THESIS_FINAL_AUDIT_HTML.md", "type": "report", "runner": "30-final-audit-html/build_final_audit_html.py"},
     {"id": "31-reference-ledger-html", "entry": "31-reference-ledger-html/THESIS_REFERENCE_AUDIT_LEDGER_HTML.md", "type": "report", "runner": "31-reference-ledger-html/build_reference_audit_ledger_html.py"},

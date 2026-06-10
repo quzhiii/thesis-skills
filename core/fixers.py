@@ -676,3 +676,85 @@ def apply_manual_anchor_fixes(
         "conflicts": conflicts,
         "mismatches": mismatches,
     }
+
+
+def apply_reference_audit_ledger_fixes(
+    project_root: str | Path, csv_path: str | Path, apply: bool
+) -> dict[str, object]:
+    import csv as csv_mod
+
+    project_root = Path(project_root)
+    csv_path = Path(csv_path)
+
+    unused_keys: set[str] = set()
+    skipped_keys: list[dict[str, str]] = []
+    with csv_path.open("r", encoding="utf-8", newline="") as handle:
+        reader = csv_mod.DictReader(handle)
+        for row in reader:
+            key = row.get("key", "")
+            if not key:
+                continue
+            is_unused = row.get("is_unused_bib_entry", "false") == "true"
+            is_cited = row.get("is_cited_in_tex", "false") == "true"
+            is_final = row.get("is_final_reference", "false") == "true"
+            if is_unused and not is_cited and not is_final:
+                unused_keys.add(key)
+            else:
+                skipped_keys.append({"key": key, "reason": "not_truly_unused"})
+
+    entry_pattern = re.compile(
+        r"@\w+\s*\{[^@]+?\}\s*\n",
+        re.MULTILINE,
+    )
+
+    bib_files: list[Path] = []
+    for bib_file in project_root.rglob("*.bib"):
+        if ".git" in bib_file.parts:
+            continue
+        bib_files.append(bib_file)
+
+    changed_files: set[str] = set()
+    preview_patches: list[dict[str, object]] = []
+    applied_patches: list[dict[str, object]] = []
+
+    for bib_file in bib_files:
+        text = bib_file.read_text(encoding="utf-8")
+        new_text = text
+        for match in entry_pattern.finditer(text):
+            entry_text = match.group(0)
+            key_match = re.search(r"@\w+\s*\{\s*([^,]+)", entry_text)
+            if not key_match:
+                continue
+            entry_key = key_match.group(1).strip()
+            if entry_key not in unused_keys:
+                continue
+            rel = bib_file.relative_to(project_root).as_posix()
+            patch_info = {
+                "file": rel,
+                "entry_key": entry_key,
+                "old_text": entry_text.strip(),
+                "new_text": "",
+                "issue_code": "UNUSED_BIB_ENTRY",
+            }
+            preview_patches.append(patch_info)
+            new_text = new_text.replace(entry_text, "")
+
+        if new_text != text:
+            if apply:
+                bib_file.write_text(new_text, encoding="utf-8")
+                applied_patches.extend(
+                    p for p in preview_patches if p["file"] == bib_file.relative_to(project_root).as_posix()
+                )
+            changed_files.add(bib_file.relative_to(project_root).as_posix())
+
+    return {
+        "applied": apply,
+        "preview_only": not apply,
+        "preview_count": len(preview_patches),
+        "patches": preview_patches,
+        "applied_patches": applied_patches if apply else [],
+        "changed_files": len(changed_files),
+        "changed": sorted(changed_files),
+        "unused_keys": sorted(unused_keys),
+        "skipped_keys": skipped_keys[:10],
+    }

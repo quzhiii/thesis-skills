@@ -46,6 +46,50 @@ class FixerTest(unittest.TestCase):
         self.assertEqual(len(applied["applied_patches"]), 5)
         self.assertEqual(content, "    \nKeep this sentence.\n")
 
+    def test_reference_audit_ledger_fixer_only_removes_truly_unused_entries(self) -> None:
+        from core.fixers import apply_reference_audit_ledger_fixes
+        from core.project import ThesisProject
+        from core.reference_audit_ledger import build_reference_audit_ledger_rows, write_reference_audit_ledger_csv
+        from core.rules import load_rule_pack
+        from tests.test_rules import PACK_ROOT
+
+        with workspace_tempdir("fixers-") as base:
+            pack = load_rule_pack(PACK_ROOT / "university-generic")
+            materialize_project(
+                base,
+                {
+                    "main.tex": "\\documentclass{article}\n\\begin{document}\n\\cite{used2024}\n\\end{document}\n",
+                    "ref/refs.bib": "@article{used2024, title={Used}, author={A}, year={2024}, journal={J}}\n@book{unused1973, title={Unused}, author={B}, year={1973}}\n",
+                    "reports/final-reference-set-report.json": json.dumps(
+                        {"final_keys": ["used2024"], "issues": []},
+                        ensure_ascii=False,
+                    ),
+                },
+            )
+            project = ThesisProject.discover(
+                base,
+                pack.rules["project"]["main_tex_candidates"],
+                pack.rules["project"]["chapter_globs"],
+                pack.rules["project"]["bibliography_files"],
+            )
+            rows = build_reference_audit_ledger_rows(project)
+            csv_path = base / "reports" / "reference-audit-ledger.csv"
+            write_reference_audit_ledger_csv(rows, csv_path)
+            bib = base / "ref" / "refs.bib"
+            original_bib = bib.read_text(encoding="utf-8")
+
+            preview = apply_reference_audit_ledger_fixes(base, csv_path, apply=False)
+            self.assertEqual(preview["preview_count"], 1)
+            self.assertEqual(bib.read_text(encoding="utf-8"), original_bib)
+
+            applied = apply_reference_audit_ledger_fixes(base, csv_path, apply=True)
+            content = bib.read_text(encoding="utf-8")
+
+        self.assertEqual(applied["changed_files"], 1)
+        self.assertEqual(len(applied["applied_patches"]), 1)
+        self.assertIn("used2024", content)
+        self.assertNotIn("unused1973", content)
+
     def test_manual_anchor_fixer_previews_and_applies_phantomsection_insertion(self) -> None:
         from core.fixers import apply_manual_anchor_fixes
         from core.manual_anchor import run_manual_anchor_check
