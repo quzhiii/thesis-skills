@@ -32,7 +32,7 @@ def main() -> int:
     parser.add_argument("--apply", choices=["true", "false"], default="false")
     parser.add_argument(
         "--apply-mode",
-        choices=["safe", "suggest", "mixed"],
+        choices=["safe", "suggest", "mixed", "final-audit", "all"],
         default="safe",
     )
     parser.add_argument(
@@ -78,12 +78,36 @@ def main() -> int:
             + (["--issue-codes", args.issue_codes] if args.issue_codes else []),
         )
     ]
+    final_audit_steps = [
+        (
+            "final-cleanup",
+            repo_root / "23-fix-final-cleanup" / "fix_final_cleanup.py",
+            reports_dir / "final-cleanup-report.json",
+            [],
+        ),
+        (
+            "statistical-consistency",
+            repo_root / "25-fix-statistical-consistency" / "fix_statistical_consistency.py",
+            reports_dir / "statistical-consistency-report.json",
+            [],
+        ),
+        (
+            "manual-anchor",
+            repo_root / "26-fix-manual-anchor" / "fix_manual_anchor.py",
+            reports_dir / "manual-anchor-report.json",
+            [],
+        ),
+    ]
     if args.apply_mode == "safe":
         steps = safe_steps
     elif args.apply_mode == "suggest":
         steps = deep_step
-    else:
+    elif args.apply_mode == "mixed":
         steps = safe_steps + deep_step
+    elif args.apply_mode == "final-audit":
+        steps = final_audit_steps
+    else:
+        steps = safe_steps + deep_step + final_audit_steps
     steps_summary: dict[str, Any] = {}
     summary: dict[str, Any] = {
         "ruleset": args.ruleset,
