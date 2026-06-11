@@ -166,6 +166,27 @@ class FinalAuditHtmlTest(unittest.TestCase):
         self.assertIn("focus-visible", html)
         self.assertIn("skip-to-content", html.lower())
 
+    def test_html_has_print_styles(self) -> None:
+        html = render_final_audit_html(
+            {
+                "overall_verdict": "PASS",
+                "summary": {
+                    "headline": "Final audit verdict: PASS",
+                    "dimension_count": 0,
+                    "blocker_count": 0,
+                    "warning_count": 0,
+                    "missing_required_evidence_count": 0,
+                },
+                "dimensions": {},
+                "blockers": [],
+                "warnings": [],
+                "next_actions": [],
+                "sources": [],
+            }
+        )
+
+        self.assertIn("@media print", html)
+
     def test_write_and_cli_generate_html(self) -> None:
         with workspace_tempdir("final-audit-html-") as base:
             project = materialize_project(

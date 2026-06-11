@@ -480,6 +480,7 @@ def render_final_audit_html(report: dict[str, object]) -> str:
     :focus-visible {{ outline:2px solid var(--accent); outline-offset:2px; }}
     @media (max-width:920px) {{ header, .matrix, .issue-grid {{ grid-template-columns:1fr; }} .kpis {{ grid-template-columns:repeat(2,1fr); }} }}
     @media (max-width:560px) {{ .page {{ padding:18px 14px 40px; }} .kpis {{ grid-template-columns:1fr; }} h1 {{ font-size:64px; }} .verdict-panel .value {{ font-size:56px; }} }}
+    @media print {{ .lang-switch, .skip-to-content, .nav-section, .raw-note {{ display:none; }} .page {{ padding:0; max-width:none; }} .verdict-panel {{ background:#fff; color:var(--ink); border:2px solid var(--ink); }} .dimension, .issue {{ break-inside:avoid; }} table {{ break-inside:auto; }} tr {{ break-inside:avoid; }} }}
   </style>
 </head>
 <body>
