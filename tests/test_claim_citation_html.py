@@ -1037,6 +1037,47 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         self.assertIn("0.35", html)
         self.assertIn("Verify whether the cited source supports the strength of the claim.", html)
 
+    def test_entry_cards_show_metadata_overlap_evidence(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {"claim_citation_pairs": 1, "weak_pairs": 1},
+                "entries": [
+                    {
+                        "citation_key": "ref1",
+                        "triage_label": "WEAK",
+                        "triage_score": 0.35,
+                        "support_review_label": "WEAK_REVIEW",
+                        "support_review_reason": "Weak support.",
+                        "recommended_action": "Review.",
+                        "claim_type": "empirical_result",
+                        "file": "main.tex",
+                        "line": 10,
+                        "hallucination_risk_label": "REVIEW",
+                        "risk_signals": ["possible_topic_mismatch"],
+                        "support_signals": [],
+                        "next_actions": ["Review."],
+                        "claim_context": "The method improves accuracy.",
+                        "evidence": {
+                            "has_complete_metadata": True,
+                            "has_claim_context": True,
+                            "title_token_overlap": 0.15,
+                            "abstract_token_overlap": 0.0,
+                            "keyword_token_overlap": 0.0,
+                            "overlap_tokens": ["method", "accuracy"],
+                        },
+                    }
+                ],
+                "citation_needed_candidates": [],
+                "uncited_references": [],
+            }
+        )
+
+        self.assertIn("title_token_overlap", html)
+        self.assertIn("0.15", html)
+        self.assertIn("method", html)
+        self.assertIn("accuracy", html)
+
     def test_write_and_cli_generate_html(self) -> None:
         with workspace_tempdir("claim-citation-html-") as base:
             project = materialize_project(

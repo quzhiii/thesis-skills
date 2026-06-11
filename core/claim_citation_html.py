@@ -689,6 +689,25 @@ def _entry_card(entry: dict[str, object], lang: str) -> str:
     if recommended_action:
         rec_label = "建议动作" if lang == "zh" else "Recommended action"
         recommended_html = f'<div class="detail"><strong>{_e(rec_label, lang)}</strong><span>{_display_free_text(recommended_action, lang)}</span></div>'
+    evidence = entry.get("evidence") if isinstance(entry.get("evidence"), dict) else None
+    evidence_html = ""
+    if evidence:
+        title_overlap = evidence.get("title_token_overlap")
+        abstract_overlap = evidence.get("abstract_token_overlap")
+        keyword_overlap = evidence.get("keyword_token_overlap")
+        overlap_tokens = evidence.get("overlap_tokens")
+        evidence_parts: list[str] = []
+        if title_overlap is not None:
+            evidence_parts.append(f"title_token_overlap: {title_overlap}")
+        if abstract_overlap is not None:
+            evidence_parts.append(f"abstract_token_overlap: {abstract_overlap}")
+        if keyword_overlap is not None:
+            evidence_parts.append(f"keyword_token_overlap: {keyword_overlap}")
+        if isinstance(overlap_tokens, list) and overlap_tokens:
+            evidence_parts.append(f"overlap_tokens: {', '.join(str(t) for t in overlap_tokens)}")
+        if evidence_parts:
+            ev_label = "证据详情" if lang == "zh" else "Evidence details"
+            evidence_html = f'<div class="detail-block"><strong>{_e(ev_label, lang)}</strong><ul>{"".join(f"<li>{_e(item, lang)}</li>" for item in evidence_parts)}</ul></div>'
     return f"""
       <article id="{html.escape(_entry_anchor_id(entry, lang))}" class="entry-card status-{_e(entry.get('triage_label', ''), lang).lower()}">
         <div class="entry-top">
@@ -704,6 +723,7 @@ def _entry_card(entry: dict[str, object], lang: str) -> str:
         <div class="detail"><strong>{_e(I18N[lang]['cluster'], lang)}</strong><span>{cluster_html}</span></div>
         <div class="detail"><strong>{_e(I18N[lang]['cluster_reason'], lang)}</strong><span>{_display_free_text(entry.get('cluster_review_reason', ''), lang)}</span></div>
         {recommended_html}
+        {evidence_html}
         <div class="detail-block"><strong>{_e(I18N[lang]['risk_signals'], lang)}</strong>{_list_html(entry.get('risk_signals'), lang)}</div>
         <div class="detail-block"><strong>{_e(I18N[lang]['support_signals'], lang)}</strong>{_list_html(entry.get('support_signals'), lang)}</div>
         <div class="detail-block"><strong>{_e(I18N[lang]['next_actions'], lang)}</strong>{_free_text_list_html(entry.get('next_actions'), lang)}</div>
