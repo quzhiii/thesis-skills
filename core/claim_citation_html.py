@@ -71,6 +71,8 @@ I18N = {
         "generated_from": "本页面根据",
         "regenerate_note": "生成。请先更新 claim-citation JSON 报告，再重新生成本 HTML 页面。",
         "no_value": "—",
+        "per_file_section": "按文件查看",
+        "per_file_note": "按源文件路径分组浏览条目，方便按章节复核。",
     },
     "en": {
         "lang": "en",
@@ -132,6 +134,8 @@ I18N = {
         "generated_from": "This page is generated from",
         "regenerate_note": ". Re-run the claim-citation JSON report first, then regenerate this HTML page.",
         "no_value": "—",
+        "per_file_section": "Browse by file",
+        "per_file_note": "Group entries by source file path for chapter-based review.",
     },
 }
 
@@ -764,6 +768,37 @@ def _triage_sections(entries: list[dict[str, object]], lang: str) -> str:
     return "".join(blocks)
 
 
+def _per_file_sections(entries: list[dict[str, object]], lang: str) -> str:
+    if not entries:
+        return ""
+    by_file: dict[str, list[dict[str, object]]] = defaultdict(list)
+    for entry in entries:
+        by_file[str(entry.get("file", ""))].append(entry)
+    blocks: list[str] = []
+    for file_path in sorted(by_file):
+        file_entries = sorted(
+            by_file[file_path],
+            key=lambda item: (int(item.get("line") or 0), str(item.get("citation_key", ""))),
+        )
+        cards = "".join(_entry_card(entry, lang) for entry in file_entries)
+        anchor = f"{lang}-perfile-{file_path.replace('/', '-').replace('.', '-')}"
+        blocks.append(
+            f"""
+      <section class="section per-file-group" id="{html.escape(anchor)}">
+        <div class="section-head"><h2>{_e(file_path, lang)}</h2><span class="meta">{len(file_entries)}</span></div>
+        <div class="entry-grid">{cards}</div>
+      </section>
+"""
+        )
+    return f"""
+    <section class="section" id="{html.escape(_panel_anchor_id(lang, 'per-file'))}">
+      <div class="section-head"><h2>{_e(I18N[lang]['per_file_section'], lang)}</h2></div>
+      <p class="meta-copy">{_e(I18N[lang]['per_file_note'], lang)}</p>
+      {"".join(blocks)}
+    </section>
+"""
+
+
 def _candidate_rows(candidates: list[dict[str, object]], lang: str) -> str:
     if not candidates:
         return f"<div class=\"empty\">{_e(I18N[lang]['no_candidates'], lang)}</div>"
@@ -859,6 +894,7 @@ def _lang_block(report: dict[str, object], lang: str) -> str:
         {_triage_group_pills(entries, lang)}
       </section>
       {_triage_sections(entries, lang)}
+      {_per_file_sections(entries, lang)}
       {_related_reports(lang)}
       <div class="raw-note">{_e(I18N[lang]['generated_from'], lang)} <a href="claim-citation-triage-report.json">claim-citation-triage-report.json</a>{_e(I18N[lang]['regenerate_note'], lang)}</div>
     </section>

@@ -1110,6 +1110,52 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         self.assertIn("Citation frequency", html)
         self.assertIn("3", html)
 
+    def test_html_contains_per_file_grouping_view(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {"claim_citation_pairs": 2, "weak_pairs": 1, "supported_pairs": 1},
+                "entries": [
+                    {
+                        "citation_key": "ref1",
+                        "triage_label": "WEAK",
+                        "triage_score": 0.35,
+                        "support_review_label": "WEAK_REVIEW",
+                        "support_review_reason": "Weak support.",
+                        "claim_type": "empirical_result",
+                        "file": "chapters/01-intro.tex",
+                        "line": 10,
+                        "hallucination_risk_label": "REVIEW",
+                        "risk_signals": ["possible_overclaim"],
+                        "support_signals": [],
+                        "next_actions": ["Review."],
+                        "claim_context": "Claim one.",
+                    },
+                    {
+                        "citation_key": "ref2",
+                        "triage_label": "SUPPORTED",
+                        "triage_score": 0.1,
+                        "support_review_label": "ADEQUATE_REVIEW",
+                        "support_review_reason": "Adequate.",
+                        "claim_type": "background",
+                        "file": "chapters/02-methods.tex",
+                        "line": 20,
+                        "hallucination_risk_label": "PASS",
+                        "risk_signals": [],
+                        "support_signals": ["complete_metadata"],
+                        "next_actions": [],
+                        "claim_context": "Prior work.",
+                    },
+                ],
+                "citation_needed_candidates": [],
+                "uncited_references": [],
+            }
+        )
+
+        self.assertIn("per-file", html.lower())
+        self.assertIn("chapters/01-intro.tex", html)
+        self.assertIn("chapters/02-methods.tex", html)
+
     def test_write_and_cli_generate_html(self) -> None:
         with workspace_tempdir("claim-citation-html-") as base:
             project = materialize_project(
