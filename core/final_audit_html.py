@@ -302,9 +302,11 @@ def _issue_card(issue: dict[str, object], lang: str) -> str:
     reason = _reason_text(str(issue.get("reason", "")), lang)
     source = str(issue.get("source", ""))
     evidence_status = str(issue.get("evidence_status", ""))
+    risk_level = str(issue.get("risk_level", ""))
     source_link = f'<a href="{_e(source)}">{_e(source)}</a>' if source else ""
+    risk_class = f" risk-level-{_e(risk_level.lower())}" if risk_level else ""
     return f"""
-      <article class="issue verdict-{_e(verdict.lower())}">
+      <article class="issue verdict-{_e(verdict.lower())}{risk_class}">
         <div class="issue-code">{_e(verdict)} · {_e(_status_text(evidence_status, lang))}</div>
         <h3>{_e(title)}</h3>
         <p>{_e(reason)}</p>
