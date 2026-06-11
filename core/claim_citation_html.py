@@ -702,6 +702,9 @@ def _entry_card(entry: dict[str, object], lang: str) -> str:
 """
 
 
+_TRIAGE_OPEN_BY_DEFAULT = {"ORPHANED", "UNVERIFIABLE", "WEAK"}
+
+
 def _triage_sections(entries: list[dict[str, object]], lang: str) -> str:
     by_label: dict[str, list[dict[str, object]]] = defaultdict(list)
     for entry in entries:
@@ -712,11 +715,13 @@ def _triage_sections(entries: list[dict[str, object]], lang: str) -> str:
         cards = "".join(_entry_card(entry, lang) for entry in sorted(group, key=lambda item: (str(item.get("file", "")), int(item.get("line") or 0))))
         if not cards:
             cards = f"<div class=\"empty\">{_e(I18N[lang]['no_entries'], lang)}</div>"
+        open_attr = " open" if label in _TRIAGE_OPEN_BY_DEFAULT else ""
         blocks.append(
             f"""
       <section class="section triage-group triage-{label.lower()}" id="{html.escape(_panel_anchor_id(lang, f'triage-{label.lower()}'))}">
-        <div class="section-head"><h2>{_display_value(label, lang)}</h2><span class="meta">{len(group)}</span></div>
+        <details{open_attr}><summary><div class="section-head"><h2>{_display_value(label, lang)}</h2><span class="meta">{len(group)}</span></div></summary>
         <div class="entry-grid">{cards}</div>
+        </details>
       </section>
 """
         )
