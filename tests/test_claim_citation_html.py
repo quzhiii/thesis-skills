@@ -1078,6 +1078,38 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         self.assertIn("method", html)
         self.assertIn("accuracy", html)
 
+    def test_entry_cards_show_citation_frequency(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "SUPPORTED",
+                "summary": {"claim_citation_pairs": 1, "supported_pairs": 1},
+                "entries": [
+                    {
+                        "citation_key": "ref1",
+                        "triage_label": "SUPPORTED",
+                        "triage_score": 0.1,
+                        "support_review_label": "ADEQUATE_REVIEW",
+                        "support_review_reason": "Adequate support.",
+                        "recommended_action": "Review.",
+                        "claim_type": "background",
+                        "file": "main.tex",
+                        "line": 10,
+                        "hallucination_risk_label": "PASS",
+                        "risk_signals": [],
+                        "support_signals": ["complete_metadata"],
+                        "next_actions": [],
+                        "claim_context": "Prior work explored this.",
+                        "citation_frequency": 3,
+                    }
+                ],
+                "citation_needed_candidates": [],
+                "uncited_references": [],
+            }
+        )
+
+        self.assertIn("Citation frequency", html)
+        self.assertIn("3", html)
+
     def test_write_and_cli_generate_html(self) -> None:
         with workspace_tempdir("claim-citation-html-") as base:
             project = materialize_project(

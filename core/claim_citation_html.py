@@ -689,6 +689,11 @@ def _entry_card(entry: dict[str, object], lang: str) -> str:
     if recommended_action:
         rec_label = "建议动作" if lang == "zh" else "Recommended action"
         recommended_html = f'<div class="detail"><strong>{_e(rec_label, lang)}</strong><span>{_display_free_text(recommended_action, lang)}</span></div>'
+    citation_frequency = entry.get("citation_frequency")
+    frequency_html = ""
+    if citation_frequency is not None:
+        freq_label = "引用频次" if lang == "zh" else "Citation frequency"
+        frequency_html = f'<div class="detail"><strong>{_e(freq_label, lang)}</strong><span>{citation_frequency}</span></div>'
     evidence = entry.get("evidence") if isinstance(entry.get("evidence"), dict) else None
     evidence_html = ""
     if evidence:
@@ -723,6 +728,7 @@ def _entry_card(entry: dict[str, object], lang: str) -> str:
         <div class="detail"><strong>{_e(I18N[lang]['cluster'], lang)}</strong><span>{cluster_html}</span></div>
         <div class="detail"><strong>{_e(I18N[lang]['cluster_reason'], lang)}</strong><span>{_display_free_text(entry.get('cluster_review_reason', ''), lang)}</span></div>
         {recommended_html}
+        {frequency_html}
         {evidence_html}
         <div class="detail-block"><strong>{_e(I18N[lang]['risk_signals'], lang)}</strong>{_list_html(entry.get('risk_signals'), lang)}</div>
         <div class="detail-block"><strong>{_e(I18N[lang]['support_signals'], lang)}</strong>{_list_html(entry.get('support_signals'), lang)}</div>
