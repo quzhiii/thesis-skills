@@ -475,12 +475,16 @@ def render_final_audit_html(report: dict[str, object]) -> str:
     .nav-section .meta {{ text-transform:none; letter-spacing:0; font-family:Inter, "Helvetica Neue", Helvetica, Arial, sans-serif; font-size:14px; color:var(--grey-3); }}
     .status-present {{ color:var(--pass); }} .status-missing {{ color:var(--warn); }} .status-unreadable {{ color:var(--block); }}
     .raw-note {{ margin-top:24px; padding:16px; border:1px solid var(--grey-2); background:var(--grey-1); color:var(--grey-3); }}
+    .skip-to-content {{ position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }}
+    .skip-to-content:focus {{ position:static; width:auto; height:auto; padding:8px 12px; background:var(--accent); color:var(--accent-on); z-index:1000; }}
+    :focus-visible {{ outline:2px solid var(--accent); outline-offset:2px; }}
     @media (max-width:920px) {{ header, .matrix, .issue-grid {{ grid-template-columns:1fr; }} .kpis {{ grid-template-columns:repeat(2,1fr); }} }}
     @media (max-width:560px) {{ .page {{ padding:18px 14px 40px; }} .kpis {{ grid-template-columns:1fr; }} h1 {{ font-size:64px; }} .verdict-panel .value {{ font-size:56px; }} }}
   </style>
 </head>
 <body>
-  <main class="page">
+  <a class="skip-to-content" href="#main-content">Skip to content</a>
+  <main class="page" id="main-content" tabindex="-1">
     {_lang_switch()}
     {zh_block}
     {en_block}
