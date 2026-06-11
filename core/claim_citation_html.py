@@ -672,14 +672,23 @@ def _entry_card(entry: dict[str, object], lang: str) -> str:
     cluster_keys = entry.get("cluster_keys")
     cluster_html = ", ".join(_e(item, lang) for item in cluster_keys) if isinstance(cluster_keys, list) and cluster_keys else _e("", lang)
     next_actions = entry.get("next_actions") if isinstance(entry.get("next_actions"), list) else []
+    triage_score = entry.get("triage_score")
+    recommended_action = entry.get("recommended_action", "")
     summary_parts = [
         _display_value(entry.get("triage_label", ""), lang),
         _display_value(entry.get("hallucination_risk_label", ""), lang),
     ]
+    if triage_score is not None:
+        score_label = "分值" if lang == "zh" else "Score"
+        summary_parts.append(f"{score_label}: {triage_score}")
     if next_actions:
         action_label = "建议动作" if lang == "zh" else "Suggested action"
         summary_parts.append(f"{action_label}: {_display_free_text(next_actions[0], lang)}")
     review_summary = " · ".join(part for part in summary_parts if part and part != _e("", lang))
+    recommended_html = ""
+    if recommended_action:
+        rec_label = "建议动作" if lang == "zh" else "Recommended action"
+        recommended_html = f'<div class="detail"><strong>{_e(rec_label, lang)}</strong><span>{_display_free_text(recommended_action, lang)}</span></div>'
     return f"""
       <article id="{html.escape(_entry_anchor_id(entry, lang))}" class="entry-card status-{_e(entry.get('triage_label', ''), lang).lower()}">
         <div class="entry-top">
@@ -694,6 +703,7 @@ def _entry_card(entry: dict[str, object], lang: str) -> str:
         <div class="detail"><strong>{_e(I18N[lang]['risk'], lang)}</strong><span>{_display_value(entry.get('hallucination_risk_label', ''), lang)}</span></div>
         <div class="detail"><strong>{_e(I18N[lang]['cluster'], lang)}</strong><span>{cluster_html}</span></div>
         <div class="detail"><strong>{_e(I18N[lang]['cluster_reason'], lang)}</strong><span>{_display_free_text(entry.get('cluster_review_reason', ''), lang)}</span></div>
+        {recommended_html}
         <div class="detail-block"><strong>{_e(I18N[lang]['risk_signals'], lang)}</strong>{_list_html(entry.get('risk_signals'), lang)}</div>
         <div class="detail-block"><strong>{_e(I18N[lang]['support_signals'], lang)}</strong>{_list_html(entry.get('support_signals'), lang)}</div>
         <div class="detail-block"><strong>{_e(I18N[lang]['next_actions'], lang)}</strong>{_free_text_list_html(entry.get('next_actions'), lang)}</div>

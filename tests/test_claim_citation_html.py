@@ -1006,6 +1006,37 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         details_open_count = html.count("<details open")
         self.assertGreaterEqual(details_open_count, 1)
 
+    def test_entry_cards_show_recommended_action_and_triage_score(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {"claim_citation_pairs": 1, "weak_pairs": 1},
+                "entries": [
+                    {
+                        "citation_key": "ref1",
+                        "triage_label": "WEAK",
+                        "triage_score": 0.35,
+                        "support_review_label": "WEAK_REVIEW",
+                        "support_review_reason": "Weak support.",
+                        "recommended_action": "Verify whether the cited source supports the strength of the claim.",
+                        "claim_type": "empirical_result",
+                        "file": "main.tex",
+                        "line": 10,
+                        "hallucination_risk_label": "REVIEW",
+                        "risk_signals": ["possible_overclaim"],
+                        "support_signals": [],
+                        "next_actions": ["Review the claim."],
+                        "claim_context": "Significantly outperforms.",
+                    }
+                ],
+                "citation_needed_candidates": [],
+                "uncited_references": [],
+            }
+        )
+
+        self.assertIn("0.35", html)
+        self.assertIn("Verify whether the cited source supports the strength of the claim.", html)
+
     def test_write_and_cli_generate_html(self) -> None:
         with workspace_tempdir("claim-citation-html-") as base:
             project = materialize_project(
