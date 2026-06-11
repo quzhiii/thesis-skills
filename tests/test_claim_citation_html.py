@@ -898,6 +898,67 @@ class ClaimCitationHtmlTest(unittest.TestCase):
         self.assertIn('href="#zh-entry-weak-chapters-main-tex-shared-ref-12"', html)
         self.assertIn('href="#zh-entry-weak-appendix-main-tex-shared-ref-12"', html)
 
+    def test_triage_sections_have_color_coded_css_classes(self) -> None:
+        html = render_claim_citation_html(
+            {
+                "status": "WEAK",
+                "summary": {"claim_citation_pairs": 3, "weak_pairs": 1, "supported_pairs": 1, "well_supported_pairs": 1},
+                "entries": [
+                    {
+                        "citation_key": "orphan_ref",
+                        "triage_label": "ORPHANED",
+                        "support_review_label": "ORPHANED",
+                        "support_review_reason": "Missing from bibliography.",
+                        "claim_type": "empirical_result",
+                        "file": "main.tex",
+                        "line": 5,
+                        "hallucination_risk_label": "HIGH_RISK",
+                        "risk_signals": ["high_risk_reference"],
+                        "support_signals": [],
+                        "next_actions": ["Add the reference to bibliography."],
+                        "claim_context": "The method improves accuracy.",
+                    },
+                    {
+                        "citation_key": "weak_ref",
+                        "triage_label": "WEAK",
+                        "support_review_label": "WEAK_REVIEW",
+                        "support_review_reason": "Weak support.",
+                        "claim_type": "empirical_result",
+                        "file": "main.tex",
+                        "line": 10,
+                        "hallucination_risk_label": "REVIEW",
+                        "risk_signals": ["possible_overclaim"],
+                        "support_signals": ["complete_metadata"],
+                        "next_actions": ["Review the claim strength."],
+                        "claim_context": "Significantly outperforms.",
+                    },
+                    {
+                        "citation_key": "good_ref",
+                        "triage_label": "WELL_SUPPORTED",
+                        "support_review_label": "STRONG_REVIEW",
+                        "support_review_reason": "Strong support.",
+                        "claim_type": "background",
+                        "file": "main.tex",
+                        "line": 15,
+                        "hallucination_risk_label": "PASS",
+                        "risk_signals": [],
+                        "support_signals": ["complete_metadata", "low_hallucination_risk"],
+                        "next_actions": [],
+                        "claim_context": "Prior work explored this.",
+                    },
+                ],
+                "citation_needed_candidates": [],
+                "uncited_references": [],
+            }
+        )
+
+        self.assertIn('id="zh-triage-orphaned"', html)
+        self.assertIn('id="zh-triage-weak"', html)
+        self.assertIn('id="zh-triage-well_supported"', html)
+        self.assertIn('class="section triage-group triage-orphaned"', html)
+        self.assertIn('class="section triage-group triage-weak"', html)
+        self.assertIn('class="section triage-group triage-well_supported"', html)
+
     def test_write_and_cli_generate_html(self) -> None:
         with workspace_tempdir("claim-citation-html-") as base:
             project = materialize_project(

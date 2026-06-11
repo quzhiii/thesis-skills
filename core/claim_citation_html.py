@@ -714,7 +714,7 @@ def _triage_sections(entries: list[dict[str, object]], lang: str) -> str:
             cards = f"<div class=\"empty\">{_e(I18N[lang]['no_entries'], lang)}</div>"
         blocks.append(
             f"""
-      <section class="section" id="{html.escape(_panel_anchor_id(lang, f'triage-{label.lower()}'))}">
+      <section class="section triage-group triage-{label.lower()}" id="{html.escape(_panel_anchor_id(lang, f'triage-{label.lower()}'))}">
         <div class="section-head"><h2>{_display_value(label, lang)}</h2><span class="meta">{len(group)}</span></div>
         <div class="entry-grid">{cards}</div>
       </section>
