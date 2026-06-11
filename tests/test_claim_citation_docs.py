@@ -89,7 +89,7 @@ class ClaimCitationDocsTest(unittest.TestCase):
         self.assertIsInstance(modules, list)
         ids = [m["id"] for m in modules if isinstance(m, dict)]
         self.assertIn("20-check-claim-citation", ids)
-        self.assertEqual(manifest.get("version"), "3.4.1")
+        self.assertEqual(manifest.get("version"), "3.5.0")
 
 
 if __name__ == "__main__":
