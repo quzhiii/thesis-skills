@@ -61,6 +61,7 @@ For repetitive finishing work, the expected time savings are concrete:
 - **Report navigation polish** (from v3.4.1): local HTML report surfaces now cross-link `index`, `final-audit`, `reference-ledger`, `claim-citation`, readiness, and raw JSON / CSV artifacts more consistently.
 - **Support-risk heuristic calibration** (from v3.4.1): `possible_overclaim` no longer duplicates `possible_topic_mismatch` when a `PASS` reference is already flagged by the more specific topic-mismatch signal.
 - **V3.4 final-audit surfaces** remain in place: deterministic final cleanup, statistical consistency, manual-anchor checks, final-audit JSON aggregation, reference-audit ledger, and static HTML report surfaces.
+- **Static local report UX**: `reports/index.html`, `reports/final-audit-report.html`, `reports/reference-audit-ledger.html`, and `reports/claim-citation-triage.html` make JSON / CSV artifacts easier to review without replacing them as source of truth.
 - **V3.3 reference verification hardening** remains in place: final reference set parsing, DOI candidates, URL verification, scoped/resumable external verification, and the unified evidence pipeline runner `run_evidence_pipeline.py`.
 
 ---
