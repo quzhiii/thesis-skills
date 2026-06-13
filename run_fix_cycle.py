@@ -97,6 +97,12 @@ def main() -> int:
             reports_dir / "manual-anchor-report.json",
             [],
         ),
+        (
+            "reference-ledger",
+            repo_root / "28-fix-reference-audit-ledger" / "fix_reference_audit_ledger.py",
+            reports_dir / "reference-audit-ledger.csv",
+            ["--csv"],
+        ),
     ]
     if args.apply_mode == "safe":
         steps = safe_steps
@@ -116,6 +122,8 @@ def main() -> int:
         "steps": steps_summary,
     }
     for name, script, report, extra_args in steps:
+        use_csv = "--csv" in extra_args
+        report_arg = ["--csv", str(report)] if use_csv else ["--report", str(report)]
         if report.exists():
             steps_summary[name] = _run(
                 [
@@ -123,12 +131,10 @@ def main() -> int:
                     str(script),
                     "--project-root",
                     str(project_root),
-                    "--report",
-                    str(report),
-                    "--apply",
-                    args.apply,
                 ]
-                + extra_args,
+                + report_arg
+                + ["--apply", args.apply]
+                + [a for a in extra_args if a != "--csv"],
                 repo_root,
             )
         else:

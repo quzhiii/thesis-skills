@@ -703,7 +703,7 @@ def apply_reference_audit_ledger_fixes(
                 skipped_keys.append({"key": key, "reason": "not_truly_unused"})
 
     entry_pattern = re.compile(
-        r"@\w+\s*\{[^@]+?\}\s*\n",
+        r"@(\w+)\s*\{",
         re.MULTILINE,
     )
 
@@ -721,7 +721,19 @@ def apply_reference_audit_ledger_fixes(
         text = bib_file.read_text(encoding="utf-8")
         new_text = text
         for match in entry_pattern.finditer(text):
-            entry_text = match.group(0)
+            entry_type = match.group(1)
+            brace_start = match.end()
+            depth = 1
+            pos = brace_start
+            while pos < len(text) and depth > 0:
+                if text[pos] == "{":
+                    depth += 1
+                elif text[pos] == "}":
+                    depth -= 1
+                pos += 1
+            if depth != 0:
+                continue
+            entry_text = text[match.start():pos]
             key_match = re.search(r"@\w+\s*\{\s*([^,]+)", entry_text)
             if not key_match:
                 continue
