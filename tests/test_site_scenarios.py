@@ -122,38 +122,38 @@ class SiteScenarioPagesTest(unittest.TestCase):
 
     def test_site_copy_source_uses_current_version_framing(self) -> None:
         text = (SITE / "copy-source.md").read_text(encoding="utf-8")
-        self.assertIn("### v3.4.1 已包含", text)
+        self.assertIn("### v3.5.0 已包含", text)
         self.assertIn("final reference set、外部验证、DOI / URL advisory 和 hallucination risk", text)
         self.assertIn("claim-citation support triage 和本地 HTML 报告界面", text)
         self.assertIn("final-audit JSON / HTML、reference audit ledger 和报告索引", text)
-        self.assertIn("Thesis Skills v3.4.1 — MIT License — quzhiii/thesis-skills", text)
+        self.assertIn("Thesis Skills v3.5.0 — MIT License — quzhiii/thesis-skills", text)
         self.assertNotIn("v1.2.0 已包含", text)
         self.assertNotIn("Thesis Skills v1.2.0", text)
 
     def test_current_site_pages_show_v341_not_stale_version_labels(self) -> None:
         expected_by_page = {
             "index.html": [
-                "Thesis Skills v3.4.1",
-                '<span class="issue-note">v3.4.1</span>',
-                "Thesis Skills v3.4.1 · CLI-first · MIT · Python 3.10+",
-                "Thesis Skills / v3.4.1",
+                "Thesis Skills v3.5.0",
+                '<span class="issue-note">v3.5.0</span>',
+                "Thesis Skills v3.5.0 · CLI-first · MIT · Python 3.10+",
+                "Thesis Skills / v3.5.0",
             ],
             "quickstart.html": [
-                '<span class="issue-note">v3.4.1</span>',
+                '<span class="issue-note">v3.5.0</span>',
                 "生成 v3.3 引用证据链",
-                "Thesis Skills / v3.4.1",
+                "Thesis Skills / v3.5.0",
             ],
             "scenario-entry.html": [
-                '<span class="issue-note">v3.4.1</span>',
+                '<span class="issue-note">v3.5.0</span>',
                 "运行 v3.3 evidence pipeline",
             ],
             "artifact-gallery.html": [
-                "输出样例 | Thesis Skills v3.4.1",
-                '<span class="issue-note">v3.4.1 / 输出样例</span>',
-                "Thesis Skills / v3.4.1 / output samples",
+                "输出样例 | Thesis Skills v3.5.0",
+                '<span class="issue-note">v3.5.0 / 输出样例</span>',
+                "Thesis Skills / v3.5.0 / output samples",
             ],
             "docs-home.html": [
-                "当前 v3.4.1 的公开输出样例",
+                "当前 v3.5.0 的公开输出样例",
             ],
         }
         stale_snippets = [

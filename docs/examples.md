@@ -366,6 +366,8 @@ Expected output:
 
 - `reports/claim-citation-triage.html`
 
+The mixed demo can also be rendered as `reports/claim-citation-triage.html`. The HTML reading surface shows P0 / P1 / P2 / P3 review groups, issue-card style summaries, citation-needed candidates, uncited references, cluster review details, and deep links to readiness, final-audit, and reference-ledger surfaces.
+
 Boundary: this page is generated from `claim-citation-triage-report.json` and remains a reading surface only. It does not replace the JSON / Markdown / CSV artifacts, rerun claim-citation checks, or modify thesis source files.
 
 ## Unified Evidence Pipeline (v3.3.0)

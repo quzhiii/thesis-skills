@@ -4,10 +4,168 @@ import json
 import unittest
 
 from core.fixers import apply_format_fixes, apply_language_fixes, apply_review_patches
-from tests.helpers import workspace_tempdir
+from tests.helpers import materialize_project, workspace_tempdir
 
 
 class FixerTest(unittest.TestCase):
+    def test_final_cleanup_fixer_previews_and_applies_exact_marker_removals(self) -> None:
+        from core.final_cleanup import run_final_cleanup_check
+        from core.fixers import apply_final_cleanup_fixes
+        from core.project import ThesisProject
+        from core.rules import load_rule_pack
+        from tests.test_rules import PACK_ROOT
+
+        with workspace_tempdir("fixers-") as base:
+            pack = load_rule_pack(PACK_ROOT / "university-generic")
+            materialize_project(
+                base,
+                {
+                    "main.tex": "\\documentclass{article}\n\\begin{document}\n\\input{chapters/ch1}\n\\end{document}\n",
+                    "chapters/ch1.tex": "TODO FIXME ??? debug draft\nKeep this sentence.\n",
+                },
+            )
+            project = ThesisProject.discover(
+                base,
+                pack.rules["project"]["main_tex_candidates"],
+                pack.rules["project"]["chapter_globs"],
+                pack.rules["project"]["bibliography_files"],
+            )
+            report = base / "reports" / "final-cleanup-report.json"
+            run_final_cleanup_check(project, pack, report)
+            tex = base / "chapters" / "ch1.tex"
+            original = tex.read_text(encoding="utf-8")
+
+            preview = apply_final_cleanup_fixes(base, report, apply=False)
+            self.assertEqual(preview["preview_count"], 5)
+            self.assertEqual(tex.read_text(encoding="utf-8"), original)
+
+            applied = apply_final_cleanup_fixes(base, report, apply=True)
+            content = tex.read_text(encoding="utf-8")
+
+        self.assertEqual(applied["changed_files"], 1)
+        self.assertEqual(len(applied["applied_patches"]), 5)
+        self.assertEqual(content, "    \nKeep this sentence.\n")
+
+    def test_reference_audit_ledger_fixer_only_removes_truly_unused_entries(self) -> None:
+        from core.fixers import apply_reference_audit_ledger_fixes
+        from core.project import ThesisProject
+        from core.reference_audit_ledger import build_reference_audit_ledger_rows, write_reference_audit_ledger_csv
+        from core.rules import load_rule_pack
+        from tests.test_rules import PACK_ROOT
+
+        with workspace_tempdir("fixers-") as base:
+            pack = load_rule_pack(PACK_ROOT / "university-generic")
+            materialize_project(
+                base,
+                {
+                    "main.tex": "\\documentclass{article}\n\\begin{document}\n\\cite{used2024}\n\\end{document}\n",
+                    "ref/refs.bib": "@article{used2024, title={Used}, author={A}, year={2024}, journal={J}}\n@book{unused1973, title={Unused}, author={B}, year={1973}}\n",
+                    "reports/final-reference-set-report.json": json.dumps(
+                        {"final_keys": ["used2024"], "issues": []},
+                        ensure_ascii=False,
+                    ),
+                },
+            )
+            project = ThesisProject.discover(
+                base,
+                pack.rules["project"]["main_tex_candidates"],
+                pack.rules["project"]["chapter_globs"],
+                pack.rules["project"]["bibliography_files"],
+            )
+            rows = build_reference_audit_ledger_rows(project)
+            csv_path = base / "reports" / "reference-audit-ledger.csv"
+            write_reference_audit_ledger_csv(rows, csv_path)
+            bib = base / "ref" / "refs.bib"
+            original_bib = bib.read_text(encoding="utf-8")
+
+            preview = apply_reference_audit_ledger_fixes(base, csv_path, apply=False)
+            self.assertEqual(preview["preview_count"], 1)
+            self.assertEqual(bib.read_text(encoding="utf-8"), original_bib)
+
+            applied = apply_reference_audit_ledger_fixes(base, csv_path, apply=True)
+            content = bib.read_text(encoding="utf-8")
+
+        self.assertEqual(applied["changed_files"], 1)
+        self.assertEqual(len(applied["applied_patches"]), 1)
+        self.assertIn("used2024", content)
+        self.assertNotIn("unused1973", content)
+
+    def test_manual_anchor_fixer_previews_and_applies_phantomsection_insertion(self) -> None:
+        from core.fixers import apply_manual_anchor_fixes
+        from core.manual_anchor import run_manual_anchor_check
+        from core.project import ThesisProject
+        from core.rules import load_rule_pack
+        from tests.test_rules import PACK_ROOT
+
+        with workspace_tempdir("fixers-") as base:
+            pack = load_rule_pack(PACK_ROOT / "university-generic")
+            materialize_project(
+                base,
+                {
+                    "main.tex": "\\documentclass{article}\n\\begin{document}\n\\input{chapters/ch1}\n\\end{document}\n",
+                    "chapters/ch1.tex": "\\chapter*{Appendix}\n\\addcontentsline{toc}{chapter}{Appendix}\n",
+                },
+            )
+            project = ThesisProject.discover(
+                base,
+                pack.rules["project"]["main_tex_candidates"],
+                pack.rules["project"]["chapter_globs"],
+                pack.rules["project"]["bibliography_files"],
+            )
+            report = base / "reports" / "manual-anchor-report.json"
+            run_manual_anchor_check(project, pack, report)
+            tex = base / "chapters" / "ch1.tex"
+            original = tex.read_text(encoding="utf-8")
+
+            preview = apply_manual_anchor_fixes(base, report, apply=False)
+            self.assertEqual(preview["preview_count"], 1)
+            self.assertEqual(tex.read_text(encoding="utf-8"), original)
+
+            applied = apply_manual_anchor_fixes(base, report, apply=True)
+            content = tex.read_text(encoding="utf-8")
+
+        self.assertEqual(applied["changed_files"], 1)
+        self.assertEqual(len(applied["applied_patches"]), 1)
+        self.assertEqual(content, "\\chapter*{Appendix}\n\\phantomsection\n\\addcontentsline{toc}{chapter}{Appendix}\n")
+
+    def test_statistical_consistency_fixer_previews_and_applies_dominant_normalization(self) -> None:
+        from core.fixers import apply_statistical_consistency_fixes
+        from core.project import ThesisProject
+        from core.rules import load_rule_pack
+        from core.statistical_consistency import run_statistical_consistency_check
+        from tests.test_rules import PACK_ROOT
+
+        with workspace_tempdir("fixers-") as base:
+            pack = load_rule_pack(PACK_ROOT / "university-generic")
+            materialize_project(
+                base,
+                {
+                    "main.tex": "\\documentclass{article}\n\\begin{document}\n\\input{chapters/ch1}\n\\end{document}\n",
+                    "chapters/ch1.tex": "p值 and p值 and p值 and P值 here.\n",
+                },
+            )
+            project = ThesisProject.discover(
+                base,
+                pack.rules["project"]["main_tex_candidates"],
+                pack.rules["project"]["chapter_globs"],
+                pack.rules["project"]["bibliography_files"],
+            )
+            report = base / "reports" / "statistical-consistency-report.json"
+            run_statistical_consistency_check(project, pack, report)
+            tex = base / "chapters" / "ch1.tex"
+            original = tex.read_text(encoding="utf-8")
+
+            preview = apply_statistical_consistency_fixes(base, report, apply=False)
+            self.assertEqual(preview["preview_count"], 1)
+            self.assertEqual(tex.read_text(encoding="utf-8"), original)
+
+            applied = apply_statistical_consistency_fixes(base, report, apply=True)
+            content = tex.read_text(encoding="utf-8")
+
+        self.assertEqual(applied["changed_files"], 1)
+        self.assertEqual(len(applied["applied_patches"]), 1)
+        self.assertEqual(content, "p值 and p值 and p值 and p值 here.\n")
+
     def test_language_fixer_applies_safe_phase1_fixes(self) -> None:
         with workspace_tempdir("fixers-") as base:
             tex = base / "chapter.tex"

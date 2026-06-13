@@ -51,9 +51,37 @@ class ReferenceAuditLedgerHtmlTest(unittest.TestCase):
         self.assertIn("相关报告", html)
         self.assertIn("Related Reports", html)
         self.assertIn("readiness-report.json", html)
-        self.assertIn("final-audit-report.html", html)
-        self.assertIn("claim-citation-triage.html", html)
+        self.assertIn("final-audit-report.html#warning-issues-zh", html)
+        self.assertIn("final-audit-report.html#warning-issues-en", html)
+        self.assertIn("claim-citation-triage.html#zh-review-groups", html)
+        self.assertIn("claim-citation-triage.html#en-review-groups", html)
         self.assertIn("data-lang-btn=\"zh\"", html)
+
+    def test_ledger_sections_have_overflow_handling(self) -> None:
+        html = render_reference_audit_ledger_html(
+            [
+                {
+                    "key": "ref1",
+                    "title": "Reference One",
+                    "authors": "Doe, Jane",
+                    "year": "2024",
+                    "venue": "J",
+                    "doi": "",
+                    "scope": "bibliography",
+                    "source_checked": "local_bib",
+                    "status": "present",
+                    "issue": "",
+                    "action_suggested": "Review only if flagged.",
+                    "is_final_reference": "true",
+                    "is_cited_in_tex": "true",
+                    "is_unused_bib_entry": "false",
+                }
+            ]
+        )
+
+        self.assertIn("overflow-x", html)
+        self.assertIn("auto", html)
+        self.assertIn("ledger-section", html)
 
     def test_render_includes_raw_source_note_for_csv_truth(self) -> None:
         html = render_reference_audit_ledger_html(

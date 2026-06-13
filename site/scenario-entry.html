@@ -22,7 +22,7 @@
                 </div>
                 <div class="issue-title">
                     <span class="issue-kicker">Thesis Skills</span>
-                    <span class="issue-note">v3.4.1</span>
+                    <span class="issue-note">v3.5.0</span>
                 </div>
                 <div class="issue-meta">
                     <span>workflow map / cn</span>
@@ -270,10 +270,11 @@
                                     <p class="module-short">用幻觉风险评分快速定位可疑引用。</p>
                                 </div>
                                 <div class="module-copy">
-                                    <p class="module-desc">运行 v3.3 evidence pipeline 后，基于最终参考文献集、本地元数据和外部验证证据，对每条参考文献输出确定性风险分数，并生成声明-引用支撑分级。不使用 LLM，不自动改写引用。</p>
+                                    <p class="module-desc">运行 v3.3 evidence pipeline 后，基于最终参考文献集、本地元数据和外部验证证据，对每条参考文献输出确定性风险分数，并生成声明-引用支撑分级。后续可以打开 claim-citation HTML 复核页查看 P0 / P1 / P2 / P3 复核分组。不使用 LLM，不自动改写引用。</p>
                                     <div class="note-grid">
                                         <div class="note-box"><strong>适合时机</strong>怀疑部分参考文献是 AI 生成、来源不清、或 metadata 不可靠。</div>
                                         <div class="note-box"><strong>你会得到</strong><code>hallucination-risk-report.json</code>、<code>high-risk-references.csv</code>、<code>claim-citation-triage-report.json</code> 和 final reference set / DOI / URL advisory 报告。</div>
+                                        <div class="note-box"><strong>HTML 复核面</strong>issue-card 摘要帮助排序人工复核，但不自动判断真假。</div>
                                         <div class="note-box"><strong>不要误用</strong>HIGH_RISK 表示"强烈建议人工核验"，不是"假文献"的最终判定。中文文献标记为 UNSUPPORTED。</div>
                                     </div>
                                     <div class="io-block">

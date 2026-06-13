@@ -94,20 +94,25 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 | Report UX | `29-report-index/` | `build_report_index.py` | Generate static local `reports/index.html` linking JSON / CSV source-of-truth artifacts without replacing them |
 | Report UX | `30-final-audit-html/` | `build_final_audit_html.py` | Generate static local `reports/final-audit-report.html` from `final-audit-report.json` with verdict, KPI, dimension matrix, issues, and source links |
 | Report UX | `31-reference-ledger-html/` | `build_reference_audit_ledger_html.py` | Generate static local `reports/reference-audit-ledger.html` from `reference-audit-ledger.csv` with summary stats, scope views, key-grouped slices, and full-table browsing |
-| Report UX | `32-claim-citation-html/` | `build_claim_citation_html.py` | Generate static local `reports/claim-citation-triage.html` from `claim-citation-triage-report.json` with triage groups, citation-needed candidates, uncited references, cluster review, and source links |
+| Report UX | `32-claim-citation-html/` | `build_claim_citation_html.py` | Generate static local `reports/claim-citation-triage.html` from `claim-citation-triage-report.json` with P0 / P1 / P2 / P3 review groups, issue-card summaries, citation-needed candidates, uncited references, cluster review, and deep links to readiness / references / claim-citation / final-audit while preserving JSON / CSV source artifacts |
 | Defense | `17-defense-pack/` | `generate_outline.py` | Generate thesis outline for defense preparation |
 | Defense | `17-defense-pack/` | `generate_figure_inventory.py` | Inventory figures and visual evidence |
 | Defense | `17-defense-pack/` | `generate_talk_prep_notes.py` | Generate editable talk-prep notes |
 | Fix | `20-fix-references/` | `fix_references.py` | Preview and apply reference-related patches |
 | Fix | `21-fix-language-style/` | `fix_language_style.py` | Preview and apply deterministic language style patches |
 | Fix | `22-fix-format-structure/` | `fix_format_structure.py` | Preview and apply format-structure patches |
+| Fix | `23-fix-final-cleanup/` | `fix_final_cleanup.py` | Preview and apply safe final cleanup marker removals |
+| Fix | `25-fix-statistical-consistency/` | `fix_statistical_consistency.py` | Preview and apply safe statistical notation normalization |
+| Fix | `26-fix-manual-anchor/` | `fix_manual_anchor.py` | Preview and apply safe manual anchor insertion |
+| Fix | `28-fix-reference-audit-ledger/` | `fix_reference_audit_ledger.py` | Preview and apply safe removal of truly unused bibliography entries |
 | Fix | `24-fix-language-deep/` | `fix_language_deep.py` | Preview deeper language patch candidates |
 | Rules | `90-rules/` | `create_pack.py` | Create institution- or journal-specific rule packs |
 | Rules | `90-rules/` | `lint_pack.py` | Validate rule-pack structure and write scorecard summaries |
 | Rules | `90-rules/` | `export_pack.py` | Export linted rule-pack handoff bundles |
 | Runner | repository root | `run_check_once.py` | Run the deterministic check pipeline once |
 | Runner | repository root | `run_evidence_pipeline.py` | Orchestrate final reference set plus all citation evidence layers in sequence |
-| Runner | repository root | `run_fix_cycle.py` | Preview or apply report-driven fix cycles |
+| Workflow | `33-final-delivery/` | `run_final_delivery.py` | Run final delivery workflow: evidence, checks, optional fixes, bundle rebuild |
+| Runner | repository root | `run_fix_cycle.py` | Preview or apply report-driven fix cycles; modes: `safe`, `suggest`, `mixed`, `final-audit`, `all` |
 
 ## How to choose a module
 
@@ -124,4 +129,4 @@ THESIS WORKFLOW PHASE                  THESIS SKILLS MODULE
 - Start with `29-report-index/` when you want a local static HTML landing page for generated JSON / CSV artifacts.
 - Start with `30-final-audit-html/` when you want a readable local detail page for the aggregated final-audit JSON.
 - Start with `31-reference-ledger-html/` when you want a readable local HTML surface for the aggregated reference-audit CSV ledger.
-- Start with `32-claim-citation-html/` when you want a readable local HTML surface for claim-citation support review and citation-needed candidates.
+- Start with `32-claim-citation-html/` when you want a readable local HTML surface for claim-citation support review groups, issue-card summaries, and citation-needed candidates without changing JSON / CSV source artifacts.

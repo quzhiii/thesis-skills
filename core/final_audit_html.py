@@ -302,9 +302,11 @@ def _issue_card(issue: dict[str, object], lang: str) -> str:
     reason = _reason_text(str(issue.get("reason", "")), lang)
     source = str(issue.get("source", ""))
     evidence_status = str(issue.get("evidence_status", ""))
+    risk_level = str(issue.get("risk_level", ""))
     source_link = f'<a href="{_e(source)}">{_e(source)}</a>' if source else ""
+    risk_class = f" risk-level-{_e(risk_level.lower())}" if risk_level else ""
     return f"""
-      <article class="issue verdict-{_e(verdict.lower())}">
+      <article class="issue verdict-{_e(verdict.lower())}{risk_class}">
         <div class="issue-code">{_e(verdict)} · {_e(_status_text(evidence_status, lang))}</div>
         <h3>{_e(title)}</h3>
         <p>{_e(reason)}</p>
@@ -332,8 +334,8 @@ def _related_reports(lang: str) -> str:
     links = [
         ("index.html", _text("report_index", lang)),
         ("readiness-report.json", _text("readiness_json", lang)),
-        ("reference-audit-ledger.html", _text("reference_ledger_html", lang)),
-        ("claim-citation-triage.html", _text("claim_citation_html", lang)),
+        (f"reference-audit-ledger.html#evidence-rows-{lang}", _text("reference_ledger_html", lang)),
+        (f"claim-citation-triage.html#{lang}-review-groups", _text("claim_citation_html", lang)),
     ]
     pills = "".join(f'<a class="nav-pill" href="{_e(path)}">{_e(label)}</a>' for path, label in links)
     return f"""
@@ -395,7 +397,7 @@ def _render_lang_block(report: dict[str, object], lang: str) -> str:
         <div class="issue-grid">{blocker_cards}</div>
       </section>
 
-      <section class="section">
+      <section class="section" id="warning-issues-{lang}">
         <div class="section-head"><h2>{_e(_text('warning_issues', lang))}</h2><span class="meta">{_e(_text('manual_review', lang))}</span></div>
         <div class="issue-grid">{warning_cards}</div>
       </section>
@@ -473,12 +475,17 @@ def render_final_audit_html(report: dict[str, object]) -> str:
     .nav-section .meta {{ text-transform:none; letter-spacing:0; font-family:Inter, "Helvetica Neue", Helvetica, Arial, sans-serif; font-size:14px; color:var(--grey-3); }}
     .status-present {{ color:var(--pass); }} .status-missing {{ color:var(--warn); }} .status-unreadable {{ color:var(--block); }}
     .raw-note {{ margin-top:24px; padding:16px; border:1px solid var(--grey-2); background:var(--grey-1); color:var(--grey-3); }}
+    .skip-to-content {{ position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }}
+    .skip-to-content:focus {{ position:static; width:auto; height:auto; padding:8px 12px; background:var(--accent); color:var(--accent-on); z-index:1000; }}
+    :focus-visible {{ outline:2px solid var(--accent); outline-offset:2px; }}
     @media (max-width:920px) {{ header, .matrix, .issue-grid {{ grid-template-columns:1fr; }} .kpis {{ grid-template-columns:repeat(2,1fr); }} }}
     @media (max-width:560px) {{ .page {{ padding:18px 14px 40px; }} .kpis {{ grid-template-columns:1fr; }} h1 {{ font-size:64px; }} .verdict-panel .value {{ font-size:56px; }} }}
+    @media print {{ .lang-switch, .skip-to-content, .nav-section, .raw-note {{ display:none; }} .page {{ padding:0; max-width:none; }} .verdict-panel {{ background:#fff; color:var(--ink); border:2px solid var(--ink); }} .dimension, .issue {{ break-inside:avoid; }} table {{ break-inside:auto; }} tr {{ break-inside:avoid; }} }}
   </style>
 </head>
 <body>
-  <main class="page">
+  <a class="skip-to-content" href="#main-content">Skip to content</a>
+  <main class="page" id="main-content" tabindex="-1">
     {_lang_switch()}
     {zh_block}
     {en_block}

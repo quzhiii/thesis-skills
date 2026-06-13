@@ -1,4 +1,4 @@
-# Thesis Skills v3.4.1
+# Thesis Skills v3.5.0
 
 <div align="center">
 
@@ -13,7 +13,7 @@ Spend your time thinking, not fixing formatting.
 
 [中文文档](README.zh-CN.md) · **English** · [Showcase](https://quzhiii.github.io/thesis-skills)
 
-[What's New](#whats-new-in-v341) · [Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
+[What's New](#whats-new-in-v350) · [Quickstart](#quickstart) · [Outputs](#outputs) · [Scenarios](#scenarios) · [Updating](#updating-your-local-copy) · [Rule Packs](#rule-packs) · [Creating Your Own](#creating-your-own-school-rule-pack) · [Boundaries](#boundaries)
 
 </div>
 
@@ -53,16 +53,20 @@ For repetitive finishing work, the expected time savings are concrete:
 
 ---
 
-## What's new in v3.4.1
+## What's new in v3.5.0
 
-- **Report navigation polish**: local HTML report surfaces now cross-link `index`, `final-audit`, `reference-ledger`, `claim-citation`, readiness, and raw JSON / CSV artifacts more consistently.
-- **Support-risk heuristic calibration**: `possible_overclaim` no longer duplicates `possible_topic_mismatch` when a `PASS` reference is already flagged by the more specific topic-mismatch signal.
-- **Readiness Gate Integration** remains in place from V3.2, and V3.4 extends that citation evidence stack with final-audit and local HTML report surfaces.
-- **Final-audit surfaces**: new deterministic final cleanup, statistical consistency, and manual-anchor checks feed `reports/final-audit-report.json`.
-- **Reference audit handoff**: `28-reference-audit-ledger/build_reference_audit_ledger.py` writes a spreadsheet-friendly `reports/reference-audit-ledger.csv` from existing reference evidence.
+- **Bounded auto-fix for final-audit findings**: new fixers for final cleanup residue, statistical notation normalization, manual anchor insertion, and unused bibliography entry removal. All fixers are preview-first and only apply low-risk, reversible edits.
+- **Final delivery workflow**: `33-final-delivery/run_final_delivery.py` orchestrates evidence generation, final-audit checks, optional bounded fixes, and bundle rebuild in one command.
+- **Fix cycle integration**: `run_fix_cycle.py` now supports `final-audit` and `all` modes for running the new fixers.
+- **Report navigation polish** (from v3.4.1): local HTML report surfaces now cross-link `index`, `final-audit`, `reference-ledger`, `claim-citation`, readiness, and raw JSON / CSV artifacts more consistently.
+- **Support-risk heuristic calibration** (from v3.4.1): `possible_overclaim` no longer duplicates `possible_topic_mismatch` when a `PASS` reference is already flagged by the more specific topic-mismatch signal.
+- **V3.4 final-audit surfaces** remain in place: deterministic final cleanup, statistical consistency, manual-anchor checks, final-audit JSON aggregation, reference-audit ledger, and static HTML report surfaces.
 - **Static local report UX**: `reports/index.html`, `reports/final-audit-report.html`, `reports/reference-audit-ledger.html`, and `reports/claim-citation-triage.html` make JSON / CSV artifacts easier to review without replacing them as source of truth.
-- **Claim-citation support review** now includes conservative advisory signals such as `possible_topic_mismatch`, `possible_outdated_support`, and `possible_overclaim`.
 - **V3.3 reference verification hardening** remains in place: final reference set parsing, DOI candidates, URL verification, scoped/resumable external verification, and the unified evidence pipeline runner `run_evidence_pipeline.py`.
+
+### v3.3 highlights recap
+
+- **Readiness Gate Integration** with the four-layer citation evidence pipeline remains in place; V3.4 built on top of that with final-audit and local HTML report surfaces.
 
 ---
 
@@ -157,6 +161,17 @@ Optional final-audit foundation artifact:
 - `reports/reference-audit-ledger.html` from `31-reference-ledger-html/build_reference_audit_ledger_html.py`
 - `reports/claim-citation-triage.html` from `32-claim-citation-html/build_claim_citation_html.py`
 
+Bounded auto-fix modules (preview-first, low-risk only):
+
+- `23-fix-final-cleanup/fix_final_cleanup.py` — remove exact process markers (`TODO`, `FIXME`, `???`, `draft`, `debug`, `\textcolor{blue}`)
+- `25-fix-statistical-consistency/fix_statistical_consistency.py` — normalize non-dominant statistical notation when dominant style is unambiguous
+- `26-fix-manual-anchor/fix_manual_anchor.py` — insert `\phantomsection` before flagged `\addcontentsline` entries
+- `28-fix-reference-audit-ledger/fix_reference_audit_ledger.py` — remove truly unused bibliography entries (`is_unused_bib_entry=true`, `is_cited_in_tex=false`, `is_final_reference=false`)
+
+Final delivery workflow:
+
+- `33-final-delivery/run_final_delivery.py` — orchestrate evidence generation, final-audit checks, optional bounded fixes, and bundle rebuild
+
 The optional v3.3 evidence pipeline writes the citation evidence artifacts:
 
 - `reports/final-reference-set-report.json`
@@ -176,7 +191,7 @@ Example JSON snippets and demo walkthroughs: [`docs/examples.md`](docs/examples.
 
 ### Citation Integrity preview
 
-The current v3.4.1 release line keeps local Citation Integrity as the first layer of pre-submission reference checking:
+The current v3.5.0 release line keeps local Citation Integrity as the first layer of pre-submission reference checking:
 
 ```text
 References: BLOCK
@@ -412,7 +427,7 @@ python 32-claim-citation-html/build_claim_citation_html.py \
   --project-root thesis
 ```
 
-Output: `reports/claim-citation-triage.html`. This static page is generated from `claim-citation-triage-report.json` and shows triage groups, citation-needed candidates, uncited references, cluster review details, support/risk signals, and next actions. JSON remains authoritative.
+Output: `reports/claim-citation-triage.html`. This static page is generated from `claim-citation-triage-report.json` and shows P0 / P1 / P2 / P3 review groups, issue-card style summaries, citation-needed candidates, uncited references, cluster review details, support/risk signals, and next actions. It also deep-links the local readiness / references / claim-citation / final-audit report surfaces so reviewers can move between summary, reference ledger, and detail pages. The HTML is a mobile-readable local HTML bundle for manual review. JSON / CSV remain the source of truth; CSV / Markdown outputs remain unchanged.
 
 ## Scenarios
 

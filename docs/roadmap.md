@@ -4,7 +4,7 @@
 
 `v1.0.0` was the public-story stabilization milestone for `thesis-skills`.
 
-`v3.4.1` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, the V2.0 external metadata verification layer, the V3.0 hallucination risk scoring layer, the V3.1 claim-citation support triage layer, the V3.3 reference verification hardening layer, and the V3.4 final-audit / report-UX layer, with patch-level cross-report navigation polish and support-risk heuristic calibration.
+`v3.5.0` is the current documented public release line: the stabilized `v1.0` workflow story plus the shipped Citation Integrity additions from `v1.1.0`, `v1.2.0`, the V2.0 external metadata verification layer, the V3.0 hallucination risk scoring layer, the V3.1 claim-citation support triage layer, the V3.3 reference verification hardening layer, and the V3.4 final-audit / report-UX layer, with patch-level cross-report navigation polish and support-risk heuristic calibration, plus the V3.5 bounded auto-fix and final delivery workflow.
 
 ```text
 bibliography intake
@@ -52,7 +52,7 @@ Design rules that stay in effect:
 
 ## Current Workflow Status
 
-All listed workflow families remain part of the current `v3.4.1` public contract:
+All listed workflow families remain part of the current `v3.5.0` public contract:
 
 | Workflow | Status | Entrypoint |
 |---|---|---|
@@ -134,10 +134,11 @@ All listed workflow families remain part of the current `v3.4.1` public contract
 | v3.3.0 | Final reference set, resumeable external verification, DOI candidates, URL verification, and evidence pipeline hardening |
 | v3.4.0 | Final-audit foundation checkers, final-audit/report HTML surfaces, reference-audit ledger, and conservative claim-citation support-risk signals |
 | v3.4.1 | Cross-report HTML navigation polish and duplicate support-risk signal calibration |
+| v3.5.0 | Bounded auto-fix for final-audit findings, final delivery workflow, and fix cycle integration |
 
-## Post-v3.4.1 Product Roadmap
+## Post-v3.5.0 Product Roadmap
 
-`v3.4.1` is the current product baseline, not a stepping stone that forces the next feature to become `v4.0.0` or `v5.0.0`.
+`v3.5.0` is the current product baseline, not a stepping stone that forces the next feature to become `v4.0.0` or `v5.0.0`.
 
 Future work should be organized as product tracks. Reserve a new major version only when the public contract changes in a large way: a new user workflow, a new artifact family, a new distribution model, or a capability that materially changes user expectations. Smaller improvements should stay in the current release line or become minor/patch releases.
 
@@ -209,6 +210,17 @@ Initial foundation now available:
 - final audit JSON aggregation: `27-final-audit-report/build_final_audit_report.py`, writing `reports/final-audit-report.json` by aggregating existing JSON evidence without rerunning checks or rewriting source files
 - reference audit ledger: `28-reference-audit-ledger/build_reference_audit_ledger.py`, writing `reports/reference-audit-ledger.csv` from existing reference evidence without bibliography edits or external lookups
 
+Bounded auto-fix modules (v3.5.0):
+
+- final cleanup fixer: `23-fix-final-cleanup/fix_final_cleanup.py`, preview/apply removal of exact process markers
+- statistical consistency fixer: `25-fix-statistical-consistency/fix_statistical_consistency.py`, preview/apply normalization of non-dominant notation when dominant style is unambiguous
+- manual anchor fixer: `26-fix-manual-anchor/fix_manual_anchor.py`, preview/apply `\phantomsection` insertion before flagged `\addcontentsline`
+- reference ledger fixer: `28-fix-reference-audit-ledger/fix_reference_audit_ledger.py`, preview/apply removal of truly unused bibliography entries
+
+Final delivery workflow (v3.5.0):
+
+- `33-final-delivery/run_final_delivery.py`, orchestrating evidence generation, final-audit checks, optional bounded fixes, and bundle rebuild
+
 Recommended outputs for this track:
 
 - `reports/final-audit-report.json`
@@ -251,6 +263,14 @@ Initial HTML surface now available:
 - final audit detail page: `30-final-audit-html/build_final_audit_html.py`, writing `reports/final-audit-report.html` from `final-audit-report.json` as a local reading surface
 - reference ledger detail page: `31-reference-ledger-html/build_reference_audit_ledger_html.py`, writing `reports/reference-audit-ledger.html` from `reference-audit-ledger.csv` as a local reading surface
 - claim-citation detail page: `32-claim-citation-html/build_claim_citation_html.py`, writing `reports/claim-citation-triage.html` from `claim-citation-triage-report.json` as a local reading surface
+
+Current shipped HTML behavior:
+
+- claim-citation P0 / P1 / P2 / P3 review groups for manual review order
+- issue-card summaries with evidence, rationale, and suggested action
+- symmetric deep links between readiness, references, claim-citation, and final-audit report surfaces
+- narrow-screen readability improvements for local HTML review
+- JSON / CSV remain the machine-readable source of truth; HTML remains a local reading layer only
 
 ### Track F: Public Surface And Verification Discipline
 
@@ -317,16 +337,17 @@ Showcase work must follow the same bounded philosophy as code: no marketing copy
 
 ## Recent Execution Status
 
-Given the current repository state at `v3.4.1`, the recent hardening sequence is:
+Given the current repository state at `v3.5.0`, the recent hardening sequence is:
 
 1. **Build claim-citation HTML**: completed with a static local `reports/claim-citation-triage.html` surface for support-review labels, risk signals, clusters, and citation-needed candidates.
 2. **Polish cross-report navigation**: completed across claim-citation, readiness, final-audit, reference ledger, and raw JSON / CSV artifacts.
 3. **Calibrate support-risk heuristics**: completed for duplicate support-risk signal calibration without turning findings into truth claims.
 4. **Harden rule-pack packaging**: completed across pack lint, completeness, scorecard, export-bundle workflow, and docs/test alignment.
-5. **Evaluate candidate reference support later**: still deferred; only start recommendation work after support-review presentation, final-audit, and handoff tracks are stable.
-6. **Run cross-release verification**: completed for the current hardening sequence; grep, link, command, and test verification remain mandatory before treating future roadmap items as complete.
+5. **Build bounded auto-fix for final-audit**: completed with four fixers (final cleanup, statistical consistency, manual anchor, reference ledger) and fix cycle integration via `final-audit` and `all` modes.
+6. **Build final delivery workflow**: completed with `33-final-delivery/run_final_delivery.py` orchestrating evidence, checks, fixes, and bundle rebuild.
+7. **Align public surfaces**: completed for v3.5.0 across README, Chinese README, roadmap, manifest, modules docs, and test coverage.
 
-Next incremental work should focus on public-surface and generated-artifact consistency before opening a new product track.
+Next incremental work should focus on Track A (citation support review depth) or Track E (human-readable report UX) before opening a new product track.
 
 ## Cross-Release Acceptance Gates
 

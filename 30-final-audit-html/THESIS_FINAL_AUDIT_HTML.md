@@ -28,6 +28,8 @@ python 30-final-audit-html/build_final_audit_html.py \
 - warnings
 - next actions
 - source artifact links
+- related report links to `index.html`, `readiness-report.json`, `reference-audit-ledger.html`, and `claim-citation-triage.html`
+- narrow-screen responsive reading layout
 
 ## Boundaries
 

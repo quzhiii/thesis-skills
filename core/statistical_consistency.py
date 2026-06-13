@@ -138,6 +138,14 @@ def _dominant_variant(counts: dict[str, int]) -> str:
     return sorted(counts.items(), key=lambda item: (-item[1], item[0]))[0][0]
 
 
+def _is_unambiguous_dominant(counts: dict[str, int], dominant: str) -> bool:
+    if len(counts) <= 1:
+        return False
+    dominant_count = counts[dominant]
+    other_max = max(count for variant, count in counts.items() if variant != dominant)
+    return dominant_count >= 3 and dominant_count >= 2 * other_max
+
+
 def build_statistical_consistency_report(project: ThesisProject, ruleset: str) -> dict[str, object]:
     occurrences, source_files = collect_statistical_occurrences(project)
     occurrences_by_family: dict[str, list[StatisticalOccurrence]] = {}
@@ -166,6 +174,7 @@ def build_statistical_consistency_report(project: ThesisProject, ruleset: str) -
         )
         if not mixed:
             continue
+        unambiguous = _is_unambiguous_dominant(counts, dominant)
         for occurrence in family_occurrences:
             if occurrence.variant == dominant:
                 continue
@@ -179,7 +188,9 @@ def build_statistical_consistency_report(project: ThesisProject, ruleset: str) -
                     f"Review whether this should be normalized to {dominant}; this checker does not rewrite statistical notation.",
                     span=occurrence.span,
                     evidence=occurrence.evidence,
-                    review_required=True,
+                    suggestions=[dominant] if unambiguous else None,
+                    confidence=0.95 if unambiguous else None,
+                    review_required=not unambiguous,
                     category="statistical_consistency",
                     original_text=occurrence.matched_text,
                     rationale="The final-audit rule reports deviations from the dominant notation style instead of forcing a global preference.",

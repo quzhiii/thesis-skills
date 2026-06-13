@@ -231,6 +231,23 @@ class PackGeneratorTest(unittest.TestCase):
 
             self.assertFalse((output_root / "bad-chapter-mapping").exists())
 
+    def test_created_pack_passes_lint(self) -> None:
+        from core.pack_linter import lint_pack
+
+        with workspace_tempdir("pack-generator-") as output_root:
+            pack_path = create_rule_pack(
+                repo_root=ROOT,
+                output_root=output_root,
+                pack_id="lint-test-pack",
+                display_name="Lint Test Pack",
+                starter="university-generic",
+                kind="university-thesis",
+            )
+            findings = lint_pack(pack_path)
+            errors = [f for f in findings if f.severity == "error"]
+
+        self.assertEqual(errors, [], f"Created pack has lint errors: {[f.message for f in errors]}")
+
 
 if __name__ == "__main__":
     unittest.main()

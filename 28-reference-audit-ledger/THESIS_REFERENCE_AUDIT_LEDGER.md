@@ -23,7 +23,7 @@ python 28-reference-audit-ledger/build_reference_audit_ledger.py \
 ## Columns
 
 ```text
-key,title,authors,year,venue,doi,scope,source_checked,status,issue,action_suggested
+key,title,authors,year,venue,doi,scope,source_checked,status,issue,action_suggested,is_final_reference,is_cited_in_tex,is_unused_bib_entry
 ```
 
 ## Inputs

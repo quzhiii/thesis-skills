@@ -84,10 +84,108 @@ class FinalAuditHtmlTest(unittest.TestCase):
         self.assertIn("相关报告", html)
         self.assertIn("readiness-report.json", html)
         self.assertIn("final-cleanup-report.json", html)
-        self.assertIn("reference-audit-ledger.html", html)
-        self.assertIn("claim-citation-triage.html", html)
+        self.assertIn('id="warning-issues-zh"', html)
+        self.assertIn('id="warning-issues-en"', html)
+        self.assertIn("reference-audit-ledger.html#evidence-rows-zh", html)
+        self.assertIn("reference-audit-ledger.html#evidence-rows-en", html)
+        self.assertIn("claim-citation-triage.html#zh-review-groups", html)
+        self.assertIn("claim-citation-triage.html#en-review-groups", html)
         self.assertIn("终稿清理检查", html)
         self.assertIn("缺少可选证据", html)
+
+    def test_issue_cards_have_risk_level_css_classes(self) -> None:
+        html = render_final_audit_html(
+            {
+                "overall_verdict": "WARN",
+                "summary": {
+                    "headline": "Final audit verdict: WARN",
+                    "dimension_count": 1,
+                    "blocker_count": 0,
+                    "warning_count": 2,
+                    "missing_required_evidence_count": 0,
+                },
+                "dimensions": {
+                    "final_cleanup": {
+                        "title": "Final cleanup",
+                        "verdict": "WARN",
+                        "evidence_status": "present",
+                        "reason": "residue found",
+                        "source": "final-cleanup-report.json",
+                    },
+                },
+                "blockers": [],
+                "warnings": [
+                    {
+                        "dimension": "final_cleanup",
+                        "title": "Final cleanup",
+                        "verdict": "WARN",
+                        "evidence_status": "present",
+                        "reason": "TODO marker found",
+                        "source": "final-cleanup-report.json",
+                        "risk_level": "P0",
+                    },
+                    {
+                        "dimension": "statistical_consistency",
+                        "title": "Statistical consistency",
+                        "verdict": "WARN",
+                        "evidence_status": "present",
+                        "reason": "mixed notation",
+                        "source": "statistical-consistency-report.json",
+                        "risk_level": "P1",
+                    },
+                ],
+                "next_actions": ["Review final cleanup."],
+                "sources": [],
+            }
+        )
+
+        self.assertIn("risk-level-p0", html)
+        self.assertIn("risk-level-p1", html)
+
+    def test_html_has_accessibility_features(self) -> None:
+        html = render_final_audit_html(
+            {
+                "overall_verdict": "PASS",
+                "summary": {
+                    "headline": "Final audit verdict: PASS",
+                    "dimension_count": 0,
+                    "blocker_count": 0,
+                    "warning_count": 0,
+                    "missing_required_evidence_count": 0,
+                },
+                "dimensions": {},
+                "blockers": [],
+                "warnings": [],
+                "next_actions": [],
+                "sources": [],
+            }
+        )
+
+        self.assertIn('id="main-content"', html)
+        self.assertIn('tabindex="-1"', html)
+        self.assertIn("focus-visible", html)
+        self.assertIn("skip-to-content", html.lower())
+
+    def test_html_has_print_styles(self) -> None:
+        html = render_final_audit_html(
+            {
+                "overall_verdict": "PASS",
+                "summary": {
+                    "headline": "Final audit verdict: PASS",
+                    "dimension_count": 0,
+                    "blocker_count": 0,
+                    "warning_count": 0,
+                    "missing_required_evidence_count": 0,
+                },
+                "dimensions": {},
+                "blockers": [],
+                "warnings": [],
+                "next_actions": [],
+                "sources": [],
+            }
+        )
+
+        self.assertIn("@media print", html)
 
     def test_write_and_cli_generate_html(self) -> None:
         with workspace_tempdir("final-audit-html-") as base:

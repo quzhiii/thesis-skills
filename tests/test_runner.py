@@ -286,6 +286,68 @@ class RunnerTest(unittest.TestCase):
         self.assertIn("overall_verdict", readiness)
         self.assertTrue(readiness_exists)
 
+    def test_run_fix_cycle_supports_final_audit_mode(self) -> None:
+        with workspace_project_copy(SAMPLE, "runner-fix-") as project_root:
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "run_fix_cycle.py"),
+                    "--project-root",
+                    str(project_root),
+                    "--ruleset",
+                    "university-generic",
+                    "--apply-mode",
+                    "final-audit",
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            summary = json.loads(
+                (project_root / "reports" / "fix-summary.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+        self.assertEqual(summary["apply_mode"], "final-audit")
+        self.assertIn("final-cleanup", summary["steps"])
+        self.assertIn("statistical-consistency", summary["steps"])
+        self.assertIn("manual-anchor", summary["steps"])
+        self.assertNotIn("references", summary["steps"])
+        self.assertNotIn("language", summary["steps"])
+
+    def test_run_fix_cycle_supports_all_mode(self) -> None:
+        with workspace_project_copy(SAMPLE, "runner-fix-") as project_root:
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "run_fix_cycle.py"),
+                    "--project-root",
+                    str(project_root),
+                    "--ruleset",
+                    "university-generic",
+                    "--apply-mode",
+                    "all",
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            summary = json.loads(
+                (project_root / "reports" / "fix-summary.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+        self.assertEqual(summary["apply_mode"], "all")
+        self.assertIn("references", summary["steps"])
+        self.assertIn("language", summary["steps"])
+        self.assertIn("format", summary["steps"])
+        self.assertIn("language-deep", summary["steps"])
+        self.assertIn("final-cleanup", summary["steps"])
+        self.assertIn("statistical-consistency", summary["steps"])
+        self.assertIn("manual-anchor", summary["steps"])
+
 
 if __name__ == "__main__":
     unittest.main()

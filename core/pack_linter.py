@@ -17,6 +17,7 @@ REQUIRED_PACK_FIELDS = (
     "starter",
 )
 ALLOWED_KINDS = {"university-thesis", "journal"}
+ALLOWED_SEVERITIES = {"error", "warning", "info"}
 REQUIRED_RULES_TOP_LEVEL = ("project", "reference", "language")
 STARTER_MAPPINGS_TOP_LEVEL = ("mappings",)
 DRAFT_MAPPINGS_TOP_LEVEL = ("source_template_mappings", "chapter_role_mappings")
@@ -71,6 +72,7 @@ def lint_pack(path: str | Path) -> list[Finding]:
 
     findings.extend(_lint_pack_metadata(root / "pack.yaml", root.name))
     findings.extend(_lint_rules_completeness(pack.rules))
+    findings.extend(_lint_rule_content(pack.rules))
     findings.extend(_lint_mappings_completeness(pack.mappings))
     return findings
 
@@ -208,6 +210,54 @@ def _lint_rules_completeness(rules_data: dict[str, object]) -> list[Finding]:
                     severity="error",
                     code="invalid_rules_section_type",
                     message=f"rules.yaml top-level section '{section}' must be a mapping",
+                    file="rules.yaml",
+                )
+            )
+    return findings
+
+
+def _lint_rule_content(rules_data: dict[str, object]) -> list[Finding]:
+    findings: list[Finding] = []
+    language = rules_data.get("language")
+    if not isinstance(language, dict):
+        return findings
+    for rule_name, rule_value in language.items():
+        if not isinstance(rule_value, dict):
+            continue
+        if "enabled" not in rule_value:
+            findings.append(
+                Finding(
+                    severity="warning",
+                    code="missing_rule_enabled",
+                    message=f"Language rule '{rule_name}' is missing 'enabled' field",
+                    file="rules.yaml",
+                )
+            )
+        elif not isinstance(rule_value["enabled"], bool):
+            findings.append(
+                Finding(
+                    severity="error",
+                    code="invalid_rule_enabled",
+                    message=f"Language rule '{rule_name}' field 'enabled' must be a boolean",
+                    file="rules.yaml",
+                )
+            )
+        severity = rule_value.get("severity")
+        if severity is None:
+            findings.append(
+                Finding(
+                    severity="warning",
+                    code="missing_rule_severity",
+                    message=f"Language rule '{rule_name}' is missing 'severity' field",
+                    file="rules.yaml",
+                )
+            )
+        elif not isinstance(severity, str) or severity not in ALLOWED_SEVERITIES:
+            findings.append(
+                Finding(
+                    severity="error",
+                    code="invalid_rule_severity",
+                    message=f"Language rule '{rule_name}' field 'severity' must be one of: error, warning, info",
                     file="rules.yaml",
                 )
             )

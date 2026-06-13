@@ -64,12 +64,12 @@ class CitationIntegrityDocsTest(unittest.TestCase):
         self._assert_contains_all(
             "README.md",
             [
-            "# Thesis Skills v3.4.1",
+            "# Thesis Skills v3.5.0",
             "citation-integrity-report.json",
             "citation-integrity-report.md",
             "citation-issues.csv",
             "Citation Integrity preview",
-            "## What's new in v3.4.1",
+            "## What's new in v3.5.0",
                 "I want to screen AI-generated or suspicious references",
                 "## Release history",
                 "## Updating your local copy",
@@ -80,12 +80,12 @@ class CitationIntegrityDocsTest(unittest.TestCase):
         self._assert_contains_all(
             "README.zh-CN.md",
             [
-            "# Thesis Skills v3.4.1",
+            "# Thesis Skills v3.5.0",
             "citation-integrity-report.json",
             "citation-integrity-report.md",
             "citation-issues.csv",
             "Citation Integrity 预览",
-            "## v3.4.1 有哪些更新",
+            "## v3.5.0 有哪些更新",
                 "我想筛查 AI 生成或可疑的参考文献",
                 "## 历史迭代记录",
                 "## 如何同步后续更新",
@@ -99,7 +99,7 @@ class CitationIntegrityDocsTest(unittest.TestCase):
             "docs/roadmap.md",
             [
                 "`v1.0.0` was the public-story stabilization milestone",
-                "`v3.4.1` is the current documented public release line",
+                "`v3.5.0` is the current documented public release line",
                 "| v1.2.0 | Citation Integrity Markdown/CSV reports, clean demo, and public-example expansion |",
                 "| v2.0.0 | CrossRef / OpenAlex / Semantic Scholar external verification",
             ],
@@ -112,13 +112,13 @@ class CitationIntegrityDocsTest(unittest.TestCase):
             "site/scenario-entry.html",
         ]:
             with self.subTest(path=relative_path):
-                self._assert_contains_all(relative_path, ["v3.4.1"])
+                self._assert_contains_all(relative_path, ["v3.5.0"])
 
     def test_current_supporting_docs_reference_v12_not_v10_as_current(self) -> None:
         checks = {
             "site/copy-source.md": [
-                "### v3.4.1 已包含",
-                "Thesis Skills v3.4.1 — MIT License — quzhiii/thesis-skills",
+                "### v3.5.0 已包含",
+                "Thesis Skills v3.5.0 — MIT License — quzhiii/thesis-skills",
             ],
             "site/README.md": [
                 "# Thesis Skills 静态站点",
@@ -126,14 +126,14 @@ class CitationIntegrityDocsTest(unittest.TestCase):
                 "历史 v1.1 设计迭代目录（保留参考）",
             ],
             "docs/architecture.md": [
-                "current v3.4.1 public contract",
+                "current v3.5.0 public contract",
             ],
             "90-rules/STARTER_PACK_BASELINE.md": [
-                "current v3.4.1 public contract",
-                "Current v3.4.1 baseline summary",
+                "current v3.5.0 public contract",
+                "Current v3.5.0 baseline summary",
             ],
             "02-latex-to-word/THESIS_LATEX_TO_WORD.md": [
-                "current v3.4.1 first-class export promise",
+                "current v3.5.0 first-class export promise",
             ],
             "site/index-product-redraft.html": [
                 "Use `site/index.html` for the current public story.",

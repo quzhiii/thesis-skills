@@ -305,6 +305,62 @@ class PackLinterTest(unittest.TestCase):
         self.assertEqual(scorecard["overall_status"], "PASS")
         self.assertEqual(scorecard["finding_counts"]["errors"], 0)
 
+    def test_lint_pack_detects_invalid_severity_in_language_rules(self) -> None:
+        from core.pack_linter import lint_pack
+
+        with workspace_tempdir("pack-lint-") as tmp:
+            pack_root = materialize_project(
+                tmp / "bad-severity-pack",
+                {
+                    "pack.yaml": "\n".join(
+                        [
+                            "id: bad-severity-pack",
+                            "kind: university-thesis",
+                            "display_name: Bad Severity Pack",
+                            "version: 1",
+                            "precedence: guide_over_template",
+                            "starter: false",
+                            "",
+                        ]
+                    ),
+                    "rules.yaml": "project:\n  main_tex_candidates:\n    - thesis.tex\nreference:\n  missing_key:\n    severity: error\nlanguage:\n  cjk_latin_spacing:\n    enabled: true\n    severity: invalid_value\n",
+                    "mappings.yaml": "mappings:\n  source_styles:\n    title: Title\n",
+                },
+            )
+
+            findings = lint_pack(pack_root)
+            codes = [f.code for f in findings]
+
+        self.assertIn("invalid_rule_severity", codes)
+
+    def test_lint_pack_detects_missing_enabled_in_language_rules(self) -> None:
+        from core.pack_linter import lint_pack
+
+        with workspace_tempdir("pack-lint-") as tmp:
+            pack_root = materialize_project(
+                tmp / "missing-enabled-pack",
+                {
+                    "pack.yaml": "\n".join(
+                        [
+                            "id: missing-enabled-pack",
+                            "kind: university-thesis",
+                            "display_name: Missing Enabled Pack",
+                            "version: 1",
+                            "precedence: guide_over_template",
+                            "starter: false",
+                            "",
+                        ]
+                    ),
+                    "rules.yaml": "project:\n  main_tex_candidates:\n    - thesis.tex\nreference:\n  missing_key:\n    severity: error\nlanguage:\n  cjk_latin_spacing:\n    severity: warning\n",
+                    "mappings.yaml": "mappings:\n  source_styles:\n    title: Title\n",
+                },
+            )
+
+            findings = lint_pack(pack_root)
+            codes = [f.code for f in findings]
+
+        self.assertIn("missing_rule_enabled", codes)
+
 
 if __name__ == "__main__":
     unittest.main()

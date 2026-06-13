@@ -66,6 +66,7 @@ Optional final-audit foundation:
 - `index.html` — static local report index from `29-report-index/build_report_index.py`
 - `final-audit-report.html` — static final-audit reading surface from `30-final-audit-html/build_final_audit_html.py`
 - `reference-audit-ledger.html` — static reference-ledger reading surface from `31-reference-ledger-html/build_reference_audit_ledger_html.py`
+- `claim-citation-triage.html` — static claim-citation reading surface from `32-claim-citation-html/build_claim_citation_html.py`, with P0 / P1 / P2 / P3 review groups and links across readiness / references / claim-citation / final-audit
 
 ## 4. Run on your own project
 
@@ -108,6 +109,9 @@ python 30-final-audit-html/build_final_audit_html.py \
   --project-root path/to/your/thesis
 
 python 31-reference-ledger-html/build_reference_audit_ledger_html.py \
+  --project-root path/to/your/thesis
+
+python 32-claim-citation-html/build_claim_citation_html.py \
   --project-root path/to/your/thesis
 ```
 

@@ -62,7 +62,7 @@ Submission-friendly export would require:
 - bibliography CSL profile accuracy
 - page margin and font enforcement
 
-These are **future-facing constraints** and are **not** part of the current v3.4.1 first-class export promise.
+These are **future-facing constraints** and are **not** part of the current v3.5.0 first-class export promise.
 
 ## Migration helper
 

@@ -59,7 +59,9 @@ class FinalCleanupCheckTest(unittest.TestCase):
         self.assertIn("FINAL_CLEANUP_TEXTCOLOR_BLUE", codes)
         self.assertIn("FINAL_CLEANUP_COLOR_BLUE", codes)
         self.assertIn("FINAL_CLEANUP_DEBUG", codes)
-        self.assertTrue(all(finding["review_required"] for finding in data["findings"]))
+        self.assertTrue(all(not finding["review_required"] for finding in data["findings"]))
+        self.assertTrue(all(finding["suggestions"] == [""] for finding in data["findings"]))
+        self.assertTrue(all(finding["confidence"] == 0.99 for finding in data["findings"]))
         self.assertTrue(all(finding["risk_level"] == "P0" for finding in data["findings"]))
         self.assertIn("future_integration", data)
 

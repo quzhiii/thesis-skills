@@ -585,9 +585,9 @@ python 90-rules/create_pack.py \
 
 ---
 
-## 完整工作流一览
+## 基础工作流一览
 
-用一张图看清楚 `thesis-skills` 的五层架构，对应你写论文的各个阶段：
+这张图只覆盖新手第一次上手最常用的基础工作流，不把当前 `v3.5.0` 的 readiness、引用证据链、final-audit 和本地 HTML 报告界面全部塞进来：
 
 ```
 你的论文写作阶段                      thesis-skills 对应模块
@@ -623,6 +623,15 @@ Step 1  先 check-references   →  把缺引用、孤立引用全清干净
 Step 2  再 check-format        →  图表格式、章节结构
 Step 3  再 check-language      →  语言问题
 Step 4  最后 check-content     →  摘要、关键词等结构性检查
+```
+
+如果你已经跑通上面的基础流程，再继续扩展到当前 `v3.5.0` 的提交前链路：
+
+```text
+readiness 汇总                 ─→  16-check-readiness
+引用证据链 runner              ─→  run_evidence_pipeline.py
+终稿审计 JSON 聚合             ─→  27-final-audit-report
+声明-引用 HTML 复核页           ─→  32-claim-citation-html
 ```
 
 ---
