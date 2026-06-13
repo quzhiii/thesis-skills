@@ -64,6 +64,10 @@ LaTeX 项目 ───────┤                                           
 - **本地静态报告 UX**：新增 `reports/index.html`、`reports/final-audit-report.html`、`reports/reference-audit-ledger.html`、`reports/claim-citation-triage.html`，方便阅读，但 JSON / CSV 仍然是 source of truth。
 - **V3.3 引用验证加固** 继续保留：final reference set、DOI 候选、URL 验证、可限定范围/可续跑外部验证，以及统一证据流水线 runner `run_evidence_pipeline.py`。
 
+### v3.3 亮点回顾
+
+- **Readiness Gate 集成** 的四层引用证据流水线继续保留，依然可以一键跑完四层引用证据流水线；V3.4 在其上把 final-audit 与本地 HTML 报告界面补齐。
+
 ---
 
 ## 快速开始
@@ -187,7 +191,7 @@ Bounded auto-fix 模块（preview-first，仅低风险）：
 
 ### Citation Integrity 预览
 
-当前 `v3.4.1` 版本线把本地优先的 Citation Integrity 作为提交前引用检查的第一层：
+当前 `v3.5.0` 版本线把本地优先的 Citation Integrity 作为提交前引用检查的第一层：
 
 ```text
 References: BLOCK

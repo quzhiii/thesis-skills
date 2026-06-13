@@ -64,6 +64,10 @@ For repetitive finishing work, the expected time savings are concrete:
 - **Static local report UX**: `reports/index.html`, `reports/final-audit-report.html`, `reports/reference-audit-ledger.html`, and `reports/claim-citation-triage.html` make JSON / CSV artifacts easier to review without replacing them as source of truth.
 - **V3.3 reference verification hardening** remains in place: final reference set parsing, DOI candidates, URL verification, scoped/resumable external verification, and the unified evidence pipeline runner `run_evidence_pipeline.py`.
 
+### v3.3 highlights recap
+
+- **Readiness Gate Integration** with the four-layer citation evidence pipeline remains in place; V3.4 built on top of that with final-audit and local HTML report surfaces.
+
 ---
 
 ## Quickstart
@@ -187,7 +191,7 @@ Example JSON snippets and demo walkthroughs: [`docs/examples.md`](docs/examples.
 
 ### Citation Integrity preview
 
-The current v3.4.1 release line keeps local Citation Integrity as the first layer of pre-submission reference checking:
+The current v3.5.0 release line keeps local Citation Integrity as the first layer of pre-submission reference checking:
 
 ```text
 References: BLOCK

@@ -80,7 +80,7 @@ class ClaimCitationDocsTest(unittest.TestCase):
 
     def test_pyproject_toml_is_3_4_1(self) -> None:
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-        self.assertIn('version = "3.4.1"', pyproject)
+        self.assertIn('version = "3.5.0"', pyproject)
 
     def test_manifest_has_claim_citation_module(self) -> None:
         import json

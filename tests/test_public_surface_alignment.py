@@ -255,7 +255,7 @@ class PublicSurfaceAlignmentTest(unittest.TestCase):
 
     def test_commercialization_doc_points_to_v341_public_alignment(self) -> None:
         text = (ROOT / "docs/commercialization-v0.1.md").read_text(encoding="utf-8")
-        self.assertIn("v3.4.1 public alignment", text)
+        self.assertIn("v3.5.0 public alignment", text)
         self.assertNotIn("v3.4.0 public alignment", text)
 
 

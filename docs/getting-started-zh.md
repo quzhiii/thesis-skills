@@ -587,7 +587,7 @@ python 90-rules/create_pack.py \
 
 ## 基础工作流一览
 
-这张图只覆盖新手第一次上手最常用的基础工作流，不把当前 `v3.4.1` 的 readiness、引用证据链、final-audit 和本地 HTML 报告界面全部塞进来：
+这张图只覆盖新手第一次上手最常用的基础工作流，不把当前 `v3.5.0` 的 readiness、引用证据链、final-audit 和本地 HTML 报告界面全部塞进来：
 
 ```
 你的论文写作阶段                      thesis-skills 对应模块
@@ -625,7 +625,7 @@ Step 3  再 check-language      →  语言问题
 Step 4  最后 check-content     →  摘要、关键词等结构性检查
 ```
 
-如果你已经跑通上面的基础流程，再继续扩展到当前 `v3.4.1` 的提交前链路：
+如果你已经跑通上面的基础流程，再继续扩展到当前 `v3.5.0` 的提交前链路：
 
 ```text
 readiness 汇总                 ─→  16-check-readiness

@@ -138,9 +138,9 @@ class RulePackDocsTest(unittest.TestCase):
         self._assert_contains_all(
             "90-rules/STARTER_PACK_BASELINE.md",
             [
-                "current v3.4.1 public contract",
-                "Current v3.4.1 baseline summary",
-                "For the current v3.4.1 line",
+                "current v3.5.0 public contract",
+                "Current v3.5.0 baseline summary",
+                "For the current v3.5.0 line",
             ],
         )
         self._assert_contains_none(

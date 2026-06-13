@@ -145,7 +145,7 @@ Core support:
 
 Important boundary:
 
-- `review-friendly` is the only first-class implemented export mode in the current v3.4.1 public contract
+- `review-friendly` is the only first-class implemented export mode in the current v3.5.0 public contract
 - `submission-friendly` exists as a profile contract but is not yet fully implemented
 - export reports are mandatory; dry-run without `--apply` is the default
 
